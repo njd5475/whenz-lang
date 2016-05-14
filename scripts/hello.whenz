@@ -1,0 +1,15 @@
+define pattern 320x230 as java.awt.Dimension(320,230)
+
+when event app_starts once
+	print Hello World!
+	launch window
+
+when event window_launched
+	set Title Test Whenz Game
+	set Size 640x480
+	print Window Launched
+	
+when event window_closing
+	print Exiting application
+	exit
+	
