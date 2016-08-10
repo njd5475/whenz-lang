@@ -10,18 +10,23 @@ public class SetCurrentObject extends Action {
 
 	private Object value;
 	private String set;
+	private String name;
 
-	public SetCurrentObject(String set, Object to) {
+	public SetCurrentObject(String set, String name, Object to) {
 		if(to == null) {
-			throw new NullPointerException("Cannot call set" + set + " on null object");
+			throw new NullPointerException("Cannot call set" + set + " on " + name + " to a null object");
 		}
+		if(name == null) {
+			throw new NullPointerException("Cannot set " + set + " on a null object");
+		}
+		this.name = name;
 		this.value = to;
 		this.set = set;
 	}
 
 	@Override
 	public void perform(Program program) {
-		Object object = program.getObject();
+		Object object = program.getObject(name);
 		try {
 			Class cl = value.getClass();
 			Method method = object.getClass().getMethod("set" + set, cl);

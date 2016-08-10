@@ -1,15 +1,23 @@
-define pattern 320x230 as java.awt.Dimension(320,230)
+define dim as java.awt.Dimension#Dimension:640:480
+define bkcolor as java.awt.Color#Color:255:255:255
 
 when event app_starts once
 	print Hello World!
 	launch window
 
 when event window_launched
-	set Title Test Whenz Game
-	set Size 640x480
+	for window
+	set Title Test Whenz Game Ha
+	set Size dim
+	trigger event start_game
 	print Window Launched
 	
 when event window_closing
 	print Exiting application
 	exit
 	
+when event start_game
+	print Game Started
+
+when event mouse_moved
+	print Mouse Moved

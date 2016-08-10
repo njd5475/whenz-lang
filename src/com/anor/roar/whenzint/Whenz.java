@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,6 +57,7 @@ public class Whenz {
 	}
 
 	private static Condition lastCondition;
+	private static String currentObjectName;
 
 	private static void execute(String line) {
 		String[] commandParts = line.trim().split(" +");
@@ -76,16 +80,14 @@ public class Whenz {
 			chainAction(new PrintAction(r.toString()));
 			break;
 		case "define":
-			if("pattern".equals(commandParts[1])) {
-				if("as".equals(commandParts[3])) {
-					
-				}
-			}
+			evalDefine(rest(1, commandParts));
 			break;
 		case "set":
 			String rest[] = rest(1, commandParts);
-			chainAction(new SetCurrentObject(rest[0], resolveObj(concate(rest(1, rest)))));
+			chainAction(new SetCurrentObject(rest[0], currentObjectName, resolveObj(rest(1, rest))));
 			break;
+		case "for":
+			setCurrentObject(concate(rest(1, commandParts)));			
 		case "trigger":
 			if ("event".equals(commandParts[1])) {
 				String cmd[] = rest(2, commandParts);
@@ -105,13 +107,109 @@ public class Whenz {
 		}
 	}
 
-	private static Object resolveObj(String concate) {
-		for(Pattern pattern : patterns) {
-			if(pattern.matches(concate)) {
-				return pattern.resolve(concate);
+	private static Define evalDefine(String[] rest) {
+		if("pattern".equals(rest[0])) {
+			return evalDefine(new Pattern(), rest(1, rest));
+		}else{
+			String objName = rest[0];
+			Object obj = null;
+			if("as".equals(rest[1])) {
+				obj = evalJavaObject(rest(2, rest));
+				program.setObject(objName, obj);
 			}
+			java.awt.Dimension d;
+			return new Define();
+		}
+	}
+	
+	private static Object evalJavaObject(String[] rest) {
+		String all = concate(rest);
+		String className = all.substring(0, all.indexOf('#'));
+		String methodName = all.substring(all.indexOf('#')+1, all.indexOf(':'));
+		String[] params = all.substring(all.indexOf(':')+1).split(":");
+		
+		try {
+			Class<?> loadClass = Whenz.class.getClassLoader().loadClass(className);
+			List<Class<?>> paramTypes = new LinkedList<Class<?>>();
+			List<Object> args = new LinkedList<Object>();
+			for(String param : params) {
+				try {
+					args.add(Integer.parseInt(param));
+					paramTypes.add(int.class);
+				}catch(NumberFormatException nfe) {
+					try {
+					args.add(Double.parseDouble(param));
+					paramTypes.add(double.class);
+					}catch(NumberFormatException nfe1) {
+						if("true".equals(param) || "false".equals(param)) {
+							paramTypes.add(Boolean.class);
+							args.add(Boolean.parseBoolean(param));
+						}else{
+							paramTypes.add(String.class);
+							args.add(param);
+						}
+					}
+				}				
+			}
+			Class<?> types[] = paramTypes.toArray(new Class<?>[paramTypes.size()]);
+			if(methodName.equals(loadClass.getSimpleName())) {
+				//ctor
+				Constructor<?> constructor = loadClass.getConstructor(types);
+				return constructor.newInstance(args.toArray());
+			}			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	private static Pattern evalDefine(Pattern p, String[] rest) {
+		if(rest.length == 0) {
+			throw new IllegalStateException("Parse Error: Missing 'as' in define");
+		}
+		switch(rest[0]) {
+		case "number":
+			p = p.appendNumber(rest[1]);
+			evalDefine(p, rest(2, rest));
+			break;
+		case "literal":
+			p = p.appendLiteral(rest[1]);
+			evalDefine(p, rest(1, rest));
+			break;
+		case "as":
+		default:
+			return p;
 		}
 		return null;
+	}
+
+	private static void setCurrentObject(String concate) {
+		currentObjectName = concate;
+	}
+
+	private static Object resolveObj(String parts[]) {
+		String concate = concate(parts);
+		Object o = program.getObject(concate);
+		if(o != null) {
+			return o;
+		}
+		
+		return concate(parts);
 	}
 
 	private static void chainAction(Action action) {

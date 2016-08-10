@@ -15,7 +15,7 @@ public class Program {
 	private Queue<Condition>							condQueue					= new ConcurrentLinkedQueue<Condition>();
 	private Map<String, List<Condition>>	waitingForEvents	= new HashMap<String, List<Condition>>();
 	private Stack<Condition>							conditions				= new Stack<Condition>();
-	private Object												object;
+	private Map<String, Object>						objects						= new HashMap<String, Object>();
 
 	public void run() {
 		while (!conditions.isEmpty() || !condQueue.isEmpty()
@@ -77,12 +77,12 @@ public class Program {
 		}
 	}
 
-	public void setObject(Object object) {
-		this.object = object;
+	public void setObject(String name, Object object) {
+		this.objects.put(name, object);
 	}
 
-	public Object getObject() {
-		return object;
+	public Object getObject(String name) {
+		return this.objects.get(name);
 	}
 
 }
