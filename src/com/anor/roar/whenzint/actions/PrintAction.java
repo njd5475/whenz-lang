@@ -27,6 +27,7 @@ public class PrintAction extends Action {
       throws WhenzSyntaxError, IOException {
     Node printAction = new Node("PrintAction");
     if (tokens.peek().is("print")) {
+      tokens.take();
       parser.consumeWhitespace(tokens);
       while(!tokens.peek().isNewline()) {
         printAction.add(new Node("string part", tokens.take()));

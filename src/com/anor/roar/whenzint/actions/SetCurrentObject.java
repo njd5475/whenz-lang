@@ -10,6 +10,7 @@ import com.anor.roar.whenzint.patterns.Node;
 import com.anor.roar.whenzint.patterns.TokenBuffer;
 import com.anor.roar.whenzint.patterns.WhenzParser;
 import com.anor.roar.whenzint.patterns.WhenzSyntaxError;
+import com.anor.roar.whenzint.patterns.Token.TTYPE;
 
 public class SetCurrentObject extends Action {
 
@@ -37,19 +38,14 @@ public class SetCurrentObject extends Action {
 			Method method = object.getClass().getMethod("set" + set, cl);
 			method.invoke(object, value);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -58,7 +54,24 @@ public class SetCurrentObject extends Action {
   @Override
   public Node buildNode(WhenzParser parser, TokenBuffer tokens)
       throws WhenzSyntaxError, IOException {
-    // TODO Auto-generated method stub
-    return null;
+    Node setAction = new Node("Set");
+    if(tokens.peek().is("set")) {
+      tokens.take();
+      parser.consumeWhitespace(tokens);
+      if(tokens.peek().isIdentifier()) {
+        Node variableIdent = new Node("VariableIdentifier", tokens.take());
+        setAction.add(variableIdent);
+        
+        // one or more tokens till the end of the line
+        while(!tokens.peek().isNewline()) {
+          Node value = new Node("value", tokens.take());
+          variableIdent.add(value);
+        }
+        tokens.take();
+      }
+    }else{
+      parser.unexpectedToken(tokens.peek());
+    }
+    return setAction;
   }
 }

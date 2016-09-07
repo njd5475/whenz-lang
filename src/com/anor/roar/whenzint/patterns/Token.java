@@ -3,7 +3,7 @@ package com.anor.roar.whenzint.patterns;
 public class Token {
 
   public enum TTYPE {
-    NUMBER, IDENTIFIER, OPERATION, QUOTE, WHITESPACE, NEWLINE, SYMBOL, UNKNOWN
+    NUMBER, IDENTIFIER, OPERATION, QUOTE, WHITESPACE, NEWLINE, SYMBOL, UNKNOWN, EOF
   };
 
   private TTYPE         type;
@@ -16,6 +16,10 @@ public class Token {
     type = isType(c);
     this.line = line;
     this.ch = ch;
+  }
+  
+  private Token(TTYPE type) {
+    this.type = type;
   }
 
   public Token addLex(char c) {
@@ -80,7 +84,7 @@ public class Token {
   }
 
   public boolean isNewline() {
-    return type == TTYPE.NEWLINE;
+    return type == TTYPE.NEWLINE || type == TTYPE.EOF;
   }
 
   public boolean isIdentifier() {
@@ -115,4 +119,8 @@ public class Token {
     return Integer.parseInt(token.toString());
   }
 
+  public static Token eof() {
+    Token t = new Token(TTYPE.EOF);
+    return t;
+  }
 }

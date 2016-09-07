@@ -24,7 +24,7 @@ public class StreamTokenBuffer implements TokenBuffer {
       while ((t = reader.readToken()) != null && tokens.size() != bufferSize) {
         tokens.add(t);
       }
-      if(t == null) {
+      if (t == null) {
         endOfFileFound = true;
       }
     }
@@ -35,17 +35,26 @@ public class StreamTokenBuffer implements TokenBuffer {
   }
 
   public Token peek() throws IOException {
-    if(tokens.isEmpty() && !endOfFileFound) {
+    if (tokens.isEmpty() && !endOfFileFound) {
       fillBuffer();
+    }
+
+    if(isEmpty()) {
+      return Token.eof();
     }
     
     return tokens.get(0);
   }
-  
-  public Token take() throws IOException { 
-    if(tokens.isEmpty() && !endOfFileFound) {
+
+  public Token take() throws IOException {
+    if (tokens.isEmpty() && !endOfFileFound) {
       fillBuffer();
     }
+    
+    if(isEmpty()) {
+      return Token.eof();
+    }
+    
     return tokens.remove(0);
   }
 }

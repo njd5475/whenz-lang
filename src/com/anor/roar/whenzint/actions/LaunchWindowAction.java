@@ -70,6 +70,7 @@ public class LaunchWindowAction extends Action {
     parser.consumeWhitespace(tokens);
     if(tokens.peek().is("launch")) {
       tokens.take();
+      parser.consumeWhitespace(tokens);
       if(tokens.peek().is("window")) {
         tokens.take();
         if(tokens.peek().isNewline()) {

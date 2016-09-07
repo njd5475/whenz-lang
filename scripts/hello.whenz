@@ -5,14 +5,16 @@ when define bkcolor
 
 when event app_starts once
 	print Hello World!
+	print Cannot have one print command after another
 	launch window
 
 when event window_launched
-	for window
 	set Title Test Whenz Game Ha
 	set Size dim
 	trigger event start_game
 	print Window Launched
+	print Game Started
+	exit
 	
 when event window_closing
 	print Exiting application
@@ -20,6 +22,10 @@ when event window_closing
 	
 when event start_game
 	print Game Started
+	print Error Here
+
+when define dim
+	print Dim defined
 
 when event mouse_moved
 	print Mouse Moved

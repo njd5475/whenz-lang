@@ -19,8 +19,19 @@ public class ExitAction extends Action {
   @Override
   public Node buildNode(WhenzParser parser, TokenBuffer tokens)
       throws WhenzSyntaxError, IOException {
-    // TODO Auto-generated method stub
-    return null;
+    Node exitNode = new Node("Exit");
+    if(tokens.peek().is("exit")) {
+      tokens.take();
+      parser.consumeWhitespace(tokens);
+      if(tokens.peek().isNewline()) {
+        tokens.take();
+      }else{
+        parser.unexpectedToken(tokens.peek());
+      }
+    }else{
+      parser.unexpectedToken(tokens.peek());
+    }
+    return exitNode;
   }
 
 }

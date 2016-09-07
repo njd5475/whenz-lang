@@ -5,17 +5,23 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
+import com.anor.roar.whenzint.actions.SetCurrentObject;
+import com.anor.roar.whenzint.actions.TriggerEventAction;
 
 public class WhenzParser {
-  
+
   private Set<TokenAction> definedActions = new HashSet<TokenAction>();
-  private Node top;
+  private Node             top;
 
   public WhenzParser() {
     definedActions.add(new PrintAction(""));
     definedActions.add(new LaunchWindowAction());
+    definedActions.add(new SetCurrentObject("", "", ""));
+    definedActions.add(new TriggerEventAction(""));
+    definedActions.add(new ExitAction());
   }
 
   public Node parse(TokenBuffer tokens) throws IOException, WhenzSyntaxError {
@@ -36,7 +42,7 @@ public class WhenzParser {
       throws IOException, WhenzSyntaxError {
     Node whenNode = new Node("whenz");
     consumeWhitespace(tokens, true);
-    whenNode.add(consume("when", tokens));
+    consume("when", tokens);
     conditions(whenNode, tokens);
     actions(whenNode, tokens);
     parent.add(whenNode);
@@ -53,26 +59,28 @@ public class WhenzParser {
         tb.mark();
         WhenzSyntaxError error = null;
         error = classOrMethod(action, tb);
-        if(error != null) {
+        if (error != null) {
           tb.rewind();
           error = definedAction(action, tb);
         }
-        if(error != null) {
+        if (error != null) {
           throw error;
         }
+        consumeWhitespace(tokens, true);
       }
       whenNode.add(action);
     }
   }
 
-  private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens) throws IOException {
+  private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens)
+      throws IOException {
     Node defAction = new Node("defined action");
     consumeWhitespace(tokens);
     WhenzSyntaxError error = null;
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
     tb.mark();
     Node actionNode = null;
-    for(TokenAction ta : definedActions) {
+    for (TokenAction ta : definedActions) {
       try {
         actionNode = ta.buildNode(this, tb);
         error = null;
@@ -87,7 +95,8 @@ public class WhenzParser {
     return error;
   }
 
-  private WhenzSyntaxError classOrMethod(Node action, TokenBuffer tokens) throws IOException {
+  private WhenzSyntaxError classOrMethod(Node action, TokenBuffer tokens)
+      throws IOException {
     Node classMethod = new Node("Class & Method");
     className(classMethod, tokens);
     WhenzSyntaxError error = null;
@@ -106,16 +115,17 @@ public class WhenzParser {
     Node methodSignature = new Node("methodSignature");
     if (tokens.peek().isIdentifier()) {
       methodSignature.add(new Node(tokens.take().asString()));
-      while(tokens.peek().isSymbol() && tokens.peek().is(":")) {
+      while (tokens.peek().isSymbol() && tokens.peek().is(":")) {
         tokens.take();
-        if(tokens.peek().isNumber()) {
-          methodSignature.add(new Node(String.valueOf(tokens.take().asNumber())));
+        if (tokens.peek().isNumber()) {
+          methodSignature
+              .add(new Node(String.valueOf(tokens.take().asNumber())));
         }
       }
-    }else{
+    } else {
       unexpectedToken(tokens.peek());
     }
-    
+
     action.add(methodSignature);
   }
 
@@ -141,7 +151,7 @@ public class WhenzParser {
     if (!tokens.peek().isNewline()) {
       Token tk = tokens.take();
       unexpectedToken(tk);
-    }else{
+    } else {
       tokens.take();
     }
     whenNode.add(conditions);
@@ -159,9 +169,12 @@ public class WhenzParser {
   }
 
   public void unexpectedToken(Token t) throws WhenzSyntaxError {
-    System.out.println(top);
+    unexpectedToken(top, t);
+  }
+
+  public void unexpectedToken(Node subtree, Token t) throws WhenzSyntaxError {
     throw new WhenzSyntaxError("Unexpected token: ", t, t.getLine(),
-        t.getChar());
+        t.getChar(), subtree);
   }
 
   public void consumeWhitespace(TokenBuffer tokens) throws IOException {
@@ -170,9 +183,16 @@ public class WhenzParser {
 
   private void consumeWhitespace(TokenBuffer tokens, boolean newline)
       throws IOException {
-    while (!tokens.isEmpty() && (tokens.peek().isWhitespace()
-        || (newline && tokens.peek().isNewline()))) {
-      tokens.take();
+    while(!tokens.isEmpty()) {
+      if((tokens.peek().isWhitespace()
+          || (newline && tokens.peek().isNewline()))) {
+        Token t = tokens.take();
+        if(t == null) {
+          break;
+        }
+      }else{
+        break;
+      }
     }
   }
 
@@ -184,6 +204,8 @@ public class WhenzParser {
     Node root = null;
     try {
       root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      System.out.println("Parse completed!");
+      System.out.println(root);
     } catch (WhenzSyntaxError e) {
       e.printStackTrace();
     }
