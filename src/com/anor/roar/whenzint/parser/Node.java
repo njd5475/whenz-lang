@@ -25,7 +25,18 @@ public class Node {
   public void add(Node child) {
     children.add(child);
   }
+  
+  public Node[] children() {
+    return children.toArray(new Node[children.size()]);
+  }
 
+  public void traverse(NodeVisitor visitor) {
+    visitor.visit(this);
+    for(Node child : children) {
+      child.traverse(visitor);
+    }
+  }
+  
   public String toString() {
     return toString(0);
   }
