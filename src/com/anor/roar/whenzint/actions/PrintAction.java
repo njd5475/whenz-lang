@@ -1,19 +1,41 @@
 package com.anor.roar.whenzint.actions;
 
+import java.io.IOException;
+
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.patterns.Node;
+import com.anor.roar.whenzint.patterns.TokenBuffer;
+import com.anor.roar.whenzint.patterns.WhenzParser;
+import com.anor.roar.whenzint.patterns.WhenzSyntaxError;
 
 public class PrintAction extends Action {
 
-	private String toPrint;
+  private String toPrint;
 
-	public PrintAction(String toPrint) {
-		this.toPrint = toPrint;
-	}
+  public PrintAction(String toPrint) {
+    this.toPrint = toPrint;
+  }
 
-	@Override
-	public void perform(Program program) {
-		System.out.println(toPrint);
-	}
+  @Override
+  public void perform(Program program) {
+    System.out.println(toPrint);
+  }
+
+  @Override
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
+      throws WhenzSyntaxError, IOException {
+    Node printAction = new Node("PrintAction");
+    if (tokens.peek().is("print")) {
+      parser.consumeWhitespace(tokens);
+      while(!tokens.peek().isNewline()) {
+        printAction.add(new Node("string part", tokens.take()));
+      }
+      tokens.take(); //consume the newline token
+    } else {
+      parser.unexpectedToken(tokens.peek());
+    }
+    return printAction;
+  }
 
 }

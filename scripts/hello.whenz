@@ -1,5 +1,7 @@
-define dim as java.awt.Dimension#Dimension:640:480
-define bkcolor as java.awt.Color#Color:255:255:255
+when define dim
+	java.awt.Dimension#Dimension:640:480
+when define bkcolor
+	java.awt.Color#Color:255:255:255
 
 when event app_starts once
 	print Hello World!

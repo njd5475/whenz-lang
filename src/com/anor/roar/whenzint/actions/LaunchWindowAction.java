@@ -8,12 +8,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.patterns.Node;
+import com.anor.roar.whenzint.patterns.TokenBuffer;
+import com.anor.roar.whenzint.patterns.WhenzParser;
+import com.anor.roar.whenzint.patterns.WhenzSyntaxError;
 
 public class LaunchWindowAction extends Action {
 
@@ -56,6 +61,27 @@ public class LaunchWindowAction extends Action {
     frame.setVisible(true);
     program.setObject("window", frame);
     program.trigger("window_launched");
+  }
+
+  @Override
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
+      throws WhenzSyntaxError, IOException {
+    Node launchNode = new Node("LaunchWindow");
+    parser.consumeWhitespace(tokens);
+    if(tokens.peek().is("launch")) {
+      tokens.take();
+      if(tokens.peek().is("window")) {
+        tokens.take();
+        if(tokens.peek().isNewline()) {
+          tokens.take();
+        }
+      }else{
+        parser.unexpectedToken(tokens.peek());
+      }
+    }else{
+      parser.unexpectedToken(tokens.peek());
+    }
+    return launchNode;
   }
 
 }
