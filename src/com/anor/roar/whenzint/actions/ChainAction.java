@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.patterns.Node;
-import com.anor.roar.whenzint.patterns.TokenBuffer;
-import com.anor.roar.whenzint.patterns.WhenzParser;
-import com.anor.roar.whenzint.patterns.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.TokenBuffer;
+import com.anor.roar.whenzint.parser.WhenzParser;
+import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class ChainAction extends Action {
 

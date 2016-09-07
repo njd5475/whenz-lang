@@ -6,11 +6,11 @@ import java.lang.reflect.Method;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.patterns.Node;
-import com.anor.roar.whenzint.patterns.TokenBuffer;
-import com.anor.roar.whenzint.patterns.WhenzParser;
-import com.anor.roar.whenzint.patterns.WhenzSyntaxError;
-import com.anor.roar.whenzint.patterns.Token.TTYPE;
+import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.TokenBuffer;
+import com.anor.roar.whenzint.parser.WhenzParser;
+import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.Token.TTYPE;
 
 public class SetCurrentObject extends Action {
 

@@ -1,6 +1,6 @@
 package com.anor.roar.whenzint;
 
-import com.anor.roar.whenzint.patterns.TokenAction;
+import com.anor.roar.whenzint.parser.TokenAction;
 
 public abstract class Action implements TokenAction {
 

@@ -1,4 +1,4 @@
-package com.anor.roar.whenzint.patterns;
+package com.anor.roar.whenzint.parser;
 
 public class Token {
 
