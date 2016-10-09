@@ -213,9 +213,6 @@ public class WhenzParser {
     Node root = null;
     try {
       root = parser.parse(new StreamTokenBuffer(tsr, 128));
-      System.out.println("Parse completed!");
-      System.out.println(root);
-      System.out.println("Building program");
       ProgramBuilder builder = new ProgramBuilder(root);
       return builder.build();
     } catch (WhenzSyntaxError e) {
@@ -232,12 +229,8 @@ public class WhenzParser {
     Node root = null;
     try {
       root = parser.parse(new StreamTokenBuffer(tsr, 128));
-      System.out.println("Parse completed!");
-      System.out.println(root);
-      System.out.println("Building program");
       ProgramBuilder builder = new ProgramBuilder(root);
       Program program = builder.build();
-      System.out.println("Program built");
     } catch (WhenzSyntaxError e) {
       e.printStackTrace();
     }

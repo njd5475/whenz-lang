@@ -3,6 +3,8 @@ package com.anor.roar.whenzint.actions;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -11,7 +13,6 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
@@ -51,6 +52,27 @@ public class LaunchWindowAction extends Action {
         program.setObject("mouse", e.getPoint());
         program.trigger("mouse_moved");
       }
+    });
+    frame.addKeyListener(new KeyListener() {
+
+      @Override
+      public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
+      }
+
+      @Override
+      public void keyPressed(KeyEvent e) {
+        program.setObject("keyPressed", e.getKeyCode());
+        program.trigger("key_pressed");
+      }
+
+      @Override
+      public void keyReleased(KeyEvent e) {
+        program.setObject("keyReleased", e.getKeyCode());
+        program.trigger("key_released");
+      }
+      
     });
     
     frame.setLayout(new BorderLayout());

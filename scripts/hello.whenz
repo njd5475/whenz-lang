@@ -1,5 +1,6 @@
 when define dim
 	java.awt.Dimension#Dimension:640:480
+	
 when define bkcolor
 	java.awt.Color#Color:255:255:255
 
@@ -23,8 +24,9 @@ when event start_game
 	print Game Started
 	print Error Here
 
-when define dim
-	print Dim defined
-
 when event mouse_moved
 	print Mouse Moved
+	
+when event key_pressed
+	print Bye Bye
+	exit

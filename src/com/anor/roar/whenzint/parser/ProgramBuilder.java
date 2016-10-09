@@ -45,23 +45,18 @@ public class ProgramBuilder implements NodeVisitor {
       String defining = null;
       for (Node child : node.children()) {
         if ("conditions".equals(child.name())) {
-          System.out.println("Visiting conditions");
           if (child.children()[0].is("define")) {
-            System.out.println("Found whens define condition");
             defining = child.children()[1].getToken(); 
           } else if (child.children()[0].is("event")) {
-            System.out.println("Found whens event");
             cond = new EventCondition(
                 child.children()[1].getToken());
           }
         } else if ("action".equals(child.name())) {
-          System.out.println("Visiting Action");
           Node actionNode = child.children()[0];
           if ("defined action".equals(actionNode.name())) {
             Node definedActionNode = actionNode.children()[0];
             Action a = null;
             if ("Set".equals(definedActionNode.name())) {
-              System.out.println("Got a set action");
               Node setNode = definedActionNode.children()[0];
               String set = setNode.getToken();
               String name = setNode.getToken();
