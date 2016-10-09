@@ -31,10 +31,11 @@ public class Node {
   }
 
   public void traverse(NodeVisitor visitor) {
-    visitor.visit(this);
+    // depth first
     for(Node child : children) {
       child.traverse(visitor);
     }
+    visitor.visit(this);
   }
   
   public String toString() {
@@ -59,4 +60,16 @@ public class Node {
     }
     return builder.toString();
   }
+
+  public boolean is(String term) {
+    return token != null && token.is(term);
+  }
+
+  public String getToken() {
+    return token.asString();
+  }
+
+	public String name() {
+		return name;
+	}
 }

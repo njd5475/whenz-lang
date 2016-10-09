@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
@@ -206,6 +207,10 @@ public class WhenzParser {
       root = parser.parse(new StreamTokenBuffer(tsr, 128));
       System.out.println("Parse completed!");
       System.out.println(root);
+      System.out.println("Building program");
+      ProgramBuilder builder = new ProgramBuilder(root);
+      Program program = builder.build();
+      System.out.println("Program built");
     } catch (WhenzSyntaxError e) {
       e.printStackTrace();
     }
