@@ -75,6 +75,8 @@ public class LaunchWindowAction extends Action {
         tokens.take();
         if(tokens.peek().isNewline()) {
           tokens.take();
+        }else{
+          parser.unexpectedToken(tokens.peek());
         }
       }else{
         parser.unexpectedToken(tokens.peek());

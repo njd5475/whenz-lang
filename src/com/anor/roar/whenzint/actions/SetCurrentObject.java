@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.Token;
 import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
@@ -60,14 +61,27 @@ public class SetCurrentObject extends Action {
       parser.consumeWhitespace(tokens);
       if(tokens.peek().isIdentifier()) {
         Node variableIdent = new Node("VariableIdentifier", tokens.take());
-        setAction.add(variableIdent);
         
         // one or more tokens till the end of the line
+        parser.consumeWhitespace(tokens);
         while(!tokens.peek().isNewline()) {
-          Node value = new Node("value", tokens.take());
-          variableIdent.add(value);
+          if(tokens.peek().isSymbol() && tokens.peek().is("&")) {
+            tokens.take(); // is the ampersand
+            if(tokens.peek().isIdentifier()) {
+              Node obj = new Node("object", tokens.take());
+              variableIdent = new Node("Reference", variableIdent.getRawToken());
+              variableIdent.add(obj);
+            }else{
+              parser.unexpectedToken(tokens.peek());
+            }
+          }else{
+            Node value = new Node("value", tokens.take());
+            variableIdent.add(value);
+          }
         }
-        tokens.take();
+        tokens.take(); // should be the newline
+        
+        setAction.add(variableIdent);
       }
     }else{
       parser.unexpectedToken(tokens.peek());

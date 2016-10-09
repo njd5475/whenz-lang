@@ -29,10 +29,14 @@ public class PrintAction extends Action {
     if (tokens.peek().is("print")) {
       tokens.take();
       parser.consumeWhitespace(tokens);
-      while(!tokens.peek().isNewline()) {
+      while (!tokens.peek().isNewline()) {
         printAction.add(new Node("string part", tokens.take()));
       }
-      tokens.take(); //consume the newline token
+      if (tokens.peek().isNewline()) {
+        tokens.take(); // consume the newline token
+      } else {
+        parser.unexpectedToken(tokens.peek());
+      }
     } else {
       parser.unexpectedToken(tokens.peek());
     }

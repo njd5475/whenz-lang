@@ -1,5 +1,6 @@
 package com.anor.roar.whenzint.parser;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -43,9 +44,13 @@ public class WhenzParser {
       throws IOException, WhenzSyntaxError {
     Node whenNode = new Node("whenz");
     consumeWhitespace(tokens, true);
-    consume("when", tokens);
-    conditions(whenNode, tokens);
-    actions(whenNode, tokens);
+    if(tokens.peek().is("when")) {
+      tokens.take();
+      conditions(whenNode, tokens);
+      actions(whenNode, tokens);
+    }else{
+      unexpectedToken(tokens.peek());
+    }
     parent.add(whenNode);
   }
 
@@ -145,15 +150,18 @@ public class WhenzParser {
     // one or more identifiers followed by a newline
     consumeWhitespace(tokens);
     Node conditions = new Node("conditions");
-    while (tokens.peek().isIdentifier() && !tokens.peek().isNewline()) {
-      conditions.add(new Node("identifier", tokens.take()));
-      consumeWhitespace(tokens);
-    }
-    if (!tokens.peek().isNewline()) {
-      Token tk = tokens.take();
-      unexpectedToken(tk);
-    } else {
-      tokens.take();
+    if(tokens.peek().isIdentifier()) {
+      if(tokens.peek().is("define") || tokens.peek().is("event")) { 
+        while (!tokens.peek().isNewline()) {
+          conditions.add(new Node("identifier", tokens.take()));
+          consumeWhitespace(tokens);
+        }
+        tokens.take();
+      }else{
+        unexpectedToken(tokens.peek());
+      }
+    }else{
+      unexpectedToken(tokens.peek());
     }
     whenNode.add(conditions);
   }
@@ -197,6 +205,25 @@ public class WhenzParser {
     }
   }
 
+  public static Program compileProgram(String filename) throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(
+        new FileReader(filename));
+    WhenzParser parser = new WhenzParser();
+
+    Node root = null;
+    try {
+      root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      System.out.println("Parse completed!");
+      System.out.println(root);
+      System.out.println("Building program");
+      ProgramBuilder builder = new ProgramBuilder(root);
+      return builder.build();
+    } catch (WhenzSyntaxError e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+  
   public static void main(String[] args) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(
         new FileReader("./scripts/hello.whenz"));

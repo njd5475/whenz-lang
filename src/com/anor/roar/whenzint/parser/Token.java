@@ -27,7 +27,7 @@ public class Token {
       token.append(c);
       return this;
     }
-
+    
     int ln = line;
     int chr = ch;
     if (c == '\n' || isNewline()) {
@@ -51,7 +51,7 @@ public class Token {
       return TTYPE.WHITESPACE;
     } else if (c == '\n' || c == '\r') {
       return TTYPE.NEWLINE;
-    } else if (oneOf(c, '=', '.', '|', ':', '(', ')')) {
+    } else if (oneOf(c, '=', '.', '|', ':', '(', ')', '&')) {
       return TTYPE.SYMBOL;
     }
     return TTYPE.UNKNOWN;

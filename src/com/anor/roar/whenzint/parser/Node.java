@@ -68,6 +68,10 @@ public class Node {
   public String getToken() {
     return token.asString();
   }
+  
+  public Token getRawToken() {
+    return token;
+  }
 
 	public String name() {
 		return name;

@@ -21,11 +21,14 @@ public class StreamTokenBuffer implements TokenBuffer {
     int amountToRead = bufferSize - tokens.size();
     if (amountToRead > 0) {
       Token t = null;
-      while ((t = reader.readToken()) != null && tokens.size() != bufferSize) {
-        tokens.add(t);
-      }
-      if (t == null) {
-        endOfFileFound = true;
+      while (tokens.size() != bufferSize) {
+        t = reader.readToken();
+        if (t != null) {
+          tokens.add(t);
+        } else {
+          endOfFileFound = true;
+          break;
+        }
       }
     }
   }
@@ -39,10 +42,10 @@ public class StreamTokenBuffer implements TokenBuffer {
       fillBuffer();
     }
 
-    if(isEmpty()) {
+    if (isEmpty()) {
       return Token.eof();
     }
-    
+
     return tokens.get(0);
   }
 
@@ -50,11 +53,11 @@ public class StreamTokenBuffer implements TokenBuffer {
     if (tokens.isEmpty() && !endOfFileFound) {
       fillBuffer();
     }
-    
-    if(isEmpty()) {
+
+    if (isEmpty()) {
       return Token.eof();
     }
-    
+
     return tokens.remove(0);
   }
 }

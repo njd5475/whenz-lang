@@ -10,11 +10,10 @@ when event app_starts once
 
 when event window_launched
 	set Title Test Whenz Game Ha
-	set Size dim
+	set Size &dim
 	trigger event start_game
 	print Window Launched
 	print Game Started
-	exit
 	
 when event window_closing
 	print Exiting application
