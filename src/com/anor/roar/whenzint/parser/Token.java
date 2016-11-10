@@ -123,4 +123,8 @@ public class Token {
     Token t = new Token(TTYPE.EOF);
     return t;
   }
+
+	public boolean isSymbol(String symbol) {
+		return isSymbol() && is(symbol);
+	}
 }

@@ -1,10 +1,7 @@
 package com.anor.roar.whenzint;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
@@ -22,7 +19,6 @@ import com.anor.roar.whenzint.patterns.Pattern;
 
 public class Whenz {
 
-  private static List<Pattern> patterns = new LinkedList<Pattern>();
   public static Program        program  = null;
 
   public static void main(String... args) {
