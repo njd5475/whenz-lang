@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="/home/nick/whenz.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/Whenz/build.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=Whenz/src&lt;com.anor.roar.whenzint{Whenz.java[Whenz" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/Whenz/.project"/>
+        <javaElement handleIdentifier="=Whenz/src"/>
+        <file path="/Whenz/.gitignore"/>
+        <file path="/Whenz/.classpath"/>
+    </selectedElements>
+</jardesc>
