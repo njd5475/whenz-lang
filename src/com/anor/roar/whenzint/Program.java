@@ -12,77 +12,79 @@ import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class Program {
 
-	private Queue<Condition>							condQueue					= new ConcurrentLinkedQueue<Condition>();
-	private Map<String, List<Condition>>	waitingForEvents	= new HashMap<String, List<Condition>>();
-	private Stack<Condition>							conditions				= new Stack<Condition>();
-	private Map<String, Object>						objects						= new HashMap<String, Object>();
+  private Queue<Condition>             condQueue        = new ConcurrentLinkedQueue<Condition>();
+  private Map<String, List<Condition>> waitingForEvents = new HashMap<String, List<Condition>>();
+  private Stack<Condition>             conditions       = new Stack<Condition>();
+  private Map<String, Object>          objects          = new HashMap<String, Object>();
 
-	public void run() {
-		while (!conditions.isEmpty() || !condQueue.isEmpty()
-				|| !waitingForEvents.isEmpty()) {
-			Stack<Action> actions = new Stack<Action>();
+  public void run() {
+    while (!conditions.isEmpty() || !condQueue.isEmpty()
+        || !waitingForEvents.isEmpty()) {
+      Stack<Action> actions = new Stack<Action>();
 
-			emptyCondQueue();
-			Condition c;
-			while (!conditions.isEmpty()) {
-				c = conditions.pop();
-				if (c.check(this)) {
-					actions.push(c.getAction());
-				}
-				if (!c.repeats() && c instanceof EventCondition) {
-					EventCondition ec = (EventCondition) c;
-					List<Condition> list = waitingForEvents.get(ec);
-					if (list != null) {
-						list.remove(c);
-						if (list.isEmpty()) {
-							waitingForEvents.remove(ec.getEventName());
-						}
-					}
-				}
-			}
+      emptyCondQueue();
+      Condition c;
+      while (!conditions.isEmpty()) {
+        c = conditions.pop();
+        if (c.check(this)) {
+          actions.push(c.getAction());
+        }
+        if (!c.repeats() && c instanceof EventCondition) {
+          EventCondition ec = (EventCondition) c;
+          List<Condition> list = waitingForEvents.get(ec);
+          if (list != null) {
+            list.remove(c);
+            if (list.isEmpty()) {
+              waitingForEvents.remove(ec.getEventName());
+            }
+          }
+        }
+      }
 
-			Action a;
-			while (!actions.isEmpty()) {
-				a = actions.pop();
-				a.perform(this);
-			}
-		}
-	}
+      Action a;
+      while (!actions.isEmpty()) {
+        a = actions.pop();
+        a.perform(this);
+      }
+    }
+  }
 
-	private void emptyCondQueue() {
-		while (!condQueue.isEmpty()) {
-			Condition c = condQueue.poll();
-			conditions.add(c);
-		}
-	}
+  private void emptyCondQueue() {
+    while (!condQueue.isEmpty()) {
+      Condition c = condQueue.poll();
+      conditions.add(c);
+    }
+  }
 
-	public void add(Condition c) {
-		if (c instanceof EventCondition) {
-			EventCondition ec = (EventCondition) c;
-			List<Condition> conds = waitingForEvents.get(ec.getEventName());
-			if (conds == null) {
-				conds = new LinkedList<Condition>();
-				waitingForEvents.put(ec.getEventName(), conds);
-			}
-			conds.add(c);
-		} else {
-			conditions.add(c);
-		}
-	}
+  public void add(Condition c) {
+    if (c instanceof EventCondition) {
+      EventCondition ec = (EventCondition) c;
+      List<Condition> conds = waitingForEvents.get(ec.getEventName());
+      if (conds == null) {
+        conds = new LinkedList<Condition>();
+        waitingForEvents.put(ec.getEventName(), conds);
+      }
+      conds.add(c);
+    } else {
+      conditions.add(c);
+    }
+  }
 
-	public void trigger(String eventName) {
-		List<Condition> list = waitingForEvents.get(eventName);
-		for (Condition c : list) {
-			condQueue.add(c);
-		}
-	}
+  public void trigger(String eventName) {
+    List<Condition> list = waitingForEvents.get(eventName);
+    if (list != null) {
+      for (Condition c : list) {
+        condQueue.add(c);
+      }
+    }
+  }
 
-	public void setObject(String name, Object object) {
-		this.objects.put(name, object);
-	}
+  public void setObject(String name, Object object) {
+    this.objects.put(name, object);
+  }
 
-	public Object getObject(String name) {
-		return this.objects.get(name);
-	}
+  public Object getObject(String name) {
+    return this.objects.get(name);
+  }
 
 }
