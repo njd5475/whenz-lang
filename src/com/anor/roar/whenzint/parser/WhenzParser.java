@@ -10,6 +10,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
+import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.SetCurrentObject;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 
@@ -20,10 +21,11 @@ public class WhenzParser {
 
   public WhenzParser() {
     definedActions.add(new PrintAction(""));
+    definedActions.add(new PrintVarAction(""));
     definedActions.add(new LaunchWindowAction());
-    definedActions.add(new SetCurrentObject("", "", ""));
     definedActions.add(new TriggerEventAction(""));
     definedActions.add(new ExitAction());
+    definedActions.add(new SetCurrentObject("", "", ""));
   }
 
   public Node parse(TokenBuffer tokens) throws IOException, WhenzSyntaxError {

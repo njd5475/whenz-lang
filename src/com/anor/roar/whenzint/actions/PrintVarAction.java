@@ -31,7 +31,19 @@ public class PrintVarAction extends Action {
       tokens.take();
       parser.consumeWhitespace(tokens);
       if(tokens.peek().isSymbol("@")) {
-      	
+      	tokens.take();
+      	Node globalRef = new Node("GlobalVariable");
+      	while(tokens.peek().isIdentifier()) {
+      		globalRef.add(new Node("part",tokens.take()));
+      		if(tokens.peek().isSymbol(".")) {
+      			tokens.take();
+      		}else if(tokens.peek().isNewline()) {
+      			break;
+      		}else{
+      			parser.unexpectedToken(tokens.peek());
+      		}
+      	}
+      	printVarAction.add(globalRef);
       }
       
       if (tokens.peek().isNewline()) {

@@ -30,4 +30,3 @@ when event mouse_moved
 when event key_pressed
 	printvar @event.keycode
 	print Bye Bye
-	exit
