@@ -13,6 +13,7 @@ import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
+import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.SetCurrentObject;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 import com.anor.roar.whenzint.conditions.EventCondition;
@@ -82,6 +83,17 @@ public class ProgramBuilder implements NodeVisitor {
                 printStr.append(part.getToken());
               }
               a = new PrintAction(printStr.toString());
+            } else if ("PrintVar".equals(definedActionNode.name())) {
+              Node global = definedActionNode.children()[0];
+              StringBuilder printStr = new StringBuilder("");
+              Node children[] = global.children();
+              for (Node part : children) {
+                if(part != children[0]) {
+                  printStr.append(".");
+                }
+                printStr.append(part.getToken());
+              }
+              a = new PrintVarAction(printStr.toString());
             } else if ("Exit".equals(definedActionNode.name())) {
               a = new ExitAction();
             } else if ("Trigger".equals(definedActionNode.name())) {

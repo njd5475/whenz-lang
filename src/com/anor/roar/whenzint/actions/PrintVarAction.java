@@ -11,41 +11,44 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class PrintVarAction extends Action {
 
-	private String varName;
+  private String varName;
 
-	public PrintVarAction(String varName) {
-		this.varName= varName;
-	}
+  public PrintVarAction(String varName) {
+    this.varName = varName;
+  }
 
-	@Override
-	public void perform(Program program) {
-		program.getObject(varName);
-	}
-	
-	@Override
-	public Node buildNode(WhenzParser parser, TokenBuffer tokens)
-			throws WhenzSyntaxError, IOException {
-		
-		Node printVarAction = new Node("PrintVarAction");
+  @Override
+  public void perform(Program program) {
+    Object o = program.getObject(varName);
+    if (o != null) {
+      System.out.println(o.toString());
+    }
+  }
+
+  @Override
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
+      throws WhenzSyntaxError, IOException {
+
+    Node printVarAction = new Node("PrintVar");
     if (tokens.peek().is("printvar")) {
       tokens.take();
       parser.consumeWhitespace(tokens);
-      if(tokens.peek().isSymbol("@")) {
-      	tokens.take();
-      	Node globalRef = new Node("GlobalVariable");
-      	while(tokens.peek().isIdentifier()) {
-      		globalRef.add(new Node("part",tokens.take()));
-      		if(tokens.peek().isSymbol(".")) {
-      			tokens.take();
-      		}else if(tokens.peek().isNewline()) {
-      			break;
-      		}else{
-      			parser.unexpectedToken(tokens.peek());
-      		}
-      	}
-      	printVarAction.add(globalRef);
+      if (tokens.peek().isSymbol("@")) {
+        tokens.take();
+        Node globalRef = new Node("GlobalVariable");
+        while (tokens.peek().isIdentifier()) {
+          globalRef.add(new Node("part", tokens.take()));
+          if (tokens.peek().isSymbol(".")) {
+            tokens.take();
+          } else if (tokens.peek().isNewline()) {
+            break;
+          } else {
+            parser.unexpectedToken(tokens.peek());
+          }
+        }
+        printVarAction.add(globalRef);
       }
-      
+
       if (tokens.peek().isNewline()) {
         tokens.take(); // consume the newline token
       } else {
@@ -55,6 +58,6 @@ public class PrintVarAction extends Action {
       parser.unexpectedToken(tokens.peek());
     }
     return printVarAction;
-	}
+  }
 
 }

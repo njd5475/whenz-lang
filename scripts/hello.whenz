@@ -28,5 +28,5 @@ when event mouse_moved
 	print Mouse Moved
 	
 when event key_pressed
-	printvar @event.keycode
+	printvar @keyPressed
 	print Bye Bye
