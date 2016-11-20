@@ -1,6 +1,5 @@
 package com.anor.roar.whenzint.parser;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -50,6 +49,13 @@ public class WhenzParser {
       tokens.take();
       conditions(whenNode, tokens);
       actions(whenNode, tokens);
+    }else if(tokens.peek().is("//")) {
+      //consume it all
+      while(!tokens.peek().isNewline()) {
+        tokens.take();
+      }
+      tokens.take(); //remove newline
+      return; // just skip it
     }else{
       unexpectedToken(tokens.peek());
     }
@@ -59,7 +65,7 @@ public class WhenzParser {
   private void actions(Node whenNode, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
-    while (!tokens.isEmpty() && tokens.peek().isIdentifier()
+    while (!tokens.isEmpty() && (tokens.peek().isIdentifier() || tokens.peek().isSymbol("@"))
         && tokens.peek().isNot("when")) {
       Node action = new Node("action");
       if (tokens.peek().isIdentifier() && tokens.peek().isNot("when")) {
@@ -75,9 +81,102 @@ public class WhenzParser {
           throw error;
         }
         consumeWhitespace(tokens, true);
+      }else if(tokens.peek().isSymbol("@") /* Cannot be whenz */) {
+        //most likely we are setting a global reference
+        Node globalReference = new Node("GlobalReference");
+        globalReference(globalReference, tokens);
+        action.add(globalReference);
+        //optional section
+        TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
+        try {
+          consumeWhitespace(tb);
+          assignment(globalReference, tb);
+          consumeWhitespace(tb);
+          literals(globalReference, tb);
+        }catch(WhenzSyntaxError e) {
+          tb.rewind(); //in case it needs to be used again
+        }
       }
       whenNode.add(action);
     }
+  }
+
+  private void literals(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    //numbers,decimals,string literals
+    
+    //heres where lambdas are useful, instead of building interfaces
+    TokenAction number = (p, t) -> {
+      p.consumeWhitespace(t);
+      return p.number(t);
+    };
+    TokenAction decimals = (p, t) -> {
+      Node n = new Node("Decimal");
+      n.add(p.number(t));
+      if(t.peek().isSymbol(".")) {
+        t.take();
+      }
+      n.add(p.number(t));
+      return n;
+    };
+    TokenAction stringLiteral = (p, t) -> {
+      Node n = new Node("Literals");
+      StringBuilder sb = new StringBuilder();
+      while(!t.peek().isNewline()) {
+        sb.append(t.take().asString());
+      }
+      n.add(new Node(sb.toString()));
+      return n;
+    };
+    TokenAction actions[] = new TokenAction[] {number, decimals, stringLiteral};
+    TrackableTokenBuffer tb = TrackableTokenBuffer.wrapAndMark(tokens);
+    Node found = null;
+    for(TokenAction a : actions) {
+      try {
+        //assuming found is not null but if it is an exception will be raised.
+        found = a.buildNode(this, tb);
+        break; //break when we get a valid node otherwise we should get errors
+      }catch(WhenzSyntaxError e) {
+        tb.rewind();
+      }
+    }
+    if(found == null) {
+      unexpectedToken(tb.peek());
+    }
+  }
+
+  private Node number(TokenBuffer t) throws IOException, WhenzSyntaxError {
+    Node num = new Node("Number");
+    StringBuilder sb = new StringBuilder("");
+    while(t.peek().isNumber()) {
+      sb.append(t.take().asString());
+    }
+    if(sb.toString().isEmpty()) {
+      unexpectedToken(t.peek());
+    }
+    return num;
+  }
+
+  private void globalReference(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    Node namespace = new Node("Reference");
+    if(tokens.peek().isSymbol("@")) {
+      tokens.take();
+      while (tokens.peek().isIdentifier()) {
+        namespace.add(new Node("part", tokens.take()));
+        if (tokens.peek().isSymbol(".")) {
+          tokens.take();
+        } else if (tokens.peek().isNewline()) {
+          break;
+        } else {
+          break;
+        }
+      }
+      node.add(namespace);
+    }
+    
+  }
+
+  private void assignment(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    
   }
 
   private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens)

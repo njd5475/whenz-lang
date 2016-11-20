@@ -8,6 +8,7 @@ when event app_starts once
 	print Hello World!
 	print Cannot have one print command after another
 	launch window
+	@print.var = "Set a variable"
 
 when event window_launched
 	set Title Test Whenz Game Ha
@@ -15,6 +16,8 @@ when event window_launched
 	trigger event start_game
 	print Window Launched
 	print Game Started
+	printvar @print.var
+	print Before this should have been 'Set a variable'
 	
 when event window_closing
 	print Exiting application
@@ -30,3 +33,8 @@ when event mouse_moved
 when event key_pressed
 	printvar @keyPressed
 	print Bye Bye
+	
+when event app_starts once
+	print Processing files
+	
+//when @keyPressed == <ESC>

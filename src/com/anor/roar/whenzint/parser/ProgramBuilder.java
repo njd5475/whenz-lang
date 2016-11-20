@@ -94,6 +94,8 @@ public class ProgramBuilder implements NodeVisitor {
                 printStr.append(part.getToken());
               }
               a = new PrintVarAction(printStr.toString());
+            } else if ("GlobalReference".equals(definedActionNode.name())) {
+              System.out.println("Not implemented yet!");
             } else if ("Exit".equals(definedActionNode.name())) {
               a = new ExitAction();
             } else if ("Trigger".equals(definedActionNode.name())) {

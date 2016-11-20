@@ -84,4 +84,10 @@ public class TrackableTokenBuffer implements TokenBuffer {
   public static final TrackableTokenBuffer wrap(TokenBuffer buffer) {
     return new TrackableTokenBuffer(buffer);
   }
+  
+  public static final TrackableTokenBuffer wrapAndMark(TokenBuffer buffer) {
+    TrackableTokenBuffer ttb = wrap(buffer);
+    ttb.mark();
+    return ttb;
+  }
 }
