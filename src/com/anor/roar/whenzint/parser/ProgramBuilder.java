@@ -123,7 +123,7 @@ public class ProgramBuilder implements NodeVisitor {
             }
             Action a = null;
             if("Literals".equals(rval.name())) {
-              a = new SetToLiteral(quickRef, rval.children()[0].name().replaceAll("\"", ""));
+              a = new SetToLiteral(quickRef, rval.children()[0].name());
             }
             
             if (a != null) {
