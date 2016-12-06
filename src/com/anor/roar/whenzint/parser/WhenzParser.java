@@ -10,7 +10,7 @@ import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
-import com.anor.roar.whenzint.actions.SetCurrentObject;
+import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 
 public class WhenzParser {
@@ -24,7 +24,7 @@ public class WhenzParser {
     definedActions.add(new LaunchWindowAction());
     definedActions.add(new TriggerEventAction(""));
     definedActions.add(new ExitAction());
-    definedActions.add(new SetCurrentObject("", "", ""));
+    definedActions.add(new CallSetterMethod("", "", ""));
   }
 
   public Node parse(TokenBuffer tokens) throws IOException, WhenzSyntaxError {
@@ -65,6 +65,7 @@ public class WhenzParser {
   private void actions(Node whenNode, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
+
     while (!tokens.isEmpty() && (tokens.peek().isIdentifier() || tokens.peek().isSymbol("@"))
         && tokens.peek().isNot("when")) {
       Node action = new Node("action");
@@ -96,8 +97,10 @@ public class WhenzParser {
         }catch(WhenzSyntaxError e) {
           tb.rewind(); //in case it needs to be used again
         }
+        
       }
       whenNode.add(action);
+      System.out.println(whenNode);
     }
   }
 
@@ -141,6 +144,8 @@ public class WhenzParser {
     }
     if(found == null) {
       unexpectedToken(tb.peek());
+    }else{
+      node.add(found);
     }
   }
 
@@ -176,7 +181,14 @@ public class WhenzParser {
   }
 
   private void assignment(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
-    
+    Node assignment = new Node("Assignment");
+    consumeWhitespace(tokens);
+    if(!tokens.peek().isSymbol("=")) {
+      unexpectedToken(tokens.peek());
+    }
+    tokens.take();
+    consumeWhitespace(tokens);
+    node.add(assignment);
   }
 
   private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens)

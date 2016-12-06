@@ -13,13 +13,13 @@ import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 import com.anor.roar.whenzint.parser.Token.TTYPE;
 
-public class SetCurrentObject extends Action {
+public class CallSetterMethod extends Action {
 
 	private Object value;
 	private String set;
 	private String name;
 
-	public SetCurrentObject(String set, String name, Object to) {
+	public CallSetterMethod(String set, String name, Object to) {
 		if(to == null) {
 			throw new NullPointerException("Cannot call set" + set + " on " + name + " to a null object");
 		}
