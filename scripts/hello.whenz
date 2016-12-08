@@ -34,6 +34,9 @@ when event key_pressed
 	printvar @keyPressed
 	print Bye Bye
 	
+when @keyPressed == 27
+	print Escaped was pressed
+	
 when event app_starts once
 	print Processing files
 	

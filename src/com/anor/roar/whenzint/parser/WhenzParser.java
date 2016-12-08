@@ -100,7 +100,6 @@ public class WhenzParser {
         
       }
       whenNode.add(action);
-      System.out.println(whenNode);
     }
   }
 
@@ -263,6 +262,7 @@ public class WhenzParser {
     // one or more identifiers followed by a newline
     consumeWhitespace(tokens);
     Node conditions = new Node("conditions");
+    //TODO: try a couple of different patterns here for conditional expressions
     if(tokens.peek().isIdentifier()) {
       if(tokens.peek().is("define") || tokens.peek().is("event")) { 
         while (!tokens.peek().isNewline()) {
