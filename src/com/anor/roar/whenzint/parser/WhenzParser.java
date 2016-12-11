@@ -115,7 +115,7 @@ public class WhenzParser {
       Node n = new Node("Decimal");
       n.add(p.number(t));
       if(t.peek().isSymbol(".")) {
-        t.take();
+         t.take();
       }
       n.add(p.number(t));
       return n;
@@ -157,6 +157,7 @@ public class WhenzParser {
     if(sb.toString().isEmpty()) {
       unexpectedToken(t.peek());
     }
+    num.add(new Node(sb.toString()));
     return num;
   }
 
@@ -273,10 +274,37 @@ public class WhenzParser {
       }else{
         unexpectedToken(tokens.peek());
       }
+    }else if(tokens.peek().isSymbol("@")) {
+      globalReference(conditions, tokens);
+      consumeWhitespace(tokens);
+      conditionalOperand(conditions, tokens);
+      consumeWhitespace(tokens);
+      literals(conditions, tokens);
+      consumeWhitespace(tokens, true);
     }else{
       unexpectedToken(tokens.peek());
     }
     whenNode.add(conditions);
+  }
+
+  private void conditionalOperand(Node conditions, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    Node op = new Node("Conditional Operand");
+    if(tokens.peek().isSymbol("==")) {
+      op.add(new Node("is equal",tokens.take()));
+    }else if(tokens.peek().isSymbol(">=")) {
+      op.add(new Node("greater equal", tokens.take()));
+    }else if(tokens.peek().isSymbol("<=")) {
+      op.add(new Node("less equal", tokens.take()));
+    }else if(tokens.peek().isSymbol("!=")) {
+      op.add(new Node("not equal", tokens.take()));
+      //    }else if(tokens.peek().isSymbol("&&")) {
+      //      op.add(new Node("and"));
+      //    }else if(tokens.peek().isSymbol("||")) {
+      //      op.add(new Node("or"));
+    }else{
+      unexpectedToken(tokens.peek());
+    }
+    conditions.add(op);
   }
 
   private Node consume(String term, TokenBuffer tokens)
