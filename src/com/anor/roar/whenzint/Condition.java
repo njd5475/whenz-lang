@@ -9,6 +9,7 @@ public abstract class Condition {
 
 	public abstract Action getAction();
 
+	//TODO: this needs refactoring for more controlled method
 	public abstract void setAction(Action action);
 
 	public final boolean repeats() {

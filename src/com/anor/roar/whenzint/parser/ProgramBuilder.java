@@ -1,6 +1,5 @@
 package com.anor.roar.whenzint.parser;
 
-import java.awt.event.KeyEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
@@ -10,14 +9,15 @@ import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.Whenz;
+import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.SetToLiteral;
-import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
+import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class ProgramBuilder implements NodeVisitor {
@@ -52,6 +52,15 @@ public class ProgramBuilder implements NodeVisitor {
             defining = child.children()[1].getToken();
           } else if (child.children()[0].is("event")) {
             cond = new EventCondition(child.children()[1].getToken());
+          } else if ("Reference".equals(child.children()[0].name())) {
+            Node referenceNode = child.children()[0];
+            String ref = referenceString(referenceNode.children());
+            String op = child.children()[1].children()[0].getToken();
+            int num = Integer.parseInt(child.children()[2].children()[0].name());
+            cond = new BoolCondition(op, ref, num);
+            cond.repeats();
+          }else{
+            System.out.println(child);
           }
         } else if ("action".equals(child.name())) {
           Node actionNode = child.children()[0];
@@ -114,14 +123,7 @@ public class ProgramBuilder implements NodeVisitor {
           } else if ("GlobalReference".equals(actionNode.name())) {
             Node lval = actionNode.children()[0];
             Node rval = actionNode.children()[2];
-            String quickRef = "";
-            Node parts[] = lval.children();
-            for(Node n : lval.children()) {
-              quickRef += n.getToken();
-              if(n != parts[parts.length-1]) {
-                quickRef += ".";
-              }
-            }
+            String quickRef = referenceString(lval.children());
             Action a = null;
             if("Literals".equals(rval.name())) {
               a = new SetToLiteral(quickRef, rval.children()[0].name());
@@ -162,6 +164,18 @@ public class ProgramBuilder implements NodeVisitor {
       }
     }
 
+  }
+
+  private String referenceString(Node[] children) {
+    String quickRef = "";
+    Node parts[] = children;
+    for(Node n : children) {
+      quickRef += n.getToken();
+      if(n != parts[parts.length-1]) {
+        quickRef += ".";
+      }
+    }
+    return quickRef;
   }
 
   public Object instanceObject(String className, String methodName,
