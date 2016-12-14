@@ -8,18 +8,19 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class Program {
 
-  private Queue<Condition>             condQueue        = new ConcurrentLinkedQueue<Condition>();
-  private Map<String, List<Condition>> waitingForEvents = new HashMap<String, List<Condition>>();
-  private Stack<Condition>             conditions       = new Stack<Condition>();
-  private Map<String, Object>          objects          = new HashMap<String, Object>();
+  private Queue<Condition>             condQueue         = new ConcurrentLinkedQueue<Condition>();
+  private Map<String, List<Condition>> waitingForEvents  = new HashMap<String, List<Condition>>();
+  private Map<String, List<Condition>> waitingForObjects = new HashMap<String, List<Condition>>();
+  private Stack<Condition>             conditions        = new Stack<Condition>();
+  private Map<String, Object>          objects           = new HashMap<String, Object>();
 
   public void run() {
-    while (!conditions.isEmpty() || !condQueue.isEmpty()
-        || !waitingForEvents.isEmpty()) {
+    while (!conditions.isEmpty() || !condQueue.isEmpty() || !waitingForEvents.isEmpty()) {
       Stack<Action> actions = new Stack<Action>();
 
       emptyCondQueue();
@@ -28,6 +29,8 @@ public class Program {
         c = conditions.pop();
         if (c.check(this)) {
           actions.push(c.getAction());
+        }else if(c instanceof BoolCondition) {
+          System.out.println("BoolCondition");
         }
         if (!c.repeats() && c instanceof EventCondition) {
           EventCondition ec = (EventCondition) c;
@@ -81,10 +84,29 @@ public class Program {
 
   public void setObject(String name, Object object) {
     this.objects.put(name, object);
+    triggerListener(name);
+  }
+
+  private void triggerListener(String name) {
+    List<Condition> condList = waitingForObjects.get(name);
+    if (condList != null) {
+      for(Condition c : condList) {
+        condQueue.add(c);  
+      }
+    }
   }
 
   public Object getObject(String name) {
     return this.objects.get(name);
+  }
+
+  public void setListener(String ref, Condition cond) {
+    List<Condition> list = waitingForObjects.get(ref);
+    if (list == null) {
+      list = new LinkedList<Condition>();
+      this.waitingForObjects.put(ref, list);
+    }
+    list.add(cond);
   }
 
 }

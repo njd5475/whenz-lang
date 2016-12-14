@@ -58,9 +58,9 @@ public class ProgramBuilder implements NodeVisitor {
             String op = child.children()[1].children()[0].getToken();
             int num = Integer.parseInt(child.children()[2].children()[0].name());
             cond = new BoolCondition(op, ref, num);
-            cond.repeats();
+            program.setListener(ref, cond);
           }else{
-            System.out.println(child);
+            System.out.println("Unhandled condition: " + child);
           }
         } else if ("action".equals(child.name())) {
           Node actionNode = child.children()[0];
