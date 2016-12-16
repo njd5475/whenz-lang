@@ -36,6 +36,7 @@ when event key_pressed
 	
 when @keyPressed == 27
 	print Escaped was pressed
+	exit
 	
 when event app_starts once
 	print Processing files
