@@ -37,6 +37,10 @@ when event key_pressed
 when @keyPressed == 27
 	print Escaped was pressed
 	exit
+
+when @keyPressed == 78
+	print Space pressed
+	launch window
 	
 when event app_starts once
 	print Processing files
