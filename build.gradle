@@ -1,0 +1,13 @@
+apply plugin : 'java'
+apply plugin : 'application'
+apply plugin : 'eclipse'
+
+mainClassName = 'com.anor.roar.whenzint.Whenz'
+
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src']
+		}
+	}
+}
