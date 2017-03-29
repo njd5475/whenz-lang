@@ -9,6 +9,7 @@ public class BoolCondition extends Condition {
   private String op;
   private String ref;
   private int number;
+  private String cmp;
   private Action action;
 
   public BoolCondition(String op, String ref, int num) {
@@ -16,13 +17,21 @@ public class BoolCondition extends Condition {
     this.ref = ref;
     this.number = num;
   }
+  
+  public BoolCondition(String op, String ref, String cmp) {
+    this.op = op;
+    this.ref = ref;
+    this.cmp = cmp;
+  }
 
   @Override
   public boolean check(Program program) {
     //TODO: this needs optimization just putting this here to get it working
     if("==".equals(op)) {
       Object refObj = program.getObject(ref);
-      if(refObj != null) {
+      if(refObj != null && cmp != null) {
+        return refObj.equals(cmp);
+      }else if(refObj != null) {
         return refObj.equals(number);
       }else{
         System.err.format("RefObj %s is null\n", ref);

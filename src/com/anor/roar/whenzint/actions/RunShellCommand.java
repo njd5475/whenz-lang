@@ -10,26 +10,24 @@ import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
-public class SetToLiteral extends Action {
+public class RunShellCommand extends Action {
 
-  private String name;
-  private Object literal;
+  private String varName;
 
-  public SetToLiteral(String name, Object literal) {
-    this.name = name;
-    this.literal = literal;
+  public RunShellCommand(String varName) {
+    this.varName = varName;
   }
 
   @Override
-  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
-      throws WhenzSyntaxError, IOException {
-    // TODO Auto-generated method stub
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
+    
     return null;
   }
 
   @Override
   public void perform(Program program, Map<Object, Object> context) {
-    program.setObject(name, literal);
+    // TODO Auto-generated method stub
+
   }
 
 }

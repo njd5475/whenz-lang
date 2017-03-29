@@ -61,6 +61,10 @@ public class Node {
     return builder.toString();
   }
 
+  public boolean isNamed(String name) {
+    return this.name.equals(name);
+  }
+  
   public boolean is(String term) {
     return token != null && token.is(term);
   }

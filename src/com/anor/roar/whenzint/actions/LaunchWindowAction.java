@@ -11,6 +11,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
@@ -24,7 +25,7 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 public class LaunchWindowAction extends Action {
 
   @Override
-  public void perform(final Program program) {
+  public void perform(final Program program, Map<Object, Object> context) {
     JFrame frame = new JFrame();
     frame.addWindowListener(new WindowAdapter() {
       @Override

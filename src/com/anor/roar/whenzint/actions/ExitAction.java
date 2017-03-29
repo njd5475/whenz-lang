@@ -1,6 +1,7 @@
 package com.anor.roar.whenzint.actions;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
@@ -12,7 +13,7 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 public class ExitAction extends Action {
 
 	@Override
-	public void perform(Program program) {
+	public void perform(Program program, Map<Object, Object> context) {
 		System.exit(0);
 	}
 

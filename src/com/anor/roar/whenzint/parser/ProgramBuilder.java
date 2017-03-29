@@ -56,10 +56,19 @@ public class ProgramBuilder implements NodeVisitor {
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
             String op = child.children()[1].children()[0].getToken();
-            int num = Integer.parseInt(child.children()[2].children()[0].name());
-            cond = new BoolCondition(op, ref, num);
+            Node rightVal = child.children()[2];
+            if (rightVal.isNamed("Number")) {
+              Node rightValChild = rightVal.children()[0];
+              if (rightValChild.getRawToken().isNumber()) {
+                int num = Integer.parseInt(rightValChild.name());
+                cond = new BoolCondition(op, ref, num);
+              }
+            } else if (rightVal.isNamed("Literals")) {
+              Node rightValChild = rightVal.children()[0];
+              cond = new BoolCondition(op, ref, rightValChild.name());
+            }
             program.setListener(ref, cond);
-          }else{
+          } else {
             System.out.println("Unhandled condition: " + child);
           }
         } else if ("action".equals(child.name())) {
@@ -107,8 +116,7 @@ public class ProgramBuilder implements NodeVisitor {
             } else if ("Exit".equals(definedActionNode.name())) {
               a = new ExitAction();
             } else if ("Trigger".equals(definedActionNode.name())) {
-              a = new TriggerEventAction(
-                  definedActionNode.children()[0].getToken());
+              a = new TriggerEventAction(definedActionNode.children()[0].getToken());
             } else if ("LaunchWindow".equals(definedActionNode.name())) {
               a = new LaunchWindowAction();
             }
@@ -125,10 +133,10 @@ public class ProgramBuilder implements NodeVisitor {
             Node rval = actionNode.children()[2];
             String quickRef = referenceString(lval.children());
             Action a = null;
-            if("Literals".equals(rval.name())) {
+            if ("Literals".equals(rval.name())) {
               a = new SetToLiteral(quickRef, rval.children()[0].name());
             }
-            
+
             if (a != null) {
               if (lastAction == null) {
                 lastAction = a;
@@ -169,17 +177,16 @@ public class ProgramBuilder implements NodeVisitor {
   private String referenceString(Node[] children) {
     String quickRef = "";
     Node parts[] = children;
-    for(Node n : children) {
+    for (Node n : children) {
       quickRef += n.getToken();
-      if(n != parts[parts.length-1]) {
+      if (n != parts[parts.length - 1]) {
         quickRef += ".";
       }
     }
     return quickRef;
   }
 
-  public Object instanceObject(String className, String methodName,
-      String params[]) {
+  public Object instanceObject(String className, String methodName, String params[]) {
     try {
       Class<?> loadClass = Whenz.class.getClassLoader().loadClass(className);
       List<Class<?>> paramTypes = new LinkedList<Class<?>>();

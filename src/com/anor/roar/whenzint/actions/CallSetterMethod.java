@@ -3,6 +3,7 @@ package com.anor.roar.whenzint.actions;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
@@ -32,7 +33,7 @@ public class CallSetterMethod extends Action {
 	}
 
 	@Override
-	public void perform(Program program) {
+	public void perform(Program program, Map<Object, Object> context) {
 		Object object = program.getObject(name);
 		try {
 			Class cl = value.getClass();

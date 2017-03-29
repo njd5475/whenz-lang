@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
-import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 
 public class WhenzParser {
@@ -94,6 +94,7 @@ public class WhenzParser {
           assignment(globalReference, tb);
           consumeWhitespace(tb);
           literals(globalReference, tb);
+          consumeWhitespace(tb, true);
         }catch(WhenzSyntaxError e) {
           tb.rewind(); //in case it needs to be used again
         }
@@ -150,14 +151,13 @@ public class WhenzParser {
 
   private Node number(TokenBuffer t) throws IOException, WhenzSyntaxError {
     Node num = new Node("Number");
-    StringBuilder sb = new StringBuilder("");
-    while(t.peek().isNumber()) {
-      sb.append(t.take().asString());
-    }
-    if(sb.toString().isEmpty()) {
+    Token numberToken = null;
+    if(t.peek().isNumber()) {
+      numberToken = t.take();
+    }else {
       unexpectedToken(t.peek());
     }
-    num.add(new Node(sb.toString()));
+    num.add(new Node(numberToken.asString(), numberToken));
     return num;
   }
 

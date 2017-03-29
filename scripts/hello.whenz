@@ -10,14 +10,14 @@ when event app_starts once
 	launch window
 	@print.var = "Set a variable"
 
-when event window_launched
+when event window_launched //secretly sets a target object for set calls
 	set Title Test Whenz Game Ha
 	set Size &dim
 	trigger event start_game
 	print Window Launched
 	print Game Started
 	printvar @print.var
-	print Before this should have been 'Set a variable'
+	print Before this should have been "Set a variable"
 	
 when event window_closing
 	print Exiting application
@@ -27,12 +27,19 @@ when event start_game
 	print Game Started
 	print Error Here
 
+//when action draw box &x1,&y1-&x2,&y2 on &window
+//	draw box &x1,&y1-&x2,&y2
+
 when event mouse_moved
 	print Mouse Moved
+	//draw box 0,0-10,10 on @window
 	
 when event key_pressed
 	printvar @keyPressed
 	print Bye Bye
+	
+when @print.var == "Set a variable"
+	print Print var has been set
 	
 when @keyPressed == 27
 	print Escaped was pressed
@@ -40,7 +47,7 @@ when @keyPressed == 27
 
 when @keyPressed == 78
 	print Space pressed
-	launch window
+  launch window
 	
 when event app_starts once
 	print Processing files

@@ -47,7 +47,7 @@ public class Program {
       Action a;
       while (!actions.isEmpty()) {
         a = actions.pop();
-        a.perform(this);
+        a.perform(this, new HashMap<Object, Object>());
       }
     }
   }
