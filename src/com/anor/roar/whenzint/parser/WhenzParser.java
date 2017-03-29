@@ -11,6 +11,7 @@ import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
+import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 
 public class WhenzParser {
@@ -25,6 +26,7 @@ public class WhenzParser {
     definedActions.add(new TriggerEventAction(""));
     definedActions.add(new ExitAction());
     definedActions.add(new CallSetterMethod("", "", ""));
+    definedActions.add(new RunShellCommand(""));
   }
 
   public Node parse(TokenBuffer tokens) throws IOException, WhenzSyntaxError {

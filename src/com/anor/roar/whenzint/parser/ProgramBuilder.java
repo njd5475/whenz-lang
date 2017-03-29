@@ -15,6 +15,7 @@ import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
+import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 import com.anor.roar.whenzint.conditions.BoolCondition;
@@ -119,6 +120,13 @@ public class ProgramBuilder implements NodeVisitor {
               a = new TriggerEventAction(definedActionNode.children()[0].getToken());
             } else if ("LaunchWindow".equals(definedActionNode.name())) {
               a = new LaunchWindowAction();
+            } else if ("RunShellCommand".equals(definedActionNode.name())) {
+              StringBuilder sb = new StringBuilder("");
+              for(Node ch : definedActionNode.children()) {
+                sb.append(ch.getToken());
+                sb.append(' ');
+              }
+              a = new RunShellCommand(sb.toString().trim());
             }
 
             if (a != null) {
