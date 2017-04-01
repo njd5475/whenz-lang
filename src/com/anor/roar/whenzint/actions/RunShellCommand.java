@@ -20,23 +20,25 @@ public class RunShellCommand extends Action {
 
   @Override
   public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
-    if(tokens.peek().is("execute")) {
+    if (tokens.peek().is("execute")) {
       Node exec = new Node("RunShellCommand");
       tokens.take();
       parser.consumeWhitespace(tokens);
-      if(tokens.peek().isIdentifier()) {
-        Node command = new Node("Command", tokens.take());
-        exec.add(command);
-        parser.consumeWhitespace(tokens);
-        while(!tokens.peek().isNewline()) {
+      if (tokens.peek().isIdentifier()) {
+        while (!tokens.peek().isNewline()) {
+          Node arg = new Node("Arg");
           parser.consumeWhitespace(tokens);
-          Node arg = new Node("Arg", tokens.take());
+          while (!tokens.peek().isWhitespace() && !tokens.peek().isNewline()) {
+            Node argParts = new Node("ArgPart", tokens.take());
+            arg.add(argParts);
+          }
           exec.add(arg);
         }
-        
+        tokens.take();
+
         return exec;
       }
-      
+
     }
     parser.unexpectedToken(tokens.peek());
     return null;
@@ -44,7 +46,7 @@ public class RunShellCommand extends Action {
 
   @Override
   public void perform(Program program, Map<Object, Object> context) {
-    System.out.println("Executing Command");
+    System.out.println("Executing Command '" + varName + "'");
     try {
       Runtime.getRuntime().exec(varName);
     } catch (IOException e) {

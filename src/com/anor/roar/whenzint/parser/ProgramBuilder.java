@@ -122,9 +122,13 @@ public class ProgramBuilder implements NodeVisitor {
               a = new LaunchWindowAction();
             } else if ("RunShellCommand".equals(definedActionNode.name())) {
               StringBuilder sb = new StringBuilder("");
-              for(Node ch : definedActionNode.children()) {
-                sb.append(ch.getToken());
-                sb.append(' ');
+              for (Node ch : definedActionNode.children()) {
+                if ("Arg".equals(ch.name())) {
+                  for (Node arg : ch.children()) {
+                    sb.append(arg.getToken());
+                  }
+                  sb.append(' ');
+                }
               }
               a = new RunShellCommand(sb.toString().trim());
             }
