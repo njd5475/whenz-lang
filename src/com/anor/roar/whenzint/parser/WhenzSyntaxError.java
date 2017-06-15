@@ -5,7 +5,7 @@ public class WhenzSyntaxError extends Exception {
   private Node tree;
 
   public WhenzSyntaxError(String message, Token t, int ln, int ch) {
-    super(message + ": " + t.toString() + " at " + ln + ":" + ch);
+    super(message + ": " + t.toString() + " at line=" + ln + " col=" + ch);
   }
 
   public WhenzSyntaxError(String message, Token t, int ln, int ch,

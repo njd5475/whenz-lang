@@ -34,7 +34,7 @@ public class TokenStreamReader extends Reader {
         if (next == null) {
           next = new Token((char) r, 1, 0);
         } else {
-          next = next.addLex((char) r);
+          next = next.next((char) r);
         }
 
         if (next != current && current != null) {

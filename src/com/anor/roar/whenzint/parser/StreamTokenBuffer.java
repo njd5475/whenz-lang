@@ -43,7 +43,7 @@ public class StreamTokenBuffer implements TokenBuffer {
     }
 
     if (isEmpty()) {
-      return Token.eof();
+      return Token.eof(-1,-1);
     }
 
     return tokens.get(0);
@@ -55,7 +55,7 @@ public class StreamTokenBuffer implements TokenBuffer {
     }
 
     if (isEmpty()) {
-      return Token.eof();
+      return Token.eof(-1,-1);
     }
 
     return tokens.remove(0);
