@@ -33,7 +33,7 @@ public class CallSetterMethod extends Action {
 	}
 
 	@Override
-	public void perform(Program program, Map<Object, Object> context) {
+	public void perform(Program program, Map<String, Object> context) {
 		Object object = program.getObject(name);
 		try {
 			Class cl = value.getClass();

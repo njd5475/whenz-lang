@@ -21,7 +21,7 @@ public class ChainAction extends Action {
 	}
 
 	@Override
-	public void perform(Program program, Map<Object, Object> context) {
+	public void perform(Program program, Map<String, Object> context) {
 		action.perform(program, context);
 		next.perform(program, context);
 	}

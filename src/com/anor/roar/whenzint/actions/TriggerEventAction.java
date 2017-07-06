@@ -19,7 +19,7 @@ public class TriggerEventAction extends Action {
 	}
 
 	@Override
-	public void perform(Program program, Map<Object, Object> context) {
+	public void perform(Program program, Map<String, Object> context) {
 		program.trigger(eventName);
 	}
 

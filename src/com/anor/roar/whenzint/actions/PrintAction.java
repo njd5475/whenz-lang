@@ -19,7 +19,7 @@ public class PrintAction extends Action {
   }
 
   @Override
-  public void perform(Program program, Map<Object, Object> context) {
+  public void perform(Program program, Map<String, Object> context) {
     System.out.println(toPrint);
   }
 

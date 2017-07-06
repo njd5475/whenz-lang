@@ -19,7 +19,7 @@ public class PrintVarAction extends Action {
   }
 
   @Override
-  public void perform(Program program, Map<Object, Object> context) {
+  public void perform(Program program, Map<String, Object> context) {
     Object o = program.getObject(varName);
     if (o != null) {
       System.out.println(o.toString());

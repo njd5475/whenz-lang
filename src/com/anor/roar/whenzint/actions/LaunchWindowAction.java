@@ -25,7 +25,7 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 public class LaunchWindowAction extends Action {
 
   @Override
-  public void perform(final Program program, Map<Object, Object> context) {
+  public void perform(final Program program, Map<String, Object> context) {
     JFrame frame = new JFrame();
     frame.addWindowListener(new WindowAdapter() {
       @Override

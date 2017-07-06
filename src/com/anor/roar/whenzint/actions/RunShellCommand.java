@@ -45,7 +45,7 @@ public class RunShellCommand extends Action {
   }
 
   @Override
-  public void perform(Program program, Map<Object, Object> context) {
+  public void perform(Program program, Map<String, Object> context) {
     System.out.println("Executing Command '" + varName + "'");
     try {
       Runtime.getRuntime().exec(varName);
