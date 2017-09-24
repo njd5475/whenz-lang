@@ -54,11 +54,13 @@ when @keyPressed == 78
 //try to see if line numbers match up
 when event app_starts once
 	print Processing files
-	new @buf 2048
+	//new @buf 2048
+	&size = 2048
+	&buf is &size bytes
 	
-when &in on @stdin
-	print Hello, User!
+//when &in on @stdin
+//	print Hello, User!
 	
 //when @keyPressed == <ESC>
-action new &name &size
-	&name = new byte[&size]
+//action new &name &size
+//	&name is &size bytes

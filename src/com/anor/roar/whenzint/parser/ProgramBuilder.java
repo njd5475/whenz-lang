@@ -75,6 +75,7 @@ public class ProgramBuilder implements NodeVisitor {
         } else if ("action".equals(child.name())) {
           Node actionNode = child.children()[0];
           if ("defined action".equals(actionNode.name())) {
+            //TODO: differ processing these to each action class
             Node definedActionNode = actionNode.children()[0];
             Action a = null;
             if ("Set".equals(definedActionNode.name())) {

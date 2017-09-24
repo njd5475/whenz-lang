@@ -169,7 +169,7 @@ public class WhenzParser {
     return num;
   }
 
-  private void globalReference(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+  public void globalReference(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node namespace = new Node("Reference");
     if(tokens.peek().isSymbol("@")) {
       tokens.take();
