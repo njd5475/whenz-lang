@@ -4,7 +4,8 @@ public class Token {
 
 	public enum TTYPE {
 		NUMBER,
-		IDENTIFIER,
+		WORD,
+		UNDERSCORE,
 		OPERATION,
 		QUOTE,
 		WHITESPACE,
@@ -62,8 +63,10 @@ public class Token {
 			return TTYPE.OPERATION;
 		} else if (c == '"' || c == '\'') {
 			return TTYPE.QUOTE;
-		} else if (c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-			return TTYPE.IDENTIFIER;
+		} else if (c == '_') {
+		  return TTYPE.UNDERSCORE;
+		} else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+			return TTYPE.WORD;
 		} else if (c == ' ' || c == '\t') {
 			return TTYPE.WHITESPACE;
 		} else if (c == '\n') {
@@ -104,8 +107,12 @@ public class Token {
 		return type == TTYPE.NEWLINE || type == TTYPE.EOF;
 	}
 
-	public boolean isIdentifier() {
-		return type == TTYPE.IDENTIFIER;
+	public boolean isWord() {
+		return type == TTYPE.WORD;
+	}
+	
+	public boolean isUnderscore() {
+	  return type == TTYPE.UNDERSCORE;
 	}
 
 	public boolean isNumber() {

@@ -60,7 +60,7 @@ public class CallSetterMethod extends Action {
     if(tokens.peek().is("set")) {
       tokens.take();
       parser.consumeWhitespace(tokens);
-      if(tokens.peek().isIdentifier()) {
+      if(tokens.peek().isWord()) {
         Node variableIdent = new Node("VariableIdentifier", tokens.take());
         
         // one or more tokens till the end of the line
@@ -68,7 +68,7 @@ public class CallSetterMethod extends Action {
         while(!tokens.peek().isNewline()) {
           if(tokens.peek().isSymbol() && tokens.peek().is("&")) {
             tokens.take(); // is the ampersand
-            if(tokens.peek().isIdentifier()) {
+            if(tokens.peek().isWord()) {
               Node obj = new Node("object", tokens.take());
               variableIdent = new Node("Reference", variableIdent.getRawToken());
               variableIdent.add(obj);

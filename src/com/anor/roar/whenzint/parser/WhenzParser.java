@@ -74,10 +74,10 @@ public class WhenzParser {
   private void actions(Node whenNode, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
 
-    while(!tokens.isEmpty() && (tokens.peek().isIdentifier() || tokens.peek().isSymbol("@"))
+    while(!tokens.isEmpty() && (tokens.peek().isWord() || tokens.peek().isSymbol("@"))
         && tokens.peek().isNot("when")) {
       Node action = new Node("action");
-      if(tokens.peek().isIdentifier() && tokens.peek().isNot("when")) {
+      if(tokens.peek().isWord() && tokens.peek().isNot("when")) {
         TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
         tb.mark();
         WhenzSyntaxError error = null;
@@ -121,6 +121,7 @@ public class WhenzParser {
       return p.number(t);
     };
     TokenAction decimals = (p, t) -> {
+      p.consumeWhitespace(t);
       Node n = new Node("Decimal");
       n.add(p.number(t));
       if(t.peek().isSymbol(".")) {
@@ -130,6 +131,7 @@ public class WhenzParser {
       return n;
     };
     TokenAction stringLiteral = (p, t) -> {
+      p.consumeWhitespace(t);
       Node n = new Node("Literals");
       StringBuilder sb = new StringBuilder();
       while(!t.peek().isNewline()) {
@@ -171,9 +173,9 @@ public class WhenzParser {
 
   public void globalReference(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node namespace = new Node("Reference");
-    if(tokens.peek().isSymbol("@")) {
+    if(tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) {
       tokens.take();
-      while(tokens.peek().isIdentifier()) {
+      while(tokens.peek().isWord()) {
         namespace.add(new Node("part", tokens.take()));
         if(tokens.peek().isSymbol(".")) {
           tokens.take();
@@ -237,7 +239,7 @@ public class WhenzParser {
 
   private void methodSignature(Node action, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node methodSignature = new Node("methodSignature");
-    if(tokens.peek().isIdentifier()) {
+    if(tokens.peek().isWord()) {
       methodSignature.add(new Node(tokens.take().asString()));
       while(tokens.peek().isSymbol() && tokens.peek().is(":")) {
         tokens.take();
@@ -255,7 +257,7 @@ public class WhenzParser {
   private void className(Node action, TokenBuffer tokens) throws IOException {
     Node className = new Node("classname");
     String strClass = "";
-    while(tokens.peek().isIdentifier() || (tokens.peek().is("."))) {
+    while(tokens.peek().isWord() || (tokens.peek().is("."))) {
       strClass += tokens.take().asString();
     }
     className.add(new Node(strClass));
@@ -267,7 +269,7 @@ public class WhenzParser {
     consumeWhitespace(tokens);
     Node conditions = new Node("conditions");
     // TODO: try a couple of different patterns here for conditional expressions
-    if(tokens.peek().isIdentifier()) {
+    if(tokens.peek().isWord()) {
       if(tokens.peek().is("define") || tokens.peek().is("event")) {
         while(!tokens.peek().isNewline()) {
           conditions.add(new Node("identifier", tokens.take()));

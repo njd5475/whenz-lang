@@ -33,7 +33,11 @@ public class TrackableTokenBuffer implements TokenBuffer {
    * Set the iterator
    */
   public void rewind() {
-    iter = track.listIterator();
+    if(track != null) {
+      iter = track.listIterator();
+    }else{
+      System.err.println("Trackable never marked");
+    }
   }
 
   /**

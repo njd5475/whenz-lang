@@ -24,7 +24,7 @@ public class RunShellCommand extends Action {
       Node exec = new Node("RunShellCommand");
       tokens.take();
       parser.consumeWhitespace(tokens);
-      if (tokens.peek().isIdentifier()) {
+      if (tokens.peek().isWord()) {
         while (!tokens.peek().isNewline()) {
           Node arg = new Node("Arg");
           parser.consumeWhitespace(tokens);

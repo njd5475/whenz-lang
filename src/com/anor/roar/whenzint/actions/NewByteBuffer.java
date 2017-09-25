@@ -49,7 +49,7 @@ public class NewByteBuffer extends Action {
     }
 
     if(path != null) {
-      while(tokens.peek().isIdentifier()) {
+      while(tokens.peek().isWord()) {
         path.add(new Node("Part", tokens.take()));
         if(tokens.peek().isWhitespace()) {
           break;
@@ -71,7 +71,7 @@ public class NewByteBuffer extends Action {
           byteNode.add(path = new Node("GlobalPath"));
         }
         
-        while(tokens.peek().isIdentifier()) {
+        while(tokens.peek().isWord()) {
           path.add(new Node("Part", tokens.take()));
           if(tokens.peek().isWhitespace()) {
             break;

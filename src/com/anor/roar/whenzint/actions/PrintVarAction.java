@@ -37,7 +37,7 @@ public class PrintVarAction extends Action {
       if (tokens.peek().isSymbol("@")) {
         tokens.take();
         Node globalRef = new Node("GlobalVariable");
-        while (tokens.peek().isIdentifier()) {
+        while (tokens.peek().isWord()) {
           globalRef.add(new Node("part", tokens.take()));
           if (tokens.peek().isSymbol(".")) {
             tokens.take();

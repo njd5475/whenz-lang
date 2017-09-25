@@ -33,7 +33,7 @@ public class TriggerEventAction extends Action {
       if(tokens.peek().is("event")) {
         tokens.take();
         parser.consumeWhitespace(tokens);
-        if(tokens.peek().isIdentifier()) {
+        if(tokens.peek().isWord()) {
           Node eventName = new Node("Event", tokens.take());
           triggerEvent.add(eventName);
           parser.consumeWhitespace(tokens);

@@ -53,7 +53,7 @@ when @keyPressed == 78
 	
 //try to see if line numbers match up
 when event app_starts once
-	print Processing files
+	@var1 = 2048
 	//new @buf 2048
 	&size = 2048
 	&buf is &size bytes
