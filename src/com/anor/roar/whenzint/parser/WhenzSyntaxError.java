@@ -14,6 +14,10 @@ public class WhenzSyntaxError extends Exception {
     this.tree = top;
   }
 
+  public WhenzSyntaxError(String message, Token tok) {
+    this(message, tok, tok.getLine(), tok.getChar());
+  }
+
   @Override
   public void printStackTrace() {
     System.err.println(tree);

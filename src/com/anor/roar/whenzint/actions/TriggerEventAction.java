@@ -27,14 +27,17 @@ public class TriggerEventAction extends Action {
   public Node buildNode(WhenzParser parser, TokenBuffer tokens)
       throws WhenzSyntaxError, IOException {
     Node triggerEvent = new Node("Trigger");
+    parser.consumeWhitespace(tokens);
     if(tokens.peek().is("trigger")) {
       tokens.take();
       parser.consumeWhitespace(tokens);
       if(tokens.peek().is("event")) {
         tokens.take();
         parser.consumeWhitespace(tokens);
-        if(tokens.peek().isWord()) {
-          Node eventName = new Node("Event", tokens.take());
+        Node ident = parser.identifier(tokens);
+        if(ident != null) {
+          Node eventName = new Node("Event");
+          eventName.add(ident);
           triggerEvent.add(eventName);
           parser.consumeWhitespace(tokens);
           if(tokens.peek().isNewline()) {

@@ -36,7 +36,11 @@ public class TrackableTokenBuffer implements TokenBuffer {
     if(track != null) {
       iter = track.listIterator();
     }else{
-      System.err.println("Trackable never marked");
+      try {
+        throw new WhenzSyntaxError("Trackable never marked", buffer.peek());
+      }catch(Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 

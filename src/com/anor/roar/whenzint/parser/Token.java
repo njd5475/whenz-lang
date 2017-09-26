@@ -44,7 +44,6 @@ public class Token {
 		if (nextType == TTYPE.NEWLINE) {
 			++nLine;
 			nCol = 0;
-			System.out.println("Line: " + nLine);
 		}
 
 		if (nextType != type || type == TTYPE.NEWLINE) {

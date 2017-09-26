@@ -3,6 +3,8 @@ package com.anor.roar.whenzint.parser;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.anor.roar.whenzint.Program;
@@ -74,7 +76,7 @@ public class WhenzParser {
   private void actions(Node whenNode, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
 
-    while(!tokens.isEmpty() && (tokens.peek().isWord() || tokens.peek().isSymbol("@"))
+    while(!tokens.isEmpty() && (tokens.peek().is("//") || tokens.peek().isWord() || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&"))
         && tokens.peek().isNot("when")) {
       Node action = new Node("action");
       if(tokens.peek().isWord() && tokens.peek().isNot("when")) {
@@ -89,8 +91,9 @@ public class WhenzParser {
         if(error != null) {
           throw error;
         }
+        whenNode.add(action);
         consumeWhitespace(tokens, true);
-      } else if(tokens.peek().isSymbol("@") /* Cannot be whenz */) {
+      } else if(tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&") /* Cannot be whenz */) {
         // most likely we are setting a global reference
         Node globalReference = new Node("GlobalReference");
         globalReference(globalReference, tokens);
@@ -98,6 +101,7 @@ public class WhenzParser {
         // optional section
         TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
         try {
+          tb.mark();
           consumeWhitespace(tb);
           assignment(globalReference, tb);
           consumeWhitespace(tb);
@@ -106,9 +110,15 @@ public class WhenzParser {
         } catch(WhenzSyntaxError e) {
           tb.rewind(); // in case it needs to be used again
         }
-
+        whenNode.add(action);
+      } else if(tokens.peek().is("//")) {
+        // consume it all
+        while(!tokens.peek().isNewline()) {
+          tokens.take();
+        }
+        tokens.take(); // remove newline
+        consumeWhitespace(tokens);
       }
-      whenNode.add(action);
     }
   }
 
@@ -175,10 +185,12 @@ public class WhenzParser {
     Node namespace = new Node("Reference");
     if(tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) {
       tokens.take();
-      while(tokens.peek().isWord()) {
-        namespace.add(new Node("part", tokens.take()));
+      Node part = this.identifier(tokens);
+      while(part != null) {
+        namespace.add(part);
         if(tokens.peek().isSymbol(".")) {
           tokens.take();
+          part = this.identifier(tokens);
         } else if(tokens.peek().isNewline()) {
           break;
         } else {
@@ -374,6 +386,53 @@ public class WhenzParser {
     } catch(WhenzSyntaxError e) {
       e.printStackTrace();
     }
+  }
+
+  private boolean isIdentifier(TokenBuffer tb) {
+    try {
+      if(tb.peek().isUnderscore() || tb.peek().isWord()) {
+        List<Token> tokList = new LinkedList<Token>();
+        tokList.add(tb.take());
+        while(tb.peek().isWord() || tb.peek().isNumber() || tb.peek().isUnderscore()) {
+          tokList.add(tb.take());
+        }
+        return true;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+
+  public Node identifier(TokenBuffer tokens) throws WhenzSyntaxError {
+    TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
+    try {
+      tb.mark();
+      if(!isIdentifier(tb)) {
+        throw new WhenzSyntaxError("Expected Identifier", tokens.peek());
+      }
+      tb.rewind();
+      
+      if(tb.peek().isUnderscore() || tb.peek().isWord()) {
+        List<Token> tokList = new LinkedList<Token>();
+        tokList.add(tb.take());
+        while(tb.peek().isWord() || tb.peek().isNumber() || tb.peek().isUnderscore()) {
+          tokList.add(tb.take());
+        }
+        
+        StringBuilder sb = new StringBuilder("");
+        for(Token t : tokList) {
+          sb.append(t.asString());
+        }
+        Node ident = new Node("Identifier");
+        Node val = new Node(sb.toString());
+        ident.add(val);
+        return ident;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 
 }

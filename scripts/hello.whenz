@@ -13,8 +13,10 @@ when event app_starts once
 	execute base64 /dev/urandom | head -c 5 | xargs touch
 
 when event window_launched //secretly sets a target object for set calls
+	print What
 	set Title Test Whenz Game Ha
 	set Size &dim
+	print Test a print here
 	trigger event start_game
 	print Window Launched
 	print Game Started
@@ -56,7 +58,7 @@ when event app_starts once
 	@var1 = 2048
 	//new @buf 2048
 	&size = 2048
-	&buf is &size bytes
+	//&buf is &size bytes
 	
 //when &in on @stdin
 //	print Hello, User!
