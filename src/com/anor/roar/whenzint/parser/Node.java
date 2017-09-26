@@ -8,13 +8,14 @@ public class Node {
   private List<Node> children = new LinkedList<Node>();
   private String     name;
   private Token      token;
+  private String     val;
 
   public Node() {
     this("Unamed");
   }
 
   public Node(String name) {
-    this(name, null);
+    this.name = name;
   }
 
   public Node(String name, Token token) {
@@ -22,40 +23,47 @@ public class Node {
     this.token = token;
   }
 
+  public Node(String name, String val) {
+    this.name = name;
+    this.val = val;
+  }
+
   public void add(Node child) {
     children.add(child);
   }
-  
+
   public Node[] children() {
     return children.toArray(new Node[children.size()]);
   }
 
   public void traverse(NodeVisitor visitor) {
     // depth first
-    for(Node child : children) {
+    for (Node child : children) {
       child.traverse(visitor);
     }
     visitor.visit(this);
   }
-  
+
   public String toString() {
     return toString(0);
   }
 
   private String toString(int tab) {
     StringBuilder builder = new StringBuilder("");
-    for(int i = 0; i < tab; ++i) {
+    for (int i = 0; i < tab; ++i) {
       builder.append("  ");
     }
     builder.append("> '" + name + "'");
-    if(token != null) {
+    if (token != null) {
       builder.append(" Token: " + token.toString());
-    }else{
+    } else if(val != null) {
+      builder.append(" Value: " + val);
+    } else {
       builder.append("|");
     }
     builder.append('\n');
-    
-    for(Node node : children) {
+
+    for (Node node : children) {
       builder.append(node.toString(tab + 1));
     }
     return builder.toString();
@@ -64,20 +72,49 @@ public class Node {
   public boolean isNamed(String name) {
     return this.name.equals(name);
   }
-  
+
   public boolean is(String term) {
-    return token != null && token.is(term);
+    if(hasToken()) {
+      return token.is(term);
+    }else if(val != null) {
+      return val.equals(term);
+    }
+    return false;
+  }
+
+  public boolean hasToken() {
+    return token != null;
   }
 
   public String getToken() {
-    return token.asString();
+    if (hasToken()) {
+      return token.asString();
+    }
+    return null;
   }
-  
+
   public Token getRawToken() {
     return token;
   }
 
-	public String name() {
-		return name;
-	}
+  public String getValue() {
+    return val;
+  }
+
+  public String name() {
+    return name;
+  }
+
+  public boolean hasValue() {
+    return val != null;
+  }
+
+  public String getTokenOrValue() {
+    if(hasToken()) {
+      return token.asString();
+    }else if(hasValue()) {
+      return val;
+    }
+    return null;
+  }
 }

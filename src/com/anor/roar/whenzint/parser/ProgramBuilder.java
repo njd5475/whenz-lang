@@ -25,7 +25,6 @@ public class ProgramBuilder implements NodeVisitor {
 
   private Node    root;
   private Program program;
-  private int     literalCount;
 
   public ProgramBuilder(Node root) {
     this.root = root;
@@ -50,9 +49,10 @@ public class ProgramBuilder implements NodeVisitor {
       for (Node child : node.children()) {
         if ("conditions".equals(child.name())) {
           if (child.children()[0].is("define")) {
-            defining = child.children()[1].getToken();
+            Node defChild = child.children()[0].children()[0];
+            defining = defChild.getTokenOrValue();
           } else if (child.children()[0].is("event")) {
-            cond = new EventCondition(child.children()[1].getToken());
+            cond = new EventCondition(child.children()[0].children()[0].getTokenOrValue());
           } else if ("Reference".equals(child.children()[0].name())) {
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
@@ -75,7 +75,7 @@ public class ProgramBuilder implements NodeVisitor {
         } else if ("action".equals(child.name())) {
           Node actionNode = child.children()[0];
           if ("defined action".equals(actionNode.name())) {
-            //TODO: differ processing these to each action class
+            // TODO: differ processing these to each action class
             Node definedActionNode = actionNode.children()[0];
             Action a = null;
             if ("Set".equals(definedActionNode.name())) {
@@ -85,14 +85,28 @@ public class ProgramBuilder implements NodeVisitor {
               Object obj = "";
               if ("Reference".equals(setNode.name())) {
                 Node val = setNode.children()[0];
-                obj = program.getObject(val.getToken());
+                if(val.hasToken()) {
+                  obj = program.getObject(val.getToken());
+                }else if(val.hasValue()) {
+                  obj = program.getObject(val.getValue());
+                }
+                if(obj == null) {
+                  System.err.println("Link Error: Reference " + val.getTokenOrValue() + " referes to a null object");
+                }
                 name = "window";
               } else if ("VariableIdentifier".equals(setNode.name())) {
                 StringBuilder str = new StringBuilder("");
                 for (Node v : setNode.children()) {
-                  str.append(v.getToken());
+                  if(v.hasToken()) {
+                    str.append(v.getToken());
+                  }else if(v.hasValue()) {
+                    str.append(v.getValue());
+                  }
                 }
                 obj = str.toString();
+                if(obj == null) {
+                  System.err.println("Issues linking program");
+                }
                 name = "window";
                 program.setObject(name, obj);
               }
@@ -118,7 +132,8 @@ public class ProgramBuilder implements NodeVisitor {
             } else if ("Exit".equals(definedActionNode.name())) {
               a = new ExitAction();
             } else if ("Trigger".equals(definedActionNode.name())) {
-              a = new TriggerEventAction(definedActionNode.children()[0].getToken());
+              a = new TriggerEventAction(
+                  definedActionNode.children()[0].getValue());
             } else if ("LaunchWindow".equals(definedActionNode.name())) {
               a = new LaunchWindowAction();
             } else if ("RunShellCommand".equals(definedActionNode.name())) {
@@ -191,7 +206,11 @@ public class ProgramBuilder implements NodeVisitor {
     String quickRef = "";
     Node parts[] = children;
     for (Node n : children) {
-      quickRef += n.getToken();
+      if (n.hasToken()) {
+        quickRef += n.getToken();
+      } else {
+        quickRef += n.getValue();
+      }
       if (n != parts[parts.length - 1]) {
         quickRef += ".";
       }
@@ -199,7 +218,8 @@ public class ProgramBuilder implements NodeVisitor {
     return quickRef;
   }
 
-  public Object instanceObject(String className, String methodName, String params[]) {
+  public Object instanceObject(String className, String methodName,
+      String params[]) {
     try {
       Class<?> loadClass = Whenz.class.getClassLoader().loadClass(className);
       List<Class<?>> paramTypes = new LinkedList<Class<?>>();

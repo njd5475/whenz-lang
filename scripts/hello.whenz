@@ -8,9 +8,10 @@ when event app_starts once
 	print Hello World!
 	print Cannot have one print command after another
 	launch window
+	
 	@print.var = "Set a variable"
 	
-	execute base64 /dev/urandom | head -c 5 | xargs touch
+	execute touch aFileTouchedByWhenz
 
 when event window_launched //secretly sets a target object for set calls
 	print What
