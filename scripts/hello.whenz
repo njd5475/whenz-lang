@@ -59,6 +59,7 @@ when event app_starts once
 	@var1 = 2048
 	//new @buf 2048
 	&size = 2048
+	printvar @size
 	//&buf is &size bytes
 	
 //when &in on @stdin

@@ -29,9 +29,8 @@ public class Program {
         c = conditions.pop();
         if (c.check(this)) {
           actions.push(c.getAction());
-        }else if(c instanceof BoolCondition) {
-          System.out.println("BoolCondition");
         }
+        
         if (!c.repeats() && c instanceof EventCondition) {
           EventCondition ec = (EventCondition) c;
           List<Condition> list = waitingForEvents.get(ec);
