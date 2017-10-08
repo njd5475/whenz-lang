@@ -2,16 +2,20 @@ package com.anor.roar.whenzint.parser;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.actions.ExitAction;
+import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
@@ -23,8 +27,10 @@ import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class ProgramBuilder implements NodeVisitor {
 
-  private Node    root;
-  private Program program;
+  private Node                      root;
+  private Program                   program;
+
+  private Map<String, VariablePath> paths = new HashMap<>();
 
   public ProgramBuilder(Node root) {
     this.root = root;
@@ -52,7 +58,8 @@ public class ProgramBuilder implements NodeVisitor {
             Node defChild = child.children()[0].children()[0];
             defining = defChild.getTokenOrValue();
           } else if (child.children()[0].is("event")) {
-            cond = new EventCondition(child.children()[0].children()[0].getTokenOrValue());
+            cond = new EventCondition(
+                child.children()[0].children()[0].getTokenOrValue());
           } else if ("Reference".equals(child.children()[0].name())) {
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
@@ -85,26 +92,27 @@ public class ProgramBuilder implements NodeVisitor {
               Object obj = "";
               if ("Reference".equals(setNode.name())) {
                 Node val = setNode.children()[0];
-                if(val.hasToken()) {
+                if (val.hasToken()) {
                   obj = program.getObject(val.getToken());
-                }else if(val.hasValue()) {
+                } else if (val.hasValue()) {
                   obj = program.getObject(val.getValue());
                 }
-                if(obj == null) {
-                  System.err.println("Link Error: Reference " + val.getTokenOrValue() + " referes to a null object");
+                if (obj == null) {
+                  System.err.println("Link Error: Reference "
+                      + val.getTokenOrValue() + " referes to a null object");
                 }
                 name = "window";
               } else if ("VariableIdentifier".equals(setNode.name())) {
                 StringBuilder str = new StringBuilder("");
                 for (Node v : setNode.children()) {
-                  if(v.hasToken()) {
+                  if (v.hasToken()) {
                     str.append(v.getToken());
-                  }else if(v.hasValue()) {
+                  } else if (v.hasValue()) {
                     str.append(v.getValue());
                   }
                 }
                 obj = str.toString();
-                if(obj == null) {
+                if (obj == null) {
                   System.err.println("Issues linking program");
                 }
                 name = "window";
@@ -147,6 +155,10 @@ public class ProgramBuilder implements NodeVisitor {
                 }
               }
               a = new RunShellCommand(sb.toString().trim());
+            } else if ("Increment".equals(definedActionNode.name())) {
+              Node children[] = definedActionNode.children();
+              VariablePath path = getPath(children[0]);
+              a = new IncrementAction(path);
             }
 
             if (a != null) {
@@ -163,6 +175,9 @@ public class ProgramBuilder implements NodeVisitor {
             Action a = null;
             if ("Literals".equals(rval.name())) {
               a = new SetToLiteral(quickRef, rval.children()[0].name());
+            } else if ("Number".equals(rval.name())) {
+              a = new SetToLiteral(quickRef,
+                  Integer.parseInt(rval.children()[0].getToken()));
             }
 
             if (a != null) {
@@ -200,6 +215,18 @@ public class ProgramBuilder implements NodeVisitor {
       }
     }
 
+  }
+
+  private VariablePath getPath(Node node) {
+    String ref = referenceString(node.children());
+    if (ref != null) {
+      VariablePath path = paths.get(ref);
+      if ("Reference".equals(node.name()) && path == null) {
+        paths.put(ref, path = VariablePath.create(ref));
+      }
+      return path;
+    }
+    return null;
   }
 
   private String referenceString(Node[] children) {

@@ -107,7 +107,7 @@ public class NewByteBuffer extends Action {
     }
 
     if(size > 0) {
-      path.set(context, ByteBuffer.allocateDirect(size));
+      path.set(program, context, ByteBuffer.allocateDirect(size));
     }
   }
 

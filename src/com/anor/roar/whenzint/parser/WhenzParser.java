@@ -10,6 +10,7 @@ import java.util.Set;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
+import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
@@ -30,6 +31,7 @@ public class WhenzParser {
     definedActions.add(new ExitAction());
     definedActions.add(new CallSetterMethod("", "", ""));
     definedActions.add(new RunShellCommand(""));
+    definedActions.add(new IncrementAction(null));
   }
 
   public void registerAction(TokenAction action) {

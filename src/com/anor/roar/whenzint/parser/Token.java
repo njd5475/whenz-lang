@@ -70,7 +70,7 @@ public class Token {
 			return TTYPE.WHITESPACE;
 		} else if (c == '\n') {
 			return TTYPE.NEWLINE;
-		} else if (oneOf(c, '=', '.', '|', ':', '(', ')', '&', '@')) {
+		} else if (oneOf(c, '=', '.', '|', ':', '(', ')', '&', '@', '<', '>')) {
 			return TTYPE.SYMBOL;
 		}
 		return TTYPE.UNKNOWN;

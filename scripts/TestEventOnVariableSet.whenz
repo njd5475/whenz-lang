@@ -1,0 +1,21 @@
+
+when event app_starts once
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  print Hello World!
+  @ww = 5
+  printvar @ww
+
+when @ww == 5
+  print @ww is equal to 5 should increment
+  increment @ww
+
+when @ww == 6
+  print @ww is equal to 6
+  exit
