@@ -8,8 +8,8 @@ public class BoolCondition extends Condition {
 
   private String op;
   private String ref;
-  private int number;
-  private String cmp;
+  private Integer number = null;
+  private String cmp = null;
   private Action action;
 
   public BoolCondition(String op, String ref, int num) {
@@ -35,6 +35,22 @@ public class BoolCondition extends Condition {
         return refObj.equals(number);
       }else{
         System.err.format("RefObj %s is null\n", ref);
+      }
+    }else if("<=".equals(op)) {
+      Object refObj = program.getObject(ref);
+      if(refObj != null && number != null) {
+        if(refObj instanceof Number) {
+          Number n = (Number)refObj;
+          return n.intValue() <= number;
+        }
+      }
+    }else if(">=".equals(op)) {
+      Object refObj = program.getObject(ref);
+      if(refObj != null && number != null) {
+        if(refObj instanceof Number) {
+          Number n = (Number)refObj;
+          return n.intValue() >= number;
+        }
       }
     }
     return false;
