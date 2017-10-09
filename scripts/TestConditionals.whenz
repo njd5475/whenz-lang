@@ -2,16 +2,15 @@
 when event app_starts once
 	print Starting counting up
 	@counter = 0
-	trigger event count
 	
-when @counter <= 100
+when @counter <= 10000
 	print Counter is less than 100:
 	printvar @counter
 	increment @counter
 	
-when @counter == 100
+when @counter == 10000
 	print Counter is equal to 100
 	
-when @counter >= 101
+when @counter >= 10001
 	print Counter is over 100
 	exit
