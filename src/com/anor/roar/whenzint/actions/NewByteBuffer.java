@@ -8,6 +8,7 @@ import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.Token;
 import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
@@ -109,6 +110,18 @@ public class NewByteBuffer extends Action {
     if(size > 0) {
       path.set(program, context, ByteBuffer.allocateDirect(size));
     }
+  }
+
+  @Override
+  public Action buildAction(ProgramBuilder builder, Node node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String getActionNodeName() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

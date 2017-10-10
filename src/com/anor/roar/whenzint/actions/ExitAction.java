@@ -6,12 +6,17 @@ import java.util.Map;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class ExitAction extends Action {
 
+  static {
+    ProgramBuilder.registerActionBuilder(new ExitAction());
+  }
+  
 	@Override
 	public void perform(Program program, Map<String, Object> context) {
 		System.exit(0);
@@ -33,6 +38,16 @@ public class ExitAction extends Action {
       parser.unexpectedToken(tokens.peek());
     }
     return exitNode;
+  }
+
+  @Override
+  public Action buildAction(ProgramBuilder builder, Node node) {
+    return new ExitAction();
+  }
+
+  @Override
+  public String getActionNodeName() {
+    return "Exit";
   }
 
 }

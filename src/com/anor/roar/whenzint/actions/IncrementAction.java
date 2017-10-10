@@ -7,6 +7,7 @@ import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
@@ -15,6 +16,10 @@ public class IncrementAction extends Action {
 
   private VariablePath path;
 
+  static {
+    ProgramBuilder.registerActionBuilder(new IncrementAction(null));
+  }
+  
   public IncrementAction(VariablePath path) {
     this.path = path;
   }
@@ -51,6 +56,18 @@ public class IncrementAction extends Action {
         path.set(program, context, i + 1);
       }
     }
+  }
+
+  @Override
+  public Action buildAction(ProgramBuilder builder, Node node) {
+    Node children[] = node.children();
+    VariablePath path = builder.getPath(children[0]);
+    return new IncrementAction(path);
+  }
+
+  @Override
+  public String getActionNodeName() {
+    return "Increment";
   }
 
 }

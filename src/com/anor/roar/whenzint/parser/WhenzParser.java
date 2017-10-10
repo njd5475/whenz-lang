@@ -1,5 +1,6 @@
 package com.anor.roar.whenzint.parser;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.RunShellCommand;
+import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 
 public class WhenzParser {
@@ -32,6 +34,7 @@ public class WhenzParser {
     definedActions.add(new CallSetterMethod("", "", ""));
     definedActions.add(new RunShellCommand(""));
     definedActions.add(new IncrementAction(null));
+    new SetToLiteral(null, null);
   }
 
   public void registerAction(TokenAction action) {
@@ -400,6 +403,21 @@ public class WhenzParser {
     try {
       root = parser.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root);
+      return builder.build();
+    } catch (WhenzSyntaxError e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+  
+  public static Program compileToProgram(String filename, Program prog) throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(new FileReader(filename));
+    WhenzParser parser = new WhenzParser();
+
+    Node root = null;
+    try {
+      root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      ProgramBuilder builder = new ProgramBuilder(root, prog);
       return builder.build();
     } catch (WhenzSyntaxError e) {
       e.printStackTrace();

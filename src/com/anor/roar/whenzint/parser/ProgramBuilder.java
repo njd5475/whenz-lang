@@ -27,14 +27,20 @@ import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class ProgramBuilder implements NodeVisitor {
 
-  private Node                      root;
-  private Program                   program;
+  private Node                              root;
+  private Program                           program;
 
-  private Map<String, VariablePath> paths = new HashMap<>();
+  private Map<String, VariablePath>         paths   = new HashMap<>();
+  private static Map<String, ActionBuilder> actions = new HashMap<>();
 
   public ProgramBuilder(Node root) {
     this.root = root;
     this.program = new Program();
+  }
+
+  public ProgramBuilder(Node root2, Program prog) {
+    this.root = root2;
+    this.program = prog;
   }
 
   public Program build() {
@@ -44,6 +50,10 @@ public class ProgramBuilder implements NodeVisitor {
 
   private void convertTree() {
     root.traverse(this);
+  }
+
+  public static void registerActionBuilder(ActionBuilder builder) {
+    actions.put(builder.getActionNodeName(), builder);
   }
 
   @Override
@@ -84,82 +94,8 @@ public class ProgramBuilder implements NodeVisitor {
           if ("defined action".equals(actionNode.name())) {
             // TODO: differ processing these to each action class
             Node definedActionNode = actionNode.children()[0];
-            Action a = null;
-            if ("Set".equals(definedActionNode.name())) {
-              Node setNode = definedActionNode.children()[0];
-              String set = setNode.getToken();
-              String name = setNode.getToken();
-              Object obj = "";
-              if ("Reference".equals(setNode.name())) {
-                Node val = setNode.children()[0];
-                if (val.hasToken()) {
-                  obj = program.getObject(val.getToken());
-                } else if (val.hasValue()) {
-                  obj = program.getObject(val.getValue());
-                }
-                if (obj == null) {
-                  System.err.println("Link Error: Reference "
-                      + val.getTokenOrValue() + " referes to a null object");
-                }
-                name = "window";
-              } else if ("VariableIdentifier".equals(setNode.name())) {
-                StringBuilder str = new StringBuilder("");
-                for (Node v : setNode.children()) {
-                  if (v.hasToken()) {
-                    str.append(v.getToken());
-                  } else if (v.hasValue()) {
-                    str.append(v.getValue());
-                  }
-                }
-                obj = str.toString();
-                if (obj == null) {
-                  System.err.println("Issues linking program");
-                }
-                name = "window";
-                program.setObject(name, obj);
-              }
-
-              a = new CallSetterMethod(set, name, obj);
-            } else if ("PrintAction".equals(definedActionNode.name())) {
-              StringBuilder printStr = new StringBuilder("");
-              for (Node part : definedActionNode.children()) {
-                printStr.append(part.getToken());
-              }
-              a = new PrintAction(printStr.toString());
-            } else if ("PrintVar".equals(definedActionNode.name())) {
-              Node global = definedActionNode.children()[0];
-              StringBuilder printStr = new StringBuilder("");
-              Node children[] = global.children();
-              for (Node part : children) {
-                if (part != children[0]) {
-                  printStr.append(".");
-                }
-                printStr.append(part.getToken());
-              }
-              a = new PrintVarAction(printStr.toString());
-            } else if ("Exit".equals(definedActionNode.name())) {
-              a = new ExitAction();
-            } else if ("Trigger".equals(definedActionNode.name())) {
-              a = new TriggerEventAction(
-                  definedActionNode.children()[0].getValue());
-            } else if ("LaunchWindow".equals(definedActionNode.name())) {
-              a = new LaunchWindowAction();
-            } else if ("RunShellCommand".equals(definedActionNode.name())) {
-              StringBuilder sb = new StringBuilder("");
-              for (Node ch : definedActionNode.children()) {
-                if ("Arg".equals(ch.name())) {
-                  for (Node arg : ch.children()) {
-                    sb.append(arg.getToken());
-                  }
-                  sb.append(' ');
-                }
-              }
-              a = new RunShellCommand(sb.toString().trim());
-            } else if ("Increment".equals(definedActionNode.name())) {
-              Node children[] = definedActionNode.children();
-              VariablePath path = getPath(children[0]);
-              a = new IncrementAction(path);
-            }
+            ActionBuilder builder = actions.get(definedActionNode.name());
+            Action a = builder.buildAction(this, definedActionNode);
 
             if (a != null) {
               if (lastAction == null) {
@@ -169,16 +105,8 @@ public class ProgramBuilder implements NodeVisitor {
               }
             }
           } else if ("GlobalReference".equals(actionNode.name())) {
-            Node lval = actionNode.children()[0];
-            Node rval = actionNode.children()[2];
-            String quickRef = referenceString(lval.children());
-            Action a = null;
-            if ("Literals".equals(rval.name())) {
-              a = new SetToLiteral(quickRef, rval.children()[0].name());
-            } else if ("Number".equals(rval.name())) {
-              a = new SetToLiteral(quickRef,
-                  Integer.parseInt(rval.children()[0].getToken()));
-            }
+            ActionBuilder builder = actions.get(actionNode.name());
+            Action a = builder.buildAction(this, actionNode);
 
             if (a != null) {
               if (lastAction == null) {
@@ -217,7 +145,7 @@ public class ProgramBuilder implements NodeVisitor {
 
   }
 
-  private VariablePath getPath(Node node) {
+  public VariablePath getPath(Node node) {
     String ref = referenceString(node.children());
     if (ref != null) {
       VariablePath path = paths.get(ref);
@@ -229,7 +157,7 @@ public class ProgramBuilder implements NodeVisitor {
     return null;
   }
 
-  private String referenceString(Node[] children) {
+  public String referenceString(Node[] children) {
     String quickRef = "";
     Node parts[] = children;
     for (Node n : children) {
@@ -293,6 +221,14 @@ public class ProgramBuilder implements NodeVisitor {
     }
 
     return null;
+  }
+
+  public Object getObject(String token) {
+    return program.getObject(token);
+  }
+
+  public void setObject(String name, Object obj) {
+    program.setObject(name, obj);
   }
 
 }

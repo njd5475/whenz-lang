@@ -18,12 +18,17 @@ import javax.swing.JFrame;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.parser.Node;
+import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class LaunchWindowAction extends Action {
 
+  static {
+    ProgramBuilder.registerActionBuilder(new LaunchWindowAction());
+  }
+  
   @Override
   public void perform(final Program program, Map<String, Object> context) {
     JFrame frame = new JFrame();
@@ -108,6 +113,16 @@ public class LaunchWindowAction extends Action {
       parser.unexpectedToken(tokens.peek());
     }
     return launchNode;
+  }
+
+  @Override
+  public Action buildAction(ProgramBuilder builder, Node node) {
+    return new LaunchWindowAction();
+  }
+
+  @Override
+  public String getActionNodeName() {
+    return "LaunchWindow";
   }
 
 }
