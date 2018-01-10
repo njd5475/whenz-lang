@@ -1,57 +1,90 @@
 package com.anor.roar.whenzint.conditions;
 
+import java.util.function.Predicate;
+
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
 
 public class BoolCondition extends Condition {
 
-  private String op;
   private String ref;
   private Integer number = null;
   private String cmp = null;
+  private Predicate<Program> theOp; 
   private Action action;
 
   public BoolCondition(String op, String ref, int num) {
-    this.op = op;
     this.ref = ref;
     this.number = num;
+    if("==".equals(op)) {
+      theOp = (p) -> {
+        return checkEqualEqual(p);
+      };
+    }else if("<=".equals(op)) {
+      theOp = (p) -> {
+        return checkLessEqual(p);
+      };
+    }else if(">=".equals(op)) {
+      theOp = (p) -> {
+        return checkGreaterEqual(p);
+      };
+    }
   }
   
   public BoolCondition(String op, String ref, String cmp) {
-    this.op = op;
     this.ref = ref;
     this.cmp = cmp;
+    if("==".equals(op)) {
+      theOp = (p) -> {
+        return checkEqualEqual(p);
+      };
+    }else if("<=".equals(op)) {
+      theOp = (p) -> {
+        return checkLessEqual(p);
+      };
+    }else if(">=".equals(op)) {
+      theOp = (p) -> {
+        return checkGreaterEqual(p);
+      };
+    }
   }
 
   @Override
   public boolean check(Program program) {
-    //TODO: this needs optimization just putting this here to get it working
-    if("==".equals(op)) {
-      Object refObj = program.getObject(ref);
-      if(refObj != null && cmp != null) {
-        return refObj.equals(cmp);
-      }else if(refObj != null) {
-        return refObj.equals(number);
-      }else{
-        System.err.format("RefObj %s is null\n", ref);
+    return theOp.test(program);
+  }
+  
+  public boolean checkGreaterEqual(Program program) {
+    Object refObj = program.getObject(ref);
+    if(refObj != null && number != null) {
+      if(refObj instanceof Number) {
+        Number n = (Number)refObj;
+        return n.intValue() >= number;
       }
-    }else if("<=".equals(op)) {
-      Object refObj = program.getObject(ref);
-      if(refObj != null && number != null) {
-        if(refObj instanceof Number) {
-          Number n = (Number)refObj;
-          return n.intValue() <= number;
-        }
+    }
+    return false;
+  }
+  
+  public boolean checkLessEqual(Program program) {
+    Object refObj = program.getObject(ref);
+    if(refObj != null && number != null) {
+      if(refObj instanceof Number) {
+        Number n = (Number)refObj;
+        return n.intValue() <= number;
       }
-    }else if(">=".equals(op)) {
-      Object refObj = program.getObject(ref);
-      if(refObj != null && number != null) {
-        if(refObj instanceof Number) {
-          Number n = (Number)refObj;
-          return n.intValue() >= number;
-        }
-      }
+    }
+    return false;
+  }
+  
+  public boolean checkEqualEqual(Program program) {
+    Object refObj = program.getObject(ref);
+    if(refObj != null && cmp != null) {
+      return refObj.equals(cmp);
+    }else if(refObj != null) {
+      return refObj.equals(number);
+    }else{
+      System.err.format("RefObj %s is null\n", ref);
     }
     return false;
   }

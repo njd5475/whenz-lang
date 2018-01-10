@@ -1,0 +1,9 @@
+
+action 'print' ( 1:ANY | '{' 2:GLOBAL_REF '}' )*
+	1: print _
+	2: printvar _
+	
+// this actually uses the increment action to chain a number of actions together
+action inc 1:GLOBAL_REF by 2:NUMBER
+	loop :2
+		increment :1

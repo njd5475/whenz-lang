@@ -92,9 +92,12 @@ public class ProgramBuilder implements NodeVisitor {
         } else if ("action".equals(child.name())) {
           Node actionNode = child.children()[0];
           if ("defined action".equals(actionNode.name())) {
-            // TODO: differ processing these to each action class
+            // TODO: defer processing these to each action class
             Node definedActionNode = actionNode.children()[0];
             ActionBuilder builder = actions.get(definedActionNode.name());
+            if(builder == null) {
+              System.out.println("NO Action Builder: " + definedActionNode);
+            }
             Action a = builder.buildAction(this, definedActionNode);
 
             if (a != null) {
@@ -149,7 +152,7 @@ public class ProgramBuilder implements NodeVisitor {
     String ref = referenceString(node.children());
     if (ref != null) {
       VariablePath path = paths.get(ref);
-      if ("Reference".equals(node.name()) && path == null) {
+      if (("Reference".equals(node.name()) || "GlobalPath".equals(node.name())) && path == null) {
         paths.put(ref, path = VariablePath.create(ref));
       }
       return path;

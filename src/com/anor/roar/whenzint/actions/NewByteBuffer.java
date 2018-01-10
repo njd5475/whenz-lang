@@ -17,14 +17,15 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 public class NewByteBuffer extends Action {
 
   static {
-    WhenzParser.getInstance().registerAction(new NewByteBuffer());
+    //WhenzParser.getInstance().registerAction(new NewByteBuffer());
+    ProgramBuilder.registerActionBuilder(new NewByteBuffer());
   }
 
   private VariablePath path;
   private VariablePath sizePath;
   private int          staticSize;
 
-  protected NewByteBuffer() {
+  public NewByteBuffer() {
 
   }
 
@@ -39,55 +40,63 @@ public class NewByteBuffer extends Action {
   }
 
   @Override
-  public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
-    Node byteNode = new Node("New");
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
+      throws WhenzSyntaxError, IOException {
+    Node byteNode = new Node("NewByteBuffer");
     parser.consumeWhitespace(tokens);
     Node path = null;
-    if(tokens.peek().isSymbol("&")) {
+    if (tokens.peek().isSymbol("&")) {
       byteNode.add(path = new Node("LocalPath"));
-    } else if(!tokens.peek().isSymbol("@")) {
+    } else if (tokens.peek().isSymbol("@")) {
       byteNode.add(path = new Node("GlobalPath"));
     }
 
-    if(path != null) {
-      while(tokens.peek().isWord()) {
+    if (path != null) {
+      tokens.take();
+      while (tokens.peek().isWord()) {
         path.add(new Node("Part", tokens.take()));
-        if(tokens.peek().isWhitespace()) {
+        if (tokens.peek().isWhitespace()) {
           break;
         }
-        
-        if(tokens.peek().isSymbol(".")) {
+
+        if (tokens.peek().isSymbol(".")) {
           tokens.take();
-        }else{
+        } else {
           parser.unexpectedToken(tokens.peek());
         }
       }
-      
-      if(tokens.peek().is("is")) {
+      parser.consumeWhitespace(tokens);
+      if (tokens.peek().is("is")) {
         tokens.take();
         parser.consumeWhitespace(tokens);
-        if(tokens.peek().isSymbol("&")) {
+        if (tokens.peek().isSymbol("&")) {
           byteNode.add(path = new Node("LocalPath"));
-        } else if(!tokens.peek().isSymbol("@")) {
+        } else if (tokens.peek().isSymbol("@")) {
           byteNode.add(path = new Node("GlobalPath"));
+        } else if (tokens.peek().isNumber()) {
+          byteNode.add(new Node("Number", tokens.take()));
         }
-        
-        while(tokens.peek().isWord()) {
-          path.add(new Node("Part", tokens.take()));
-          if(tokens.peek().isWhitespace()) {
-            break;
-          }
-          
-          if(tokens.peek().isSymbol(".")) {
-            tokens.take();
-          }else{
-            parser.unexpectedToken(tokens.peek());
+
+        if (path.isNamed("LocalPath") || path.isNamed("GlobalPath")) {
+          while (tokens.peek().isWord()) {
+            path.add(new Node("Part", tokens.take()));
+            if (tokens.peek().isWhitespace()) {
+              break;
+            }
+
+            if (tokens.peek().isSymbol(".")) {
+              tokens.take();
+            } else {
+              parser.unexpectedToken(tokens.peek());
+            }
           }
         }
+
+        return byteNode;
       } else {
         parser.unexpectedToken(tokens.take());
       }
-    }else{
+    } else {
       parser.unexpectedToken(tokens.take());
     }
     return null;
@@ -96,32 +105,37 @@ public class NewByteBuffer extends Action {
   @Override
   public void perform(Program program, Map<String, Object> context) {
     int size = -1;
-    if(sizePath != null) {
+    if (sizePath != null) {
       Object obj = sizePath.get(context);
-      if(obj instanceof Number) {
+      if (obj instanceof Number) {
         size = ((Number) obj).intValue();
       }
     }
 
-    if(staticSize > 0) {
+    if (staticSize > 0) {
       size = staticSize;
     }
 
-    if(size > 0) {
+    if (size > 0) {
       path.set(program, context, ByteBuffer.allocateDirect(size));
     }
   }
 
   @Override
   public Action buildAction(ProgramBuilder builder, Node node) {
-    // TODO Auto-generated method stub
-    return null;
+    NewByteBuffer act;
+    VariablePath path2 = builder.getPath(node.children()[0]);
+    if(node.children()[1].isNamed("Number")) {
+      act = new NewByteBuffer(path2, node.children()[1].getRawToken().asNumber());
+    }else{
+      act = new NewByteBuffer(path2, builder.getPath(node.children()[1]));
+    }
+    
+    return act;
   }
 
   @Override
   public String getActionNodeName() {
-    // TODO Auto-generated method stub
-    return null;
+    return "NewByteBuffer";
   }
-
 }

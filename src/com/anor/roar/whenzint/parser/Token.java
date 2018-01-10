@@ -149,4 +149,8 @@ public class Token {
 	public boolean isSymbol(String symbol) {
 		return isSymbol() && is(symbol);
 	}
+
+  public TTYPE getType() {
+    return type;
+  }
 }

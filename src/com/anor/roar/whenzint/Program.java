@@ -13,32 +13,33 @@ import com.anor.roar.whenzint.conditions.EventCondition;
 
 public class Program {
 
-  private Queue<Condition>             condQueue         = new ConcurrentLinkedQueue<Condition>();
-  private Map<String, List<Condition>> waitingForEvents  = new HashMap<String, List<Condition>>();
-  private Map<String, List<Condition>> waitingForObjects = new HashMap<String, List<Condition>>();
-  private Stack<Condition>             conditions        = new Stack<Condition>();
-  private Map<String, Object>          objects           = new HashMap<String, Object>();
+  // private Queue<Condition> condQueue = new ConcurrentLinkedQueue<>();
+  private Map<String, List<Condition>>     waitingForEvents  = new HashMap<>();
+  private Map<String, List<Condition>>     waitingForObjects = new HashMap<>();
+  // private Stack<Condition> conditions = new Stack<>();
+  private Map<String, Object>              objects           = new HashMap<>();
+  private Stack<Action>                    actions           = new Stack<>();
+  private Map<Action, Map<String, Object>> actionContexts    = new HashMap<>();
+  private Map<Condition, Boolean>          enabled           = new HashMap<>();
 
   public void run() {
-    while (!conditions.isEmpty() || !condQueue.isEmpty() || !waitingForEvents.isEmpty()) {
-      Stack<Action> actions = new Stack<Action>();
+    boolean noConditions = false;
+    while (!noConditions) {
+      actions.clear();
 
-      emptyCondQueue();
       Condition c;
-      while (!conditions.isEmpty()) {
-        c = conditions.pop();
-        if (c.check(this)) {
-          actions.push(c.getAction());
-        }
-        
-        if (!c.repeats() && c instanceof EventCondition) {
-          EventCondition ec = (EventCondition) c;
-          List<Condition> list = waitingForEvents.get(ec);
-          if (list != null) {
-            list.remove(c);
-            if (list.isEmpty()) {
-              waitingForEvents.remove(ec.getEventName());
-            }
+      noConditions = true;
+      for (Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
+        if (e.getValue()) {
+          noConditions = false;
+          c = e.getKey();
+          if (c.check(this)) {
+            actions.push(c.getAction());
+          }
+
+          if (!c.repeats() || c instanceof EventCondition) {
+            System.out.println("Disabled condition for " + c.getClass());
+            enabled.put(c, false); // disable condition
           }
         }
       }
@@ -46,17 +47,23 @@ public class Program {
       Action a;
       while (!actions.isEmpty()) {
         a = actions.pop();
-        a.perform(this, new HashMap<String, Object>());
+        Map<String, Object> context = actionContexts.get(a);
+        if (context == null) {
+          actionContexts.put(a, context = new HashMap<String, Object>());
+        } else {
+          context.clear();
+        }
+        a.perform(this, context);
+      }
+
+      try {
+        Thread.sleep(0);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
       }
     }
   }
 
-  private void emptyCondQueue() {
-    while (!condQueue.isEmpty()) {
-      Condition c = condQueue.poll();
-      conditions.add(c);
-    }
-  }
 
   public void add(Condition c) {
     if (c instanceof EventCondition) {
@@ -67,8 +74,9 @@ public class Program {
         waitingForEvents.put(ec.getEventName(), conds);
       }
       conds.add(c);
+      enabled.put(c, false);
     } else {
-      conditions.add(c);
+      enabled.put(c, true);
     }
   }
 
@@ -76,7 +84,7 @@ public class Program {
     List<Condition> list = waitingForEvents.get(eventName);
     if (list != null) {
       for (Condition c : list) {
-        condQueue.add(c);
+        enabled.put(c, true); // enable conditions that are waiting for an event
       }
     }
   }
@@ -89,8 +97,8 @@ public class Program {
   private void triggerListener(String name) {
     List<Condition> condList = waitingForObjects.get(name);
     if (condList != null) {
-      for(Condition c : condList) {
-        condQueue.add(c);  
+      for (Condition c : condList) {
+        enabled.put(c, true); // enable the check
       }
     }
   }

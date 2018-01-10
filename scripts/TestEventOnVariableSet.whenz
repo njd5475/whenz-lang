@@ -9,13 +9,13 @@ when event app_starts once
   print Hello World!
   print Hello World!
   print Hello World!
-  @ww = 5
+  @ww = 5678
   printvar @ww
 
-when @ww == 5
-  print @ww is equal to 5 should increment
+when @ww == 5678
+  print @ww is equal to 5678 should increment
   increment @ww
 
-when @ww == 6
-  print @ww is equal to 6
+when @ww == 5679
+  print @ww is equal to 5679
   exit

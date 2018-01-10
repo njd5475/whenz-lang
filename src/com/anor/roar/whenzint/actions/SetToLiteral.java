@@ -8,6 +8,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.parser.Node;
 import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
+import com.anor.roar.whenzint.parser.TrackableTokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
@@ -15,7 +16,7 @@ public class SetToLiteral extends Action {
 
   private String name;
   private Object literal;
-  
+
   static {
     ProgramBuilder.registerActionBuilder(new SetToLiteral(null, null));
   }
@@ -28,8 +29,14 @@ public class SetToLiteral extends Action {
   @Override
   public Node buildNode(WhenzParser parser, TokenBuffer tokens)
       throws WhenzSyntaxError, IOException {
-    // TODO Auto-generated method stub
-    return null;
+    Node assignNode = new Node("Assignment");
+    parser.globalReference(assignNode, tokens);
+    parser.consumeWhitespace(tokens);
+    parser.assignment(assignNode, tokens);
+    parser.consumeWhitespace(tokens);
+    parser.literals(assignNode, tokens);
+    parser.consumeWhitespace(tokens, true);
+    return assignNode;
   }
 
   @Override
@@ -53,7 +60,7 @@ public class SetToLiteral extends Action {
 
   @Override
   public String getActionNodeName() {
-    return "GlobalReference";
+    return "Assignment";
   }
 
 }

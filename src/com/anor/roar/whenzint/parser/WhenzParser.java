@@ -1,6 +1,6 @@
 package com.anor.roar.whenzint.parser;
 
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -13,6 +13,7 @@ import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
+import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.RunShellCommand;
@@ -26,6 +27,8 @@ public class WhenzParser {
   private static WhenzParser instance       = new WhenzParser();
 
   private WhenzParser() {
+    definedActions.add(new NewByteBuffer());
+    definedActions.add(new SetToLiteral(null, null));
     definedActions.add(new PrintAction(""));
     definedActions.add(new PrintVarAction(""));
     definedActions.add(new LaunchWindowAction());
@@ -54,9 +57,33 @@ public class WhenzParser {
   private void program(Node root, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     this.top = root;
+    TrackableTokenBuffer ttb = TrackableTokenBuffer.wrap(tokens);
     while (!tokens.isEmpty()) {
-      when(root, tokens);
+      ttb.mark();
+      try {
+        when(root, ttb);
+      } catch (WhenzSyntaxError e) {
+        ttb.rewind();
+        defineActions(root, ttb, e);
+      }
     }
+  }
+
+  private void defineActions(Node root, TrackableTokenBuffer ttb,
+      WhenzSyntaxError previousError) throws WhenzSyntaxError {
+    try {
+      if (ttb.peek().is("action")) {
+        ttb.take();
+      } else {
+        if (previousError != null) {
+          throw previousError;
+        }
+        this.unexpectedToken(ttb.peek());
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
   }
 
   private void when(Node parent, TokenBuffer tokens)
@@ -87,9 +114,10 @@ public class WhenzParser {
     while (!tokens.isEmpty()
         && (tokens.peek().is("//") || tokens.peek().isWord()
             || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&"))
-        && tokens.peek().isNot("when")) {
+        && tokens.peek().isNot("when") && tokens.peek().isNot("action")) {
       Node action = new Node("action");
-      if (tokens.peek().isWord() && tokens.peek().isNot("when")) {
+      if ((tokens.peek().isWord() || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) 
+          && tokens.peek().isNot("when")) {
         TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
         tb.mark();
         WhenzSyntaxError error = null;
@@ -103,25 +131,6 @@ public class WhenzParser {
         }
         whenNode.add(action);
         consumeWhitespace(tokens, true);
-      } else if (tokens.peek().isSymbol("@")
-          || tokens.peek().isSymbol("&") /* Cannot be whenz */) {
-        // most likely we are setting a global reference
-        Node globalReference = new Node("GlobalReference");
-        globalReference(globalReference, tokens);
-        action.add(globalReference);
-        // optional section
-        TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
-        try {
-          tb.mark();
-          consumeWhitespace(tb);
-          assignment(globalReference, tb);
-          consumeWhitespace(tb);
-          literals(globalReference, tb);
-          consumeWhitespace(tb, true);
-        } catch (WhenzSyntaxError e) {
-          tb.rewind(); // in case it needs to be used again
-        }
-        whenNode.add(action);
       } else if (tokens.peek().is("//")) {
         // consume it all
         while (!tokens.peek().isNewline()) {
@@ -133,7 +142,7 @@ public class WhenzParser {
     }
   }
 
-  private void literals(Node node, TokenBuffer tokens)
+  public void literals(Node node, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     // numbers,decimals,string literals
 
@@ -216,7 +225,7 @@ public class WhenzParser {
 
   }
 
-  private void assignment(Node node, TokenBuffer tokens)
+  public void assignment(Node node, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     Node assignment = new Node("Assignment");
     consumeWhitespace(tokens);
@@ -305,7 +314,7 @@ public class WhenzParser {
       if (tokens.peek().is("define") || tokens.peek().is("event")) {
         Node condChild = new Node("Event", tokens.take());
         consumeWhitespace(tokens);
-        
+
         while (!(tokens.peek().isNewline() || tokens.peek().is("//"))) {
           condChild.add(identifier(tokens));
           consumeWhitespace(tokens);
@@ -380,7 +389,7 @@ public class WhenzParser {
     consumeWhitespace(tokens, false);
   }
 
-  private void consumeWhitespace(TokenBuffer tokens, boolean newline)
+  public void consumeWhitespace(TokenBuffer tokens, boolean newline)
       throws IOException {
     while (!tokens.isEmpty()) {
       if ((tokens.peek().isWhitespace()
@@ -396,12 +405,13 @@ public class WhenzParser {
   }
 
   public static Program compileProgram(String filename) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new FileReader(filename));
+    TokenStreamReader tsr = new TokenStreamReader(
+        new BufferedReader(new FileReader(filename), 4096));
     WhenzParser parser = new WhenzParser();
 
     Node root = null;
     try {
-      root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      root = parser.parse(new StreamTokenBuffer(tsr, 4096));
       ProgramBuilder builder = new ProgramBuilder(root);
       return builder.build();
     } catch (WhenzSyntaxError e) {
@@ -409,9 +419,11 @@ public class WhenzParser {
     }
     return null;
   }
-  
-  public static Program compileToProgram(String filename, Program prog) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new FileReader(filename));
+
+  public static Program compileToProgram(String filename, Program prog)
+      throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(
+        new BufferedReader(new FileReader(filename), 4096));
     WhenzParser parser = new WhenzParser();
 
     Node root = null;

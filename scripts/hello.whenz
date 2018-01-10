@@ -42,17 +42,23 @@ when event mouse_moved
 when event key_pressed
 	printvar @keyPressed
 	print Bye Bye
+	@keyPressed = 0
 	
 when @print.var == "Set a variable"
 	print Print var has been set
 	
 when @keyPressed == 27
 	print Escaped was pressed
+	@keyPressed = 0
 	exit
 
 when @keyPressed == 78
 	print Space pressed
+	@keyPressed = 0
   launch window
+  
+when @keyPressed == 0
+	print Key is zero
 	
 //try to see if line numbers match up
 when event app_starts once

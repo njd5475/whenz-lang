@@ -1,0 +1,23 @@
+
+when event app_starts once
+	print Starting App!
+	//@decimal = 0.49432
+	@string = "Hello World!"
+	@integer = 2489
+	@opCount = 0
+
+//when @decimal == 0.49432
+//	print Decimal set
+//  increment @opCount
+	
+when @string == Hello World!
+	printvar @string
+	increment @opCount
+	
+when @integer == 2489
+	print Integer set
+	increment @opCount
+	
+when @opCount == 2
+	print All done
+	exit
