@@ -12,16 +12,7 @@ import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
-import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ChainAction;
-import com.anor.roar.whenzint.actions.ExitAction;
-import com.anor.roar.whenzint.actions.IncrementAction;
-import com.anor.roar.whenzint.actions.LaunchWindowAction;
-import com.anor.roar.whenzint.actions.PrintAction;
-import com.anor.roar.whenzint.actions.PrintVarAction;
-import com.anor.roar.whenzint.actions.RunShellCommand;
-import com.anor.roar.whenzint.actions.SetToLiteral;
-import com.anor.roar.whenzint.actions.TriggerEventAction;
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
 
@@ -73,17 +64,18 @@ public class ProgramBuilder implements NodeVisitor {
           } else if ("Reference".equals(child.children()[0].name())) {
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
-            String op = child.children()[1].children()[0].getToken();
+            String op = child.children()[1].children()[0].getTokenOrValue();
             Node rightVal = child.children()[2];
+            boolean repeats = !child.hasChildNamed("once");
             if (rightVal.isNamed("Number")) {
               Node rightValChild = rightVal.children()[0];
               if (rightValChild.getRawToken().isNumber()) {
                 int num = Integer.parseInt(rightValChild.name());
-                cond = new BoolCondition(op, ref, num);
+                cond = new BoolCondition(op, ref, num, repeats);
               }
             } else if (rightVal.isNamed("Literals")) {
               Node rightValChild = rightVal.children()[0];
-              cond = new BoolCondition(op, ref, rightValChild.name());
+              cond = new BoolCondition(op, ref, rightValChild.name(), repeats);
             }
             program.setListener(ref, cond);
           } else {

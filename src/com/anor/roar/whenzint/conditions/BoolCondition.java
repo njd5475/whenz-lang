@@ -11,10 +11,10 @@ public class BoolCondition extends Condition {
   private String ref;
   private Integer number = null;
   private String cmp = null;
-  private Predicate<Program> theOp; 
+  private Predicate<Program> theOp;
   private Action action;
 
-  public BoolCondition(String op, String ref, int num) {
+  public BoolCondition(String op, String ref, int num, boolean repeats) {
     this.ref = ref;
     this.number = num;
     if("==".equals(op)) {
@@ -29,10 +29,15 @@ public class BoolCondition extends Condition {
       theOp = (p) -> {
         return checkGreaterEqual(p);
       };
+    }else if("!=".equals(op)) {
+      theOp = (p) -> {
+        return checkNotEqual(p);
+      };
     }
+    this.repeats = repeats;
   }
   
-  public BoolCondition(String op, String ref, String cmp) {
+  public BoolCondition(String op, String ref, String cmp, boolean repeats) {
     this.ref = ref;
     this.cmp = cmp;
     if("==".equals(op)) {
@@ -47,7 +52,12 @@ public class BoolCondition extends Condition {
       theOp = (p) -> {
         return checkGreaterEqual(p);
       };
+    }else if("!=".equals(op)) {
+      theOp = (p) -> {
+        return checkNotEqual(p);
+      };
     }
+    this.repeats = repeats;
   }
 
   @Override
@@ -84,9 +94,13 @@ public class BoolCondition extends Condition {
     }else if(refObj != null) {
       return refObj.equals(number);
     }else{
-      System.err.format("RefObj %s is null\n", ref);
+      //System.err.format("RefObj %s is null\n", ref);
     }
     return false;
+  }
+  
+  private boolean checkNotEqual(Program program) {
+    return !checkEqualEqual(program);
   }
 
   @Override

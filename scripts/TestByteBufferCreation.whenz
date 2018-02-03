@@ -1,5 +1,6 @@
 
 when event app_starts once
-	@buf is 1024
+  print Testing
+	//@buf is 1024
 	//@size = 2096
-	@buf2 is &size
+	//@buf2 is &size

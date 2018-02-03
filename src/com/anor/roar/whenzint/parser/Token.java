@@ -46,7 +46,7 @@ public class Token {
 			nCol = 0;
 		}
 
-		if (nextType != type || type == TTYPE.NEWLINE) {
+		if (nextType != type || type == TTYPE.SYMBOL || type == TTYPE.NEWLINE) {
 			return new Token(c, nLine, nCol);
 		} else {
 			this.token.append(c);
@@ -70,7 +70,7 @@ public class Token {
 			return TTYPE.WHITESPACE;
 		} else if (c == '\n') {
 			return TTYPE.NEWLINE;
-		} else if (oneOf(c, '=', '.', '|', ':', '(', ')', '&', '@', '<', '>')) {
+		} else if (oneOf(c, '!', '\\', '/', '=', '.', '|', ':', '(', ')', '&', '@', '<', '>')) {
 			return TTYPE.SYMBOL;
 		}
 		return TTYPE.UNKNOWN;

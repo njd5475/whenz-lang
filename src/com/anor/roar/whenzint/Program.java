@@ -38,7 +38,7 @@ public class Program {
           }
 
           if (!c.repeats() || c instanceof EventCondition) {
-            System.out.println("Disabled condition for " + c.getClass());
+            //System.out.println("Disabled condition for " + c.getClass());
             enabled.put(c, false); // disable condition
           }
         }

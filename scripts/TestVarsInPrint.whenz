@@ -1,0 +1,3 @@
+when event app_starts once
+  print OS Name is @env.os.name
+  print The path was \@env.os.name

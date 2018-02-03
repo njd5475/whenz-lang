@@ -3,7 +3,7 @@ package com.anor.roar.whenzint;
 public abstract class Condition {
 
 	// default behavior
-	private boolean repeats = true;
+	protected boolean repeats = true;
 	
 	public abstract boolean check(Program program);
 

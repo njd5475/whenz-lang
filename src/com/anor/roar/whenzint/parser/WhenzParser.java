@@ -15,7 +15,6 @@ import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
-import com.anor.roar.whenzint.actions.PrintVarAction;
 import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
@@ -30,7 +29,6 @@ public class WhenzParser {
     definedActions.add(new NewByteBuffer());
     definedActions.add(new SetToLiteral(null, null));
     definedActions.add(new PrintAction(""));
-    definedActions.add(new PrintVarAction(""));
     definedActions.add(new LaunchWindowAction());
     definedActions.add(new TriggerEventAction(""));
     definedActions.add(new ExitAction());
@@ -165,10 +163,14 @@ public class WhenzParser {
       p.consumeWhitespace(t);
       Node n = new Node("Literals");
       StringBuilder sb = new StringBuilder();
-      while (!t.peek().isNewline()) {
+      while (!t.peek().isNewline() && !t.peek().is("once")) {
         sb.append(t.take().asString());
       }
-      n.add(new Node(sb.toString()));
+      String literal = sb.toString();
+      if(t.peek().is("once")) {
+        literal = literal.trim();
+      }
+      n.add(new Node(literal));
       return n;
     };
     TokenAction actions[] = new TokenAction[] { number, decimals,
@@ -337,6 +339,11 @@ public class WhenzParser {
       conditionalOperand(conditions, tokens);
       consumeWhitespace(tokens);
       literals(conditions, tokens);
+      consumeWhitespace(tokens);
+      if(tokens.peek().is("once")) {
+        tokens.take();
+        conditions.addChild("once");
+      }
       consumeWhitespace(tokens, true);
     } else {
       unexpectedToken(tokens.peek());
@@ -347,14 +354,38 @@ public class WhenzParser {
   private void conditionalOperand(Node conditions, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     Node op = new Node("Conditional Operand");
-    if (tokens.peek().isSymbol("==")) {
-      op.add(new Node("is equal", tokens.take()));
-    } else if (tokens.peek().isSymbol(">=")) {
-      op.add(new Node("greater equal", tokens.take()));
-    } else if (tokens.peek().isSymbol("<=")) {
-      op.add(new Node("less equal", tokens.take()));
-    } else if (tokens.peek().isSymbol("!=")) {
-      op.add(new Node("not equal", tokens.take()));
+    if (tokens.peek().isSymbol("=")) {
+      tokens.take();
+      if(tokens.peek().isSymbol("=")) {
+        tokens.take();
+        op.add(new Node("is equal", "=="));
+      }else{
+        unexpectedToken(tokens.peek());
+      }
+    } else if (tokens.peek().isSymbol(">")) {
+      tokens.take();
+      if(tokens.peek().isSymbol("=")) {
+        tokens.take();
+        op.add(new Node("greater equal", ">="));
+      }else{
+        unexpectedToken(tokens.peek());
+      }
+    } else if (tokens.peek().isSymbol("<")) {
+      tokens.take();
+      if(tokens.peek().isSymbol("=")) {
+        tokens.take();
+        op.add(new Node("less equal", "<="));
+      }else{
+        unexpectedToken(tokens.peek());
+      }
+    } else if (tokens.peek().isSymbol("!")) {
+      tokens.take();
+      if(tokens.peek().isSymbol("=")) {
+        tokens.take();
+        op.add(new Node("not equal", "!="));
+      }else{
+        unexpectedToken(tokens.peek());
+      }
       // }else if(tokens.peek().isSymbol("&&")) {
       // op.add(new Node("and"));
       // }else if(tokens.peek().isSymbol("||")) {

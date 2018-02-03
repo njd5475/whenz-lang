@@ -2,6 +2,7 @@ package com.anor.roar.whenzint;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
@@ -43,8 +44,13 @@ public class Whenz {
           System.out.println("Invalid input argument: " + f);
         }
       }
-
       program.trigger("app_starts");
+      Properties props = System.getProperties();
+      for(Object propName : props.keySet()) {
+        program.setObject("env." + propName.toString(), props.get(propName));
+      }
+      program.setObject("platform", "Java");
+
       runProgram();
     }
   }

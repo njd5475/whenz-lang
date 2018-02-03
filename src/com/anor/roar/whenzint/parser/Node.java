@@ -117,4 +117,17 @@ public class Node {
     }
     return null;
   }
+
+  public boolean hasChildNamed(String childName) {
+    for(Node child : children()) {
+      if(child.isNamed(childName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void addChild(String name) {
+    this.children.add(new Node(name));
+  }
 }
