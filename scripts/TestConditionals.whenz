@@ -5,7 +5,7 @@ when event app_starts once
 	
 when @counter <= 10000
 	print Counter is less than 100:
-	printvar @counter
+	print Counter: @counter
 	increment @counter
 	
 when @counter == 10000

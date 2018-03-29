@@ -1,19 +1,19 @@
 when event app_starts once
   print Hello, man.
-  printvar @platform
-  printvar @env.os.arch
-  printvar @env.os.version
-  printvar @env.os.name
-  printvar @env.user.home
-  printvar @env.user.name
-  printvar @env.file.separator
+  print Platform:   @platform
+  print Arch:       @env.os.arch
+  print OS Version: @env.os.version
+  print OS Name:    @env.os.name
+  print User Home:  @env.user.home
+  print User Name:  @env.user.name
+  print File Sep:   @env.file.separator
 
 when @platform == Java
   print We're on Java dude.
-  printvar @env.java.home
-  printvar @env.java.class.path
-  printvar @env.java.vendor
-  printvar @env.java.version
+  print Java home:    @env.java.home
+  print Classpath:    @env.java.class.path
+  print Java Vendor:  @env.java.vendor
+  print Java Version: @env.java.version
   @iter = 1
 
 when @iter == 1
