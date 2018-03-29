@@ -21,7 +21,7 @@ when event window_launched //secretly sets a target object for set calls
 	trigger event start_game
 	print Window Launched
 	print Game Started
-	printvar @print.var
+	print @print.var
 	print Before this should have been "Set a variable"
 	
 when event window_closing
@@ -40,11 +40,10 @@ when event mouse_moved
 	//draw box 0,0-10,10 on @window
 	
 when event key_pressed
-	printvar @keyPressed
+	print @keyPressed
 	print Bye Bye
-	@keyPressed = 0
 	
-when @print.var == "Set a variable"
+when @print.var == "Set a variable" once
 	print Print var has been set
 	
 when @keyPressed == 27
@@ -66,7 +65,7 @@ when event app_starts once
 	@var1 = 2048
 	//new @buf 2048
 	&size = 2048
-	printvar @size
+	print @size
 	//&buf is &size bytes
 	
 //when &in on @stdin
