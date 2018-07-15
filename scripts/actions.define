@@ -7,3 +7,9 @@ action 'print' ( 1:ANY | '{' 2:GLOBAL_REF '}' )*
 action inc 1:GLOBAL_REF by 2:NUMBER
 	loop :2
 		increment :1
+		
+# An alternative is as follows
+
+when action print &ref do
+	copy &ref bytes to @consoleBuf at @consoleCursor
+	

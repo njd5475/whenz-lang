@@ -1,0 +1,7 @@
+
+when app_starts do once
+  @f = 35
+  fib @f
+
+when @f > 0 do
+  &fib

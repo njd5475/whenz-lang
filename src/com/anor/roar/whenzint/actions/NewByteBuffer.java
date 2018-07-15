@@ -92,6 +92,13 @@ public class NewByteBuffer extends Action {
           }
         }
 
+        parser.consumeWhitespace(tokens);
+        if (tokens.peek().is("bytes")) {
+          tokens.take();
+        }else{
+          parser.unexpectedToken(tokens.take());
+        }
+        
         return byteNode;
       } else {
         parser.unexpectedToken(tokens.take());

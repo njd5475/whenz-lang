@@ -1,6 +1,7 @@
 
 when event app_starts once
   print Testing
-	//@buf is 1024
+  @buf is 1024 bytes
 	//@size = 2096
 	//@buf2 is &size
+  print Created buffer
