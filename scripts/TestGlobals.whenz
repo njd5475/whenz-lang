@@ -17,4 +17,5 @@ when @platform == Java
   @iter = 1
 
 when @iter == 1
+  print Test passed
   exit

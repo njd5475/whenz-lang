@@ -75,7 +75,7 @@ public class ProgramBuilder implements NodeVisitor {
               }
             } else if (rightVal.isNamed("Literals")) {
               Node rightValChild = rightVal.children()[0];
-              cond = new BoolCondition(op, ref, rightValChild.name(), repeats);
+              cond = new BoolCondition(op, ref, rightValChild.getTokenOrValue(), repeats);
             }
             program.setListener(ref, cond);
           } else {

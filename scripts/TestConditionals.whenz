@@ -13,4 +13,5 @@ when @counter == 10000
 	
 when @counter >= 10001
 	print Counter is over 100
+  print Test passed
 	exit

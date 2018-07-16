@@ -113,6 +113,8 @@ public class WriteVariableToFile extends Action {
         } catch(IOException e) {
           e.printStackTrace();
         }
+      }else {
+        
       }
       
     }

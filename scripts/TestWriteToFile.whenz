@@ -3,3 +3,4 @@ when event app_starts do once
 	print Building Bytes
 	@buf is 1024 bytes
 	write @buf to file1
+  print Test passed

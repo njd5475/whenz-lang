@@ -18,4 +18,5 @@ when @ww == 5678
 
 when @ww == 5679
   print @ww is equal to 5679
+  print Test passed
   exit
