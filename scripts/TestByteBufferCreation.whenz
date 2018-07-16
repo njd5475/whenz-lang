@@ -2,6 +2,10 @@
 when event app_starts once
   print Testing
   @buf is 1024 bytes
-	//@size = 2096
-	//@buf2 is &size
-  print Created buffer
+  print Buffer1: Created Successfully
+  
+  print Starting buffer2 test
+  @s = 2096
+  print Variable size set @s
+  @buf2 is @s bytes
+  print Buffer2: Created Successfully

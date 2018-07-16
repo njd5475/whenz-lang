@@ -44,52 +44,20 @@ public class NewByteBuffer extends Action {
       throws WhenzSyntaxError, IOException {
     Node byteNode = new Node("NewByteBuffer");
     parser.consumeWhitespace(tokens);
-    Node path = null;
-    if (tokens.peek().isSymbol("&")) {
-      byteNode.add(path = new Node("LocalPath"));
-    } else if (tokens.peek().isSymbol("@")) {
-      byteNode.add(path = new Node("GlobalPath"));
-    }
+    Node path = parser.globalReference(byteNode, tokens);;
 
     if (path != null) {
-      tokens.take();
-      while (tokens.peek().isWord()) {
-        path.add(new Node("Part", tokens.take()));
-        if (tokens.peek().isWhitespace()) {
-          break;
-        }
-
-        if (tokens.peek().isSymbol(".")) {
-          tokens.take();
-        } else {
-          parser.unexpectedToken(tokens.peek());
-        }
-      }
       parser.consumeWhitespace(tokens);
       if (tokens.peek().is("is")) {
         tokens.take();
         parser.consumeWhitespace(tokens);
-        if (tokens.peek().isSymbol("&")) {
-          byteNode.add(path = new Node("LocalPath"));
-        } else if (tokens.peek().isSymbol("@")) {
-          byteNode.add(path = new Node("GlobalPath"));
-        } else if (tokens.peek().isNumber()) {
-          byteNode.add(new Node("Number", tokens.take()));
+        try {
+          path = parser.globalReference(byteNode, tokens); //reset path to reuse variable
+        }catch(WhenzSyntaxError e) {
         }
-
-        if (path.isNamed("LocalPath") || path.isNamed("GlobalPath")) {
-          while (tokens.peek().isWord()) {
-            path.add(new Node("Part", tokens.take()));
-            if (tokens.peek().isWhitespace()) {
-              break;
-            }
-
-            if (tokens.peek().isSymbol(".")) {
-              tokens.take();
-            } else {
-              parser.unexpectedToken(tokens.peek());
-            }
-          }
+        
+        if (tokens.peek().isNumber()) {
+          byteNode.add(new Node("Number", tokens.take()));
         }
 
         parser.consumeWhitespace(tokens);

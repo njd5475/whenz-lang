@@ -29,6 +29,9 @@ public class Node {
   }
 
   public void add(Node child) {
+    if(child == null) {
+      throw new NullPointerException("You cannot add a null child to the tree");
+    }
     children.add(child);
   }
 
@@ -129,5 +132,14 @@ public class Node {
 
   public void addChild(String name) {
     this.children.add(new Node(name));
+  }
+
+  public Node getChildNamed(String childName) {
+    for(Node child : children) {
+      if(child.isNamed(childName)) {
+        return child;
+      }
+    }
+    return null;
   }
 }

@@ -13,10 +13,10 @@ public class VariablePath {
   private boolean       makePaths = false;
 
   protected VariablePath(String... pathArray) {
-    for (String p : pathArray) {
+    for(String p: pathArray) {
       this.paths.add(p);
       fullPath.append(p);
-      if (p != pathArray[pathArray.length - 1]) {
+      if(p != pathArray[pathArray.length - 1]) {
         fullPath.append(".");
       }
     }
@@ -34,16 +34,23 @@ public class VariablePath {
 
   public Object get(Map<String, Object> context) {
     Map<String, Object> curObj = context;
+    Object retObj = curObj;
 
-    for (String path : paths) {
-      Map<String, Object> nextObj = (Map<String, Object>) curObj.get(path);
-      if (nextObj == null && makePaths) {
-        nextObj = new HashMap<String, Object>();
-        curObj.put(path, nextObj);
+    int end = paths.size();
+    int i = 0;
+    for(String path: paths) {
+      ++i;
+      retObj = curObj.get(path);
+      if(retObj instanceof Map && i != end) {
+        Map<String, Object> nextObj = (Map<String, Object>) curObj.get(path);
+        if(nextObj == null && makePaths) {
+          nextObj = new HashMap<String, Object>();
+          curObj.put(path, nextObj);
+        }
+        curObj = nextObj;
       }
-      curObj = nextObj;
     }
-    return curObj;
+    return retObj;
   }
 
   public void set(Program program, Map<String, Object> context, Object value) {
@@ -52,11 +59,11 @@ public class VariablePath {
     List<String> pathStack = paths;
     String last = null;
     Iterator<String> iter = pathStack.iterator();
-    while (iter.hasNext()) {
+    while(iter.hasNext()) {
       String path = iter.next();
-      if (iter.hasNext()) {
+      if(iter.hasNext()) {
         Map<String, Object> nextObj = (Map<String, Object>) curObj.get(path);
-        if (nextObj == null && makePaths) {
+        if(nextObj == null && makePaths) {
           nextObj = new HashMap<String, Object>();
           curObj.put(path, nextObj);
         }
@@ -67,7 +74,7 @@ public class VariablePath {
       }
     }
 
-    if (last != null) {
+    if(last != null) {
       curObj.put(last, value);
       program.setObject(fullPath.toString(), value);
     }

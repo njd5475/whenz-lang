@@ -18,6 +18,7 @@ import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
+import com.anor.roar.whenzint.actions.WriteVariableToFile;
 
 public class WhenzParser {
 
@@ -35,6 +36,7 @@ public class WhenzParser {
     definedActions.add(new CallSetterMethod("", "", ""));
     definedActions.add(new RunShellCommand(""));
     definedActions.add(new IncrementAction(null));
+    definedActions.add(new WriteVariableToFile());
     new SetToLiteral(null, null);
   }
 
@@ -170,7 +172,7 @@ public class WhenzParser {
       if(t.peek().is("once")) {
         literal = literal.trim();
       }
-      n.add(new Node(literal));
+      n.add(new Node("Part", literal));
       return n;
     };
     TokenAction actions[] = new TokenAction[] { number, decimals,
@@ -205,7 +207,7 @@ public class WhenzParser {
     return num;
   }
 
-  public void globalReference(Node node, TokenBuffer tokens)
+  public Node globalReference(Node node, TokenBuffer tokens)
       throws IOException, WhenzSyntaxError {
     Node namespace = new Node("Reference");
     if (tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) {
@@ -223,8 +225,10 @@ public class WhenzParser {
         }
       }
       node.add(namespace);
+    }else {
+      this.unexpectedToken(tokens.peek());
     }
-
+    return namespace;
   }
 
   public void assignment(Node node, TokenBuffer tokens)
@@ -257,8 +261,10 @@ public class WhenzParser {
         error = e;
       }
     }
-    defAction.add(actionNode);
-    action.add(defAction);
+    if(actionNode != null) {
+      defAction.add(actionNode);
+      action.add(defAction);
+    }
     return error;
   }
 
