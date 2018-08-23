@@ -31,8 +31,8 @@ public class ByteBufferMapping {
         int val = (Integer)value;
         byte temp[] = new byte[this.numberOfBytes];
         for(int i = 0; i < temp.length; ++i) {
-          temp[i] = (byte)val;
-          val = val>>2;
+          temp[i] = (byte)(val & 0xFF);
+          val = val>>8; //shift a whole byte to the right
         }
         bbm.position(this.location);
         bbm.put(temp);

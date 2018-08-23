@@ -5,10 +5,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
@@ -24,12 +26,11 @@ import com.anor.roar.whenzint.actions.WriteVariableToFile;
 
 public class WhenzParser {
 
-  private Set<TokenAction>   definedActions = new HashSet<TokenAction>();
+  private Set<TokenAction>   definedActions = new LinkedHashSet<TokenAction>();
   private Node               top;
   private static WhenzParser instance       = new WhenzParser();
 
   private WhenzParser() {
-    definedActions.add(new NewByteBuffer());
     definedActions.add(new SetToLiteral(null, null));
     definedActions.add(new PrintAction(""));
     definedActions.add(new LaunchWindowAction());
@@ -39,6 +40,7 @@ public class WhenzParser {
     definedActions.add(new RunShellCommand(""));
     definedActions.add(new IncrementAction(null));
     definedActions.add(new ByteBufferMappingAction());
+    definedActions.add(new NewByteBuffer());
     definedActions.add(new WriteVariableToFile());
     new SetToLiteral(null, null);
   }
@@ -458,11 +460,10 @@ public class WhenzParser {
 
   public static Program compileProgram(String filename) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
-    WhenzParser parser = new WhenzParser();
 
     Node root = null;
     try {
-      root = parser.parse(new StreamTokenBuffer(tsr, 4096));
+      root = instance.parse(new StreamTokenBuffer(tsr, 4096));
       ProgramBuilder builder = new ProgramBuilder(root);
       return builder.build();
     } catch (WhenzSyntaxError e) {
@@ -473,11 +474,10 @@ public class WhenzParser {
 
   public static Program compileToProgram(String filename, Program prog) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
-    WhenzParser parser = new WhenzParser();
 
     Node root = null;
     try {
-      root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      root = instance.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root, prog);
       return builder.build();
     } catch (WhenzSyntaxError e) {
@@ -488,11 +488,10 @@ public class WhenzParser {
 
   public static void main(String[] args) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
-    WhenzParser parser = new WhenzParser();
 
     Node root = null;
     try {
-      root = parser.parse(new StreamTokenBuffer(tsr, 128));
+      root = instance.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root);
       Program program = builder.build();
     } catch (WhenzSyntaxError e) {

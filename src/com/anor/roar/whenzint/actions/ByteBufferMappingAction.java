@@ -17,7 +17,6 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 public class ByteBufferMappingAction extends Action {
 
   static {
-    // WhenzParser.getInstance().registerAction(new NewByteBuffer());
     ProgramBuilder.registerActionBuilder(new ByteBufferMappingAction());
   }
 
@@ -93,7 +92,11 @@ public class ByteBufferMappingAction extends Action {
     } else if(locationNode.isNamed("Identifier")) {
       VariablePath derive = parent.derive(locationNode.getTokenOrValue());
       ByteBufferMapping mapping = builder.getMapping(derive.getFullyQualifiedName());
-      location = mapping.getLocation() + mapping.getNumberOfBytes();
+      if(mapping != null) {
+        location = mapping.getLocation() + mapping.getNumberOfBytes();
+      }else {
+        System.out.println("ERROR: Missing mapping for '" + locationNode.getTokenOrValue() + "'");
+      }
     }
     ByteBufferMapping bmm = new ByteBufferMapping(numberOfBytes, parent, location);
     builder.registerMapping(bmm, path);

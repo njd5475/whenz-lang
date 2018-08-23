@@ -11,6 +11,7 @@ public class WhenzTests {
 
   @Test
   public void testHelloWorld() {
+    System.out.println(System.getProperty("os.arch"));
   }
 
 }
