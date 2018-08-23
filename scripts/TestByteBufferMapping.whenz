@@ -1,0 +1,21 @@
+when event app_starts do once
+	@size = 1024 
+	@theBuffer is @size bytes
+	print Buffer of @size bytes has been created
+	trigger event map_bytes
+	
+when event map_bytes do once
+	print Mapping byte buffer to a known structure
+	@theBuffer.magicNumber is 4 bytes from head
+	@theBuffer.class is 1 bytes from magicNumber
+	trigger event set_elf_header
+	
+when event set_elf_header do once
+	print Setting elf header section
+	@theBuffer.magicNumber = 0x7F454C46
+	@theBuffer.class = 2
+	trigger event test_file
+	
+when event test_file do once
+	write @theBuffer to elf_file
+	print Done with the test

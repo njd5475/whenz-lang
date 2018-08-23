@@ -3,12 +3,14 @@ package com.anor.roar.whenzint.parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.IncrementAction;
@@ -36,6 +38,7 @@ public class WhenzParser {
     definedActions.add(new CallSetterMethod("", "", ""));
     definedActions.add(new RunShellCommand(""));
     definedActions.add(new IncrementAction(null));
+    definedActions.add(new ByteBufferMappingAction());
     definedActions.add(new WriteVariableToFile());
     new SetToLiteral(null, null);
   }
@@ -54,8 +57,7 @@ public class WhenzParser {
     return root;
   }
 
-  private void program(Node root, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void program(Node root, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     this.top = root;
     TrackableTokenBuffer ttb = TrackableTokenBuffer.wrap(tokens);
     while (!tokens.isEmpty()) {
@@ -69,8 +71,8 @@ public class WhenzParser {
     }
   }
 
-  private void defineActions(Node root, TrackableTokenBuffer ttb,
-      WhenzSyntaxError previousError) throws WhenzSyntaxError {
+  private void defineActions(Node root, TrackableTokenBuffer ttb, WhenzSyntaxError previousError)
+      throws WhenzSyntaxError {
     try {
       if (ttb.peek().is("action")) {
         ttb.take();
@@ -86,8 +88,7 @@ public class WhenzParser {
 
   }
 
-  private void when(Node parent, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void when(Node parent, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node whenNode = new Node("whenz");
     consumeWhitespace(tokens, true);
     if (tokens.peek().is("when")) {
@@ -107,16 +108,13 @@ public class WhenzParser {
     parent.add(whenNode);
   }
 
-  private void actions(Node whenNode, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void actions(Node whenNode, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
 
-    while (!tokens.isEmpty()
-        && (tokens.peek().is("//") || tokens.peek().isWord()
-            || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&"))
-        && tokens.peek().isNot("when") && tokens.peek().isNot("action")) {
+    while (!tokens.isEmpty() && (tokens.peek().is("//") || tokens.peek().isWord() || tokens.peek().isSymbol("@")
+        || tokens.peek().isSymbol("&")) && tokens.peek().isNot("when") && tokens.peek().isNot("action")) {
       Node action = new Node("action");
-      if ((tokens.peek().isWord() || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) 
+      if ((tokens.peek().isWord() || tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&"))
           && tokens.peek().isNot("when")) {
         TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
         tb.mark();
@@ -142,14 +140,17 @@ public class WhenzParser {
     }
   }
 
-  public void literals(Node node, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  public void literals(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     // numbers,decimals,string literals
 
     // heres where lambdas are useful, instead of building interfaces
     TokenAction number = (p, t) -> {
       p.consumeWhitespace(t);
       return p.number(t);
+    };
+    TokenAction hex = (p, t) -> {
+      p.consumeWhitespace(tokens);
+      return p.hexidecimal(t);
     };
     TokenAction decimals = (p, t) -> {
       p.consumeWhitespace(t);
@@ -169,17 +170,16 @@ public class WhenzParser {
         sb.append(t.take().asString());
       }
       String literal = sb.toString();
-      if(t.peek().is("once")) {
+      if (t.peek().is("once")) {
         literal = literal.trim();
       }
       n.add(new Node("Part", literal));
       return n;
     };
-    TokenAction actions[] = new TokenAction[] { number, decimals,
-        stringLiteral };
+    TokenAction actions[] = new TokenAction[] { hex, number, decimals, stringLiteral };
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrapAndMark(tokens);
     Node found = null;
-    for (TokenAction a : actions) {
+    for(TokenAction a : actions) {
       try {
         // assuming found is not null but if it is an exception will be raised.
         found = a.buildNode(this, tb);
@@ -195,6 +195,33 @@ public class WhenzParser {
     }
   }
 
+  private Node hexidecimal(TokenBuffer t) throws IOException, WhenzSyntaxError {
+    Node hex = new Node("HexLiteral");
+    this.consumeWhitespace(t);
+    if (t.peek().is("0")) {
+      t.take();
+      if (t.peek().is("x")) {
+        t.take();
+        StringBuilder sb = new StringBuilder("");
+        while (t.peek().isNumber() || t.peek().isWord()) {
+          sb.append(t.take().asString());
+        }
+        try {
+          String hexStr = sb.toString();
+          int number = Integer.parseInt(hexStr, 16);
+          hex.add(new Node("HexLiteral", hexStr));
+        } catch (NumberFormatException nfe) {
+          this.unexpectedToken(t.peek());
+        }
+      }else {
+        this.unexpectedToken(t.peek());
+      }
+    }else {
+      this.unexpectedToken(t.peek());
+    }
+    return hex;
+  }
+
   private Node number(TokenBuffer t) throws IOException, WhenzSyntaxError {
     Node num = new Node("Number");
     Token numberToken = null;
@@ -207,8 +234,7 @@ public class WhenzParser {
     return num;
   }
 
-  public Node globalReference(Node node, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  public Node globalReference(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node namespace = new Node("Reference");
     if (tokens.peek().isSymbol("@") || tokens.peek().isSymbol("&")) {
       tokens.take();
@@ -225,14 +251,13 @@ public class WhenzParser {
         }
       }
       node.add(namespace);
-    }else {
+    } else {
       this.unexpectedToken(tokens.peek());
     }
     return namespace;
   }
 
-  public void assignment(Node node, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  public void assignment(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node assignment = new Node("Assignment");
     consumeWhitespace(tokens);
     if (!tokens.peek().isSymbol("=")) {
@@ -243,15 +268,14 @@ public class WhenzParser {
     node.add(assignment);
   }
 
-  private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens)
-      throws IOException {
+  private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens) throws IOException {
     Node defAction = new Node("defined action");
     consumeWhitespace(tokens);
     WhenzSyntaxError error = null;
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
     tb.mark();
     Node actionNode = null;
-    for (TokenAction ta : definedActions) {
+    for(TokenAction ta : definedActions) {
       try {
         actionNode = ta.buildNode(this, tb);
         error = null;
@@ -261,15 +285,14 @@ public class WhenzParser {
         error = e;
       }
     }
-    if(actionNode != null) {
+    if (actionNode != null) {
       defAction.add(actionNode);
       action.add(defAction);
     }
     return error;
   }
 
-  private WhenzSyntaxError classOrMethod(Node action, TokenBuffer tokens)
-      throws IOException {
+  private WhenzSyntaxError classOrMethod(Node action, TokenBuffer tokens) throws IOException {
     Node classMethod = new Node("Class & Method");
     className(classMethod, tokens);
     WhenzSyntaxError error = null;
@@ -283,16 +306,14 @@ public class WhenzParser {
     return error;
   }
 
-  private void methodSignature(Node action, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void methodSignature(Node action, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node methodSignature = new Node("methodSignature");
     if (tokens.peek().isWord()) {
       methodSignature.add(new Node(tokens.take().asString()));
       while (tokens.peek().isSymbol() && tokens.peek().is(":")) {
         tokens.take();
         if (tokens.peek().isNumber()) {
-          methodSignature
-              .add(new Node(String.valueOf(tokens.take().asNumber())));
+          methodSignature.add(new Node(String.valueOf(tokens.take().asNumber())));
         }
       }
     } else {
@@ -312,8 +333,7 @@ public class WhenzParser {
     action.add(className);
   }
 
-  private void conditions(Node whenNode, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void conditions(Node whenNode, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     // one or more identifiers followed by a newline
     consumeWhitespace(tokens);
     Node conditions = new Node("conditions");
@@ -346,7 +366,7 @@ public class WhenzParser {
       consumeWhitespace(tokens);
       literals(conditions, tokens);
       consumeWhitespace(tokens);
-      if(tokens.peek().is("once")) {
+      if (tokens.peek().is("once")) {
         tokens.take();
         conditions.addChild("once");
       }
@@ -357,39 +377,38 @@ public class WhenzParser {
     whenNode.add(conditions);
   }
 
-  private void conditionalOperand(Node conditions, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private void conditionalOperand(Node conditions, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     Node op = new Node("Conditional Operand");
     if (tokens.peek().isSymbol("=")) {
       tokens.take();
-      if(tokens.peek().isSymbol("=")) {
+      if (tokens.peek().isSymbol("=")) {
         tokens.take();
         op.add(new Node("is equal", "=="));
-      }else{
+      } else {
         unexpectedToken(tokens.peek());
       }
     } else if (tokens.peek().isSymbol(">")) {
       tokens.take();
-      if(tokens.peek().isSymbol("=")) {
+      if (tokens.peek().isSymbol("=")) {
         tokens.take();
         op.add(new Node("greater equal", ">="));
-      }else{
+      } else {
         unexpectedToken(tokens.peek());
       }
     } else if (tokens.peek().isSymbol("<")) {
       tokens.take();
-      if(tokens.peek().isSymbol("=")) {
+      if (tokens.peek().isSymbol("=")) {
         tokens.take();
         op.add(new Node("less equal", "<="));
-      }else{
+      } else {
         unexpectedToken(tokens.peek());
       }
     } else if (tokens.peek().isSymbol("!")) {
       tokens.take();
-      if(tokens.peek().isSymbol("=")) {
+      if (tokens.peek().isSymbol("=")) {
         tokens.take();
         op.add(new Node("not equal", "!="));
-      }else{
+      } else {
         unexpectedToken(tokens.peek());
       }
       // }else if(tokens.peek().isSymbol("&&")) {
@@ -402,8 +421,7 @@ public class WhenzParser {
     conditions.add(op);
   }
 
-  private Node consume(String term, TokenBuffer tokens)
-      throws IOException, WhenzSyntaxError {
+  private Node consume(String term, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
     consumeWhitespace(tokens);
     if (tokens.peek().asString().equals(term)) {
       return new Node(term, tokens.take());
@@ -418,19 +436,16 @@ public class WhenzParser {
   }
 
   public void unexpectedToken(Node subtree, Token t) throws WhenzSyntaxError {
-    throw new WhenzSyntaxError("Unexpected token: ", t, t.getLine(),
-        t.getChar(), subtree);
+    throw new WhenzSyntaxError("Unexpected token: ", t, t.getLine(), t.getChar(), subtree);
   }
 
   public void consumeWhitespace(TokenBuffer tokens) throws IOException {
     consumeWhitespace(tokens, false);
   }
 
-  public void consumeWhitespace(TokenBuffer tokens, boolean newline)
-      throws IOException {
+  public void consumeWhitespace(TokenBuffer tokens, boolean newline) throws IOException {
     while (!tokens.isEmpty()) {
-      if ((tokens.peek().isWhitespace()
-          || (newline && tokens.peek().isNewline()))) {
+      if ((tokens.peek().isWhitespace() || (newline && tokens.peek().isNewline()))) {
         Token t = tokens.take();
         if (t == null) {
           break;
@@ -442,8 +457,7 @@ public class WhenzParser {
   }
 
   public static Program compileProgram(String filename) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(
-        new BufferedReader(new FileReader(filename), 4096));
+    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
     WhenzParser parser = new WhenzParser();
 
     Node root = null;
@@ -457,10 +471,8 @@ public class WhenzParser {
     return null;
   }
 
-  public static Program compileToProgram(String filename, Program prog)
-      throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(
-        new BufferedReader(new FileReader(filename), 4096));
+  public static Program compileToProgram(String filename, Program prog) throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
     WhenzParser parser = new WhenzParser();
 
     Node root = null;
@@ -475,8 +487,7 @@ public class WhenzParser {
   }
 
   public static void main(String[] args) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(
-        new FileReader("./scripts/hello.whenz"));
+    TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
     WhenzParser parser = new WhenzParser();
 
     Node root = null;
@@ -494,8 +505,7 @@ public class WhenzParser {
       if (tb.peek().isUnderscore() || tb.peek().isWord()) {
         List<Token> tokList = new LinkedList<Token>();
         tokList.add(tb.take());
-        while (tb.peek().isWord() || tb.peek().isNumber()
-            || tb.peek().isUnderscore()) {
+        while (tb.peek().isWord() || tb.peek().isNumber() || tb.peek().isUnderscore()) {
           tokList.add(tb.take());
         }
         return true;
@@ -518,13 +528,12 @@ public class WhenzParser {
       if (tb.peek().isUnderscore() || tb.peek().isWord()) {
         List<Token> tokList = new LinkedList<Token>();
         tokList.add(tb.take());
-        while (tb.peek().isWord() || tb.peek().isNumber()
-            || tb.peek().isUnderscore()) {
+        while (tb.peek().isWord() || tb.peek().isNumber() || tb.peek().isUnderscore()) {
           tokList.add(tb.take());
         }
 
         StringBuilder sb = new StringBuilder("");
-        for (Token t : tokList) {
+        for(Token t : tokList) {
           sb.append(t.asString());
         }
         Node ident = new Node("Identifier", sb.toString());

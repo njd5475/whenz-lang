@@ -96,6 +96,9 @@ public class WriteVariableToFile extends Action {
       }
       
       Object o = path.get(context);
+      if(o == null) {
+        o = program.getObject(path.getFullyQualifiedName());
+      }
       
       if(o != null && o instanceof ByteBuffer) {
         ByteBuffer bb = (ByteBuffer) o;
@@ -104,6 +107,7 @@ public class WriteVariableToFile extends Action {
           FileOutputStream fos = new FileOutputStream(f);
           FileChannel channel = fos.getChannel();
           
+          bb.rewind();
           channel.write(bb);
           fos.flush();
           fos.close();
