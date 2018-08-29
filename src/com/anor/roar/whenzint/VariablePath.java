@@ -79,6 +79,18 @@ public class VariablePath {
       program.setObject(fullPath.toString(), value);
     }
   }
+  
+  public VariablePath getParent() {
+    LinkedList<String> current = new LinkedList<>(this.paths);
+    current.remove(current.removeLast());
+    return new VariablePath(current.toArray(new String[current.size()]));
+  }
+  
+  public VariablePath derive(String next) {
+    List<String> current = new LinkedList<>(this.paths);
+    current.add(next);
+    return new VariablePath(current.toArray(new String[current.size()]));
+  }
 
   public static VariablePath create(String ref) {
     return new VariablePath(ref.split("\\."));
@@ -88,4 +100,7 @@ public class VariablePath {
     return fullPath.toString();
   }
 
+  public String toString() {
+    return String.format("Reference[path=%s]", getFullyQualifiedName());
+  }
 }

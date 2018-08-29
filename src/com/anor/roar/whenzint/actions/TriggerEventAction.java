@@ -17,10 +17,17 @@ public class TriggerEventAction extends Action {
   private String eventName;
   
   static {
-    ProgramBuilder.registerActionBuilder(new TriggerEventAction(null));
+    ProgramBuilder.registerActionBuilder(new TriggerEventAction());
+  }
+  
+  public TriggerEventAction() {
+    
   }
 
   public TriggerEventAction(String eventName) {
+    if(eventName == null) {
+      throw new NullPointerException("Cannot trigger a null event");
+    }
     this.eventName = eventName;
   }
 
@@ -65,7 +72,7 @@ public class TriggerEventAction extends Action {
 
   @Override
   public Action buildAction(ProgramBuilder builder, Node node) {
-    return new TriggerEventAction(node.children()[0].getValue());
+    return new TriggerEventAction(node.getChildNamed("Event").getChildNamed("Identifier").getTokenOrValue());
   }
 
   @Override

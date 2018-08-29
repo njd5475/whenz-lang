@@ -27,8 +27,7 @@ public class SetToLiteral extends Action {
   }
 
   @Override
-  public Node buildNode(WhenzParser parser, TokenBuffer tokens)
-      throws WhenzSyntaxError, IOException {
+  public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
     Node assignNode = new Node("Assignment");
     parser.globalReference(assignNode, tokens);
     parser.consumeWhitespace(tokens);
@@ -52,8 +51,9 @@ public class SetToLiteral extends Action {
     if ("Literals".equals(rval.name())) {
       return new SetToLiteral(quickRef, rval.children()[0].getToken());
     } else if ("Number".equals(rval.name())) {
-      return new SetToLiteral(quickRef,
-          Integer.parseInt(rval.children()[0].getToken()));
+      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getToken()));
+    } else if ("HexLiteral".equals(rval.name())) {
+      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getTokenOrValue(), 16));
     }
     return null;
   }

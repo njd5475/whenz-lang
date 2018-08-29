@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
+import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class Program {
 
@@ -21,6 +22,7 @@ public class Program {
   private Stack<Action>                    actions           = new Stack<>();
   private Map<Action, Map<String, Object>> actionContexts    = new HashMap<>();
   private Map<Condition, Boolean>          enabled           = new HashMap<>();
+  private Map<String, ByteBufferMapping>   mappings          = new HashMap<>();
 
   public void run() {
     boolean noConditions = false;
@@ -29,7 +31,7 @@ public class Program {
 
       Condition c;
       noConditions = true;
-      for (Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
+      for(Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
         if (e.getValue()) {
           noConditions = false;
           c = e.getKey();
@@ -38,7 +40,7 @@ public class Program {
           }
 
           if (!c.repeats() || c instanceof EventCondition) {
-            //System.out.println("Disabled condition for " + c.getClass());
+            // System.out.println("Disabled condition for " + c.getClass());
             enabled.put(c, false); // disable condition
           }
         }
@@ -64,7 +66,6 @@ public class Program {
     }
   }
 
-
   public void add(Condition c) {
     if (c instanceof EventCondition) {
       EventCondition ec = (EventCondition) c;
@@ -83,28 +84,37 @@ public class Program {
   public void trigger(String eventName) {
     List<Condition> list = waitingForEvents.get(eventName);
     if (list != null) {
-      for (Condition c : list) {
+      for(Condition c : list) {
         enabled.put(c, true); // enable conditions that are waiting for an event
       }
     }
   }
 
   public void setObject(String name, Object object) {
-    this.objects.put(name, object);
-    triggerListener(name);
+    if(this.mappings.containsKey(name)) {
+      ByteBufferMapping map = this.mappings.get(name);
+      map.apply(this, this.objects, object);
+    }else {
+      this.objects.put(name, object);
+      triggerListener(name);
+    }
   }
 
   private void triggerListener(String name) {
     List<Condition> condList = waitingForObjects.get(name);
     if (condList != null) {
-      for (Condition c : condList) {
+      for(Condition c : condList) {
         enabled.put(c, true); // enable the check
       }
     }
   }
 
   public Object getObject(String name) {
-    return this.objects.get(name);
+    Object o = this.objects.get(name);
+    if(o == null) {
+      o = this.mappings.get(name);
+    }
+    return o;
   }
 
   public void setListener(String ref, Condition cond) {
@@ -114,6 +124,10 @@ public class Program {
       this.waitingForObjects.put(ref, list);
     }
     list.add(cond);
+  }
+
+  public void addMapping(ByteBufferMapping map, VariablePath link) {
+    this.mappings.put(link.getFullyQualifiedName(), map);
   }
 
 }

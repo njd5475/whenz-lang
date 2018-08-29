@@ -15,6 +15,7 @@ import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
+import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class ProgramBuilder implements NodeVisitor {
 
@@ -22,6 +23,7 @@ public class ProgramBuilder implements NodeVisitor {
   private Program                           program;
 
   private Map<String, VariablePath>         paths   = new HashMap<>();
+  private Map<String, ByteBufferMapping>    mappings = new HashMap<>();
   private static Map<String, ActionBuilder> actions = new HashMap<>();
 
   public ProgramBuilder(Node root) {
@@ -53,14 +55,13 @@ public class ProgramBuilder implements NodeVisitor {
       Condition cond = null;
       Action lastAction = null;
       String defining = null;
-      for (Node child : node.children()) {
+      for(Node child : node.children()) {
         if ("conditions".equals(child.name())) {
           if (child.children()[0].is("define")) {
             Node defChild = child.children()[0].children()[0];
             defining = defChild.getTokenOrValue();
           } else if (child.children()[0].is("event")) {
-            cond = new EventCondition(
-                child.children()[0].children()[0].getTokenOrValue());
+            cond = new EventCondition(child.children()[0].children()[0].getTokenOrValue());
           } else if ("Reference".equals(child.children()[0].name())) {
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
@@ -87,7 +88,7 @@ public class ProgramBuilder implements NodeVisitor {
             // TODO: defer processing these to each action class
             Node definedActionNode = actionNode.children()[0];
             ActionBuilder builder = actions.get(definedActionNode.name());
-            if(builder == null) {
+            if (builder == null) {
               System.out.println("NO Action Builder: " + definedActionNode);
             }
             Action a = builder.buildAction(this, definedActionNode);
@@ -98,6 +99,8 @@ public class ProgramBuilder implements NodeVisitor {
               } else {
                 lastAction = new ChainAction(lastAction, a);
               }
+            }else {
+              System.out.format("WARNING: Action builder '%s' failed to build action\n");
             }
           } else if ("GlobalReference".equals(actionNode.name())) {
             ActionBuilder builder = actions.get(actionNode.name());
@@ -115,7 +118,7 @@ public class ProgramBuilder implements NodeVisitor {
             String methodName = actionNode.children()[1].children()[0].name();
             List<String> params = new LinkedList<String>();
             int first = 0;
-            for (Node param : actionNode.children()[1].children()) {
+            for(Node param : actionNode.children()[1].children()) {
               if (first == 0) {
                 ++first;
                 continue;
@@ -155,7 +158,7 @@ public class ProgramBuilder implements NodeVisitor {
   public String referenceString(Node[] children) {
     String quickRef = "";
     Node parts[] = children;
-    for (Node n : children) {
+    for(Node n : children) {
       if (n.hasToken()) {
         quickRef += n.getToken();
       } else {
@@ -168,13 +171,12 @@ public class ProgramBuilder implements NodeVisitor {
     return quickRef;
   }
 
-  public Object instanceObject(String className, String methodName,
-      String params[]) {
+  public Object instanceObject(String className, String methodName, String params[]) {
     try {
       Class<?> loadClass = Whenz.class.getClassLoader().loadClass(className);
       List<Class<?>> paramTypes = new LinkedList<Class<?>>();
       List<Object> args = new LinkedList<Object>();
-      for (String param : params) {
+      for(String param : params) {
         try {
           args.add(Integer.parseInt(param));
           paramTypes.add(int.class);
@@ -226,4 +228,11 @@ public class ProgramBuilder implements NodeVisitor {
     program.setObject(name, obj);
   }
 
+  public void registerMapping(ByteBufferMapping bmm, VariablePath path) {
+    this.mappings.put(path.getFullyQualifiedName(), bmm);
+  }
+
+  public ByteBufferMapping getMapping(String path) {
+    return this.mappings.get(path);
+  }
 }

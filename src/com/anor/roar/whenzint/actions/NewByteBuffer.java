@@ -37,6 +37,9 @@ public class NewByteBuffer extends Action {
   public NewByteBuffer(VariablePath path, int size) {
     this.path = path;
     this.staticSize = size;
+    if(size <= 0) { 
+      throw new IllegalArgumentException("Cannot create a buffer of size less than or zero");
+    }
   }
 
   @Override
@@ -82,6 +85,9 @@ public class NewByteBuffer extends Action {
     int size = -1;
     if (sizePath != null) {
       Object obj = sizePath.get(context);
+      if(obj == null) {
+        obj = program.getObject(sizePath.getFullyQualifiedName());
+      }
       if (obj instanceof Number) {
         size = ((Number) obj).intValue();
       }
@@ -92,7 +98,7 @@ public class NewByteBuffer extends Action {
     }
 
     if (size > 0) {
-      path.set(program, context, ByteBuffer.allocateDirect(size));
+      path.set(program, context, ByteBuffer.allocate(size));
     }
   }
 
