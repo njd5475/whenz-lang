@@ -8,7 +8,7 @@ when event app_starts once
   print User Name:  @env.user.name
   print File Sep:   @env.file.separator
 
-when @platform == Java
+when @platform == Java do
   print We're on Java dude.
   print Java home:    @env.java.home
   print Classpath:    @env.java.class.path
@@ -16,6 +16,6 @@ when @platform == Java
   print Java Version: @env.java.version
   @iter = 1
 
-when @iter == 1
+when @iter == 1 do
   print Test passed
   exit

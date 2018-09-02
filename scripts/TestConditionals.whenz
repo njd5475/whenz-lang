@@ -3,15 +3,15 @@ when event app_starts once
 	print Starting counting up
 	@counter = 0
 	
-when @counter <= 10000
+when @counter <= 10000 do
 	print Counter is less than 100:
 	print Counter: @counter
 	increment @counter
 	
-when @counter == 10000
+when @counter == 10000 do
 	print Counter is equal to 100
 	
-when @counter >= 10001
+when @counter >= 10001 do
 	print Counter is over 100
   print Test passed
 	exit

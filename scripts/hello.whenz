@@ -43,7 +43,7 @@ when event key_pressed
 	print @keyPressed
 	print Bye Bye
 	
-when @print.var == "Set a variable" once
+when @print.var == "Set a variable" do once
 	print Print var has been set
 	
 when @keyPressed == 27

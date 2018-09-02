@@ -167,11 +167,11 @@ public class WhenzParser {
       p.consumeWhitespace(t);
       Node n = new Node("Literals");
       StringBuilder sb = new StringBuilder();
-      while (!t.peek().isNewline() && !t.peek().is("once")) {
+      while (!t.peek().isNewline() && !t.peek().is("do") && !t.peek().is("once")) {
         sb.append(t.take().asString());
       }
       String literal = sb.toString();
-      if (t.peek().is("once")) {
+      if (t.peek().is("once") || t.peek().is("do")) {
         literal = literal.trim();
       }
       n.add(new Node("Part", literal));
@@ -344,9 +344,16 @@ public class WhenzParser {
         Node condChild = new Node("Event", tokens.take());
         consumeWhitespace(tokens);
 
-        while (!(tokens.peek().isNewline() || tokens.peek().is("//"))) {
+        while (!(tokens.peek().isNewline() || tokens.peek().is("//") || tokens.peek().is("do"))) {
           condChild.add(identifier(tokens));
           consumeWhitespace(tokens);
+        }
+        if(tokens.peek().is("do")) {
+          tokens.take();
+        }
+        consumeWhitespace(tokens);
+        if(tokens.peek().is("once")) {
+          tokens.take();
         }
         conditions.add(condChild);
         if (tokens.peek().isNewline()) {

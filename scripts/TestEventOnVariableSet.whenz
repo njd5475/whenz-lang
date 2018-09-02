@@ -12,11 +12,12 @@ when event app_starts once
   @ww = 5678
   print @ww
 
-when @ww == 5678
+when @ww == 5678 do
   print @ww is equal to 5678 should increment
   increment @ww
 
-when @ww == 5679
+when @ww == 5679 do
   print @ww is equal to 5679
   print Test passed
   exit
+

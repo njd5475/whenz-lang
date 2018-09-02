@@ -6,18 +6,22 @@ when event app_starts once
 	@string = Hello World!
 	@integer = 2489
 
-//when @decimal == 0.49432
+//when @decimal == 0.49432 do
 //	print Decimal set
 //  increment @opCount
 	
-when @string == Hello World! once
+when @string == Hello World! do once
   print String set to @string, and Op count at @opCount
   increment @opCount
 
-when @integer == 2489 once
+when @integer == 2489 do once
   print Integer set to @integer, and Op count at @opCount
   increment @opCount
 
-when @opCount >= 2 once
-	print All done, at opCount @opCount
-	exit
+when @opCount == 1 do
+  increment @opCount
+
+when @opCount >= 2 do once
+  print All done, at opCount @opCount
+  print Test passed
+  exit

@@ -31,3 +31,4 @@ when event set_elf_header do once
 when event test_file do once
 	write @theBuffer to elf_file
 	print Done with the test
+  print Test passed

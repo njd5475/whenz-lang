@@ -9,3 +9,4 @@ when event app_starts once
   print Variable size set @s
   @buf2 is @s bytes
   print Buffer2: Created Successfully
+  print Test passed

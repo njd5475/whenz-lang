@@ -12,5 +12,5 @@ when @customStateObject is customState do
 
 when @initializedObject is changed do
 	print Initialized Object has been changed
-	print Test Successful.
+	print Test passed
 	exit
