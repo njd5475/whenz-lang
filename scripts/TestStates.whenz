@@ -1,0 +1,16 @@
+when event app_starts do once
+	print Starting object state tests
+	@initializedObject = 0
+	
+when @initializedObject is set do
+	print Initialized Object has been set to @initializedObject
+	@customStateObject is customState
+	
+when @customStateObject is customState do
+	print Custom state object is customState
+	@initializedObject = 1
+
+when @initializedObject is changed do
+	print Initialized Object has been changed
+	print Test Successful.
+	exit

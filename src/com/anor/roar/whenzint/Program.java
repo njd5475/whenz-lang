@@ -1,14 +1,14 @@
 package com.anor.roar.whenzint;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.anor.roar.whenzint.conditions.BoolCondition;
+import com.anor.roar.whenzint.actions.StateChangeListener;
 import com.anor.roar.whenzint.conditions.EventCondition;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
@@ -23,6 +23,9 @@ public class Program {
   private Map<Action, Map<String, Object>> actionContexts    = new HashMap<>();
   private Map<Condition, Boolean>          enabled           = new HashMap<>();
   private Map<String, ByteBufferMapping>   mappings          = new HashMap<>();
+  private Map<String, String>              states            = new HashMap<>();
+
+  private Map<String, Map<String, Set<StateChangeListener> > > stateListeners = new HashMap<>();
 
   public void run() {
     boolean noConditions = false;
@@ -91,13 +94,19 @@ public class Program {
   }
 
   public void setObject(String name, Object object) {
-    if(this.mappings.containsKey(name)) {
+    if (this.mappings.containsKey(name)) {
       ByteBufferMapping map = this.mappings.get(name);
       map.apply(this, this.objects, object);
-    }else {
+    } else {
+      if(this.objects.containsKey(name)) {
+        this.changeState(name, "changed");  
+      }else {
+        this.changeState(name, "set");
+      }
       this.objects.put(name, object);
       triggerListener(name);
-    }
+      
+     }
   }
 
   private void triggerListener(String name) {
@@ -111,7 +120,7 @@ public class Program {
 
   public Object getObject(String name) {
     Object o = this.objects.get(name);
-    if(o == null) {
+    if (o == null) {
       o = this.mappings.get(name);
     }
     return o;
@@ -125,9 +134,40 @@ public class Program {
     }
     list.add(cond);
   }
+  
+  public void registerStateListener(String object, String stateName, StateChangeListener l) {
+    Map<String, Set<StateChangeListener>> stateListenersMap = this.stateListeners.get(object);
+    if(stateListenersMap == null) {
+      stateListenersMap = new HashMap<>();
+      this.stateListeners.put(object, stateListenersMap);
+    }
+    
+    Set<StateChangeListener> listeners = stateListenersMap.get(stateName);
+    if(listeners == null) {
+      listeners = new HashSet<StateChangeListener>();
+      stateListenersMap.put(stateName, listeners);
+    }
+    
+    listeners.add(l);
+  }
 
   public void addMapping(ByteBufferMapping map, VariablePath link) {
     this.mappings.put(link.getFullyQualifiedName(), map);
   }
 
+  public void changeState(String o, String newState) {
+    if(o != null) {
+      String oldState = this.states.get(o);
+      this.states.put(o, newState);
+      Map<String, Set<StateChangeListener>> listeners = this.stateListeners.get(o);
+      if(listeners != null) {
+        Set<StateChangeListener> set = listeners.get(newState);
+        for(StateChangeListener l : set) {
+          l.changed(newState, oldState);
+        }
+      }
+    }
+  }
+
+  
 }

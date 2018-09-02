@@ -3,14 +3,11 @@ package com.anor.roar.whenzint.parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
@@ -20,6 +17,7 @@ import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
 import com.anor.roar.whenzint.actions.RunShellCommand;
+import com.anor.roar.whenzint.actions.SetStateAction;
 import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.actions.TriggerEventAction;
 import com.anor.roar.whenzint.actions.WriteVariableToFile;
@@ -39,6 +37,7 @@ public class WhenzParser {
     definedActions.add(new CallSetterMethod("", "", ""));
     definedActions.add(new RunShellCommand(""));
     definedActions.add(new IncrementAction(null));
+    definedActions.add(new SetStateAction(null, ""));
     definedActions.add(new ByteBufferMappingAction());
     definedActions.add(new NewByteBuffer());
     definedActions.add(new WriteVariableToFile());
@@ -362,11 +361,26 @@ public class WhenzParser {
         unexpectedToken(tokens.peek());
       }
     } else if (tokens.peek().isSymbol("@")) {
-      globalReference(conditions, tokens);
+      TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
+      try {
+        tb.mark();
+        globalReference(conditions, tb);
+        consumeWhitespace(tb);
+        conditionalOperand(conditions, tb);
+        consumeWhitespace(tb);
+        literals(conditions, tb);
+      }catch(WhenzSyntaxError e) {
+        tb.rewind();
+        conditions.removeAll();
+        stateCondition(conditions, tb);
+      }
       consumeWhitespace(tokens);
-      conditionalOperand(conditions, tokens);
-      consumeWhitespace(tokens);
-      literals(conditions, tokens);
+      if(tokens.peek().is("do")) {
+        tokens.take();
+        consumeWhitespace(tokens);
+      }else {
+        unexpectedToken(tokens);
+      }
       consumeWhitespace(tokens);
       if (tokens.peek().is("once")) {
         tokens.take();
@@ -377,6 +391,20 @@ public class WhenzParser {
       unexpectedToken(tokens.peek());
     }
     whenNode.add(conditions);
+  }
+  
+  private void stateCondition(Node parent, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    Node child = new Node("StateCondition");
+    globalReference(child, tokens);
+    consumeWhitespace(tokens);
+    if(tokens.peek().is("is")) {
+      tokens.take();
+      consumeWhitespace(tokens);
+      child.add(identifier(tokens));
+    }else {
+      unexpectedToken(tokens);
+    }
+    parent.add(child);
   }
 
   private void conditionalOperand(Node conditions, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
@@ -431,6 +459,10 @@ public class WhenzParser {
       unexpectedToken(tokens.peek());
       return null;
     }
+  }
+  
+  public void unexpectedToken(TokenBuffer tb) throws WhenzSyntaxError, IOException {
+    this.unexpectedToken(tb.peek());
   }
 
   public void unexpectedToken(Token t) throws WhenzSyntaxError {

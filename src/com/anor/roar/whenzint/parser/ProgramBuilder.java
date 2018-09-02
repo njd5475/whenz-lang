@@ -15,6 +15,7 @@ import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
+import com.anor.roar.whenzint.conditions.StateCondition;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class ProgramBuilder implements NodeVisitor {
@@ -79,6 +80,11 @@ public class ProgramBuilder implements NodeVisitor {
               cond = new BoolCondition(op, ref, rightValChild.getTokenOrValue(), repeats);
             }
             program.setListener(ref, cond);
+          } else if("StateCondition".equals(child.children()[0].name())) {
+            Node stateNode = child.children()[0];
+            VariablePath path = this.getPath(stateNode.getChildNamed("Reference"));
+            String stateName = stateNode.getChildNamed("Identifier").getTokenOrValue();
+            cond = new StateCondition(path.getFullyQualifiedName(), stateName);
           } else {
             System.out.println("Unhandled condition: " + child);
           }

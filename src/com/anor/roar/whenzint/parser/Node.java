@@ -142,4 +142,8 @@ public class Node {
     }
     return null;
   }
+
+  public void removeAll() {
+    children.clear();
+  }
 }
