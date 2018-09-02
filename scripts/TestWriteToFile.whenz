@@ -4,3 +4,6 @@ when event app_starts do once
 	@buf is 1024 bytes
 	write @buf to file1
   print Test passed
+
+//when @buf is created do
+//  @buf.magicnumber is 4 bytes from 1st byte
