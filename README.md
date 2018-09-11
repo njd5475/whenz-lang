@@ -1,5 +1,5 @@
 # whenz-lang
-A simple outside the box language, built to remove traditional concerns.
+A simple expiremental outside the box language, built to remove traditional concerns.
 
 # Mantra
 @creator: It's not the amount of work a programmer does that makes him efficient. 
@@ -7,6 +7,46 @@ It's the smallest amount of work a programmer has to do that makes him efficient
 
 # Simple Explanation of structure
 
+```
+// comments are simple
+when <condition> do once?
+	<action>
+	...
+	<action>
+```
+
+# Actions
+
+Print to standard output
+
+```
+	// Prints everything after the print to the end of the statement trims whitespace
+	print <to_print> <endline>
+	
+	// Print will print variables within the statement
+	print <to_print> @variable <to_print>
+```
+
+Command execution
+
+```
+	execute <command> <endline>
+```
+
+with monitoring
+
+```
+	monitor as @command exec <command> <endline>
+```
+
+# Variables
+
+```
+	//atm just globals
+	@<identifier>.<identifier>...<identifier>
+```
+
+# Motivations and ideas
 The language is based around a couple of key concepts. One of those being that you only really need a single loop in any program. There is no need for a program to enter multiple loops. Nor is there a need to halt any processing of other logic while you are in any particular branch of the code.
 
 The language also throws away the idea of there being a call stack. Think about all the languages out there with call stacks. They have grown to a rediculuous number of function calls and it's only getting worse. Programming languages use this model as a means to allow a programmer to split up the code and makes maintenance easier. But programming languages force this as the only way to write code and it has runtime implications. Why as a programmer though would I want my program to run poorly because I need to maintain the code. The code structure, source layout, and format should not impact the runtime performance of my code.
