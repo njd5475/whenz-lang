@@ -15,6 +15,35 @@ when <condition> do once?
 	<action>
 ```
 
+# Hello World
+
+```
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	print Hello World!
+	
+```
+
+# Variables
+
+```
+	//atm just globals
+	@<identifier>.<identifier>...<identifier>
+```
+
+# Events
+
+When the program starts the first event is `app_starts`. You can trigger any event using the `trigger <event>` action.
+
+And in any condition you can trigger actions by `when event <event> do`. 
+
+# States
+
+Default variable states `set` and `changed`. On initial assignment the variable will be in the `set` state.
+
+You can change the state of a variable by the action `@variable is <state>`. States can be used in any `<condition>` statement.
+
 # Actions
 
 Print to standard output
@@ -39,12 +68,13 @@ with monitoring
 	monitor as @command exec <command> <endline>
 ```
 
-# Variables
+# Installation
 
-```
-	//atm just globals
-	@<identifier>.<identifier>...<identifier>
-```
+Unzip or extract the tarball whereever you'd like it. Add softlink in `/usr/local/bin/`
+
+		$ ln -s <extract_dir>/whenz-lang/bin/whenz-lang /usr/local/bin/whenz
+		
+With this added you can now use the language as a scripting language on any linux system.
 
 # Motivations and ideas
 The language is based around a couple of key concepts. One of those being that you only really need a single loop in any program. There is no need for a program to enter multiple loops. Nor is there a need to halt any processing of other logic while you are in any particular branch of the code.
