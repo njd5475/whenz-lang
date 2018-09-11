@@ -25,10 +25,12 @@ end
 puts ""
 puts "Out of #{number-1} tests, #{passed.length} passed, #{errors.length} failed"
 
-puts "\rFailed Tests:"
-errors.each do |file, result, err, status, number|
-  puts "Test ##{number} at #{file}, failed"
-  puts "Output: "
-  puts err
-  puts "\r\r"
-end
+if errors.length > 0 then
+  puts "\rFailed Tests:"
+  errors.each do |file, result, err, status, number|
+    puts "Test ##{number} at #{file}, failed"
+    puts "Output: "
+    puts err
+    puts "\r\r"
+  end
+end`
