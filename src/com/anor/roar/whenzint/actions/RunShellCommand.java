@@ -1,10 +1,12 @@
 package com.anor.roar.whenzint.actions;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.Node;
 import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
@@ -13,69 +15,174 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class RunShellCommand extends Action {
 
-  private String varName;
-  
-  static {
-    ProgramBuilder.registerActionBuilder(new RunShellCommand(null));
-  }
+	private String commandString;
+	private VariablePath ref;
 
-  public RunShellCommand(String varName) {
-    this.varName = varName;
-  }
+	static {
+		ProgramBuilder.registerActionBuilder(new RunShellCommand(null));
+	}
 
-  @Override
-  public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
-    if (tokens.peek().is("execute")) {
-      Node exec = new Node("RunShellCommand");
-      tokens.take();
-      parser.consumeWhitespace(tokens);
-      if (tokens.peek().isWord()) {
-        while (!tokens.peek().isNewline()) {
-          Node arg = new Node("Arg");
-          parser.consumeWhitespace(tokens);
-          while (!tokens.peek().isWhitespace() && !tokens.peek().isNewline()) {
-            Node argParts = new Node("ArgPart", tokens.take());
-            arg.add(argParts);
-          }
-          exec.add(arg);
-        }
-        tokens.take();
+	public RunShellCommand(String varName) {
+		this.commandString = varName;
+	}
 
-        return exec;
-      }
+	public RunShellCommand(VariablePath ref, String varName) {
+		this.commandString = varName;
+		this.ref = ref;
+	}
 
-    }
-    parser.unexpectedToken(tokens.peek());
-    return null;
-  }
+	@Override
+	public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
+		parser.consumeWhitespace(tokens);
+		if (tokens.peek().is("execute")) {
+			Node exec = new Node(getActionNodeName());
+			tokens.take();
+			return executableCommand(exec, parser, tokens);
+		} else if (tokens.peek().is("monitor")) {
+			Node monitor = new Node(getActionNodeName());
+			tokens.take();
+			parser.consumeWhitespace(tokens);
+			if (tokens.peek().is("as")) {
+				tokens.take();
+				parser.consumeWhitespace(tokens);
+				parser.globalReference(monitor, tokens);
+				parser.consumeWhitespace(tokens);
+				if (tokens.peek().is("exec")) {
+					tokens.take();
+					return this.executableCommand(monitor, parser, tokens);
+				}
+			}
+		}
+		parser.unexpectedToken(tokens.peek());
+		return null;
+	}
 
-  @Override
-  public void perform(Program program, Map<String, Object> context) {
-    System.out.println("Executing Command '" + varName + "'");
-    try {
-      Runtime.getRuntime().exec(varName);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
+	private Node executableCommand(Node node, WhenzParser parser, TokenBuffer tokens) throws IOException {
+		parser.consumeWhitespace(tokens);
+		if (tokens.peek().isWord()) {
+			while (!tokens.peek().isNewline()) {
+				Node arg = new Node("Arg");
+				parser.consumeWhitespace(tokens);
+				while (!tokens.peek().isWhitespace() && !tokens.peek().isNewline()) {
+					Node argParts = new Node("ArgPart", tokens.take());
+					arg.add(argParts);
+				}
+				node.add(arg);
+			}
+			tokens.take();
 
-  @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
-    StringBuilder sb = new StringBuilder("");
-    for (Node ch : node.children()) {
-      if ("Arg".equals(ch.name())) {
-        for (Node arg : ch.children()) {
-          sb.append(arg.getToken());
-        }
-        sb.append(' ');
-      }
-    }
-    return new RunShellCommand(sb.toString().trim());
-  }
+			return node;
+		}
+		return null;
+	}
 
-  @Override
-  public String getActionNodeName() {
-    return "RunShellCommand";
-  }
+	@Override
+	public void perform(Program program, Map<String, Object> context) {
+		System.out.println("Executing Command '" + commandString + "'");
+		try {
+			if (ref == null) {
+				Runtime.getRuntime().exec(commandString);
+			} else {
+				Process proc = Runtime.getRuntime().exec(commandString);
+				(new Monitor(proc, program, ref)).start();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
+	@Override
+	public Action buildAction(ProgramBuilder builder, Node node) {
+		StringBuilder sb = new StringBuilder("");
+		for (Node ch : node.children()) {
+			if ("Arg".equals(ch.name())) {
+				for (Node arg : ch.children()) {
+					sb.append(arg.getToken());
+				}
+				sb.append(' ');
+			}
+		}
+		Node refNode = node.getChildNamed("Reference");
+		VariablePath ref = builder.getPath(refNode);
+		if (ref != null) {
+			return new RunShellCommand(ref, sb.toString().trim());
+		}
+		return new RunShellCommand(sb.toString().trim());
+	}
+
+	@Override
+	public String getActionNodeName() {
+		return "RunShellCommand";
+	}
+
+	public class Monitor extends Thread {
+
+		private Process proc;
+		private Program program;
+		private VariablePath ref;
+
+		public Monitor(Process proc, Program program, VariablePath ref) {
+			this.proc = proc;
+			this.program = program;
+			this.ref = ref;
+		}
+
+		public void run() {
+			byte[] errBuf = new byte[1024];
+			byte[] outBuf = new byte[1024];
+			StringBuilder output = new StringBuilder("");
+			StringBuilder errorOutput = new StringBuilder("");
+			program.changeState(ref.getFullyQualifiedName(), "Running");
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.err", errBuf);
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.err.lastread", -1);
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.out", outBuf);
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.out.lastread", -1);
+			program.setObject(ref.getFullyQualifiedName() + ".output", output);
+			program.setObject(ref.getFullyQualifiedName() + ".errorOutput", errorOutput);
+			InputStream isErr = proc.getErrorStream();
+			InputStream isOut = proc.getInputStream();
+			boolean errStreamOpen = true;
+			boolean outStreamOpen = true;
+			while(proc.isAlive() || errStreamOpen || outStreamOpen) {
+				try {
+					if(isErr.available() > 0) {
+						int read = isErr.read(errBuf, 0, errBuf.length);
+						if(read > 0) {
+							errorOutput.append(new String(errBuf, 0, read));
+				      program.setObject(ref.getFullyQualifiedName() + ".buffers.err.lastread", read);
+				      program.changeState(ref.getFullyQualifiedName() + ".buffers.err", "bufferRead");
+						}
+						if(read < 0) {
+						  errStreamOpen = false;
+						}
+					}else {
+					  errStreamOpen = false;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				
+				try {
+					if(isOut.available() > 0) {
+						int read = isOut.read(outBuf, 0, outBuf.length);
+						if(read > 0) {
+							output.append(new String(outBuf, 0, read));
+				      program.setObject(ref.getFullyQualifiedName() + ".buffers.out.lastread", read);
+              program.changeState(ref.getFullyQualifiedName() + ".buffers.out", "bufferRead");
+						}
+						if(read < 9) {
+						  outStreamOpen = false;
+						}
+					}else {
+					  outStreamOpen = false;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			// drain streams
+			program.setObject(ref.getFullyQualifiedName() + ".exitValue", proc.exitValue());
+			program.changeState(ref.getFullyQualifiedName(), "done");
+		}
+	}
 }

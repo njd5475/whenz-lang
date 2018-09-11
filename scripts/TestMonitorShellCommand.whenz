@@ -1,0 +1,16 @@
+
+when event app_starts do once
+	monitor as @testCmd exec echo hello world
+	
+when @testCmd.buffers.err is bufferRead do
+	print Buffer read (@testCmd.buffers.err.lastread bytes)
+	@testCmd.buffers.err is bufferProcessed
+
+when @testCmd.buffers.out is bufferRead do
+	print Buffer read (@testCmd.buffers.out.lastread bytes)
+	@testCmd.buffers.out is bufferProcessed
+	
+when @testCmd is done do once
+	print Output: '@testCmd.output'
+	print Test passed.
+	exit

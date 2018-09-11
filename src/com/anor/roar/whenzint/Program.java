@@ -15,17 +15,17 @@ import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 public class Program {
 
   // private Queue<Condition> condQueue = new ConcurrentLinkedQueue<>();
-  private Map<String, List<Condition>>     waitingForEvents  = new HashMap<>();
-  private Map<String, List<Condition>>     waitingForObjects = new HashMap<>();
+  private Map<String, List<Condition>>                       waitingForEvents  = new HashMap<>();
+  private Map<String, List<Condition>>                       waitingForObjects = new HashMap<>();
   // private Stack<Condition> conditions = new Stack<>();
-  private Map<String, Object>              objects           = new HashMap<>();
-  private Stack<Action>                    actions           = new Stack<>();
-  private Map<Action, Map<String, Object>> actionContexts    = new HashMap<>();
-  private Map<Condition, Boolean>          enabled           = new HashMap<>();
-  private Map<String, ByteBufferMapping>   mappings          = new HashMap<>();
-  private Map<String, String>              states            = new HashMap<>();
+  private Map<String, Object>                                objects           = new HashMap<>();
+  private Stack<Action>                                      actions           = new Stack<>();
+  private Map<Action, Map<String, Object>>                   actionContexts    = new HashMap<>();
+  private Map<Condition, Boolean>                            enabled           = new HashMap<>();
+  private Map<String, ByteBufferMapping>                     mappings          = new HashMap<>();
+  private Map<String, String>                                states            = new HashMap<>();
 
-  private Map<String, Map<String, Set<StateChangeListener> > > stateListeners = new HashMap<>();
+  private Map<String, Map<String, Set<StateChangeListener>>> stateListeners    = new HashMap<>();
 
   public void run() {
     boolean noConditions = false;
@@ -34,7 +34,7 @@ public class Program {
 
       Condition c;
       noConditions = true;
-      for(Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
+      for (Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
         if (e.getValue()) {
           noConditions = false;
           c = e.getKey();
@@ -87,7 +87,7 @@ public class Program {
   public void trigger(String eventName) {
     List<Condition> list = waitingForEvents.get(eventName);
     if (list != null) {
-      for(Condition c : list) {
+      for (Condition c : list) {
         enabled.put(c, true); // enable conditions that are waiting for an event
       }
     }
@@ -98,21 +98,21 @@ public class Program {
       ByteBufferMapping map = this.mappings.get(name);
       map.apply(this, this.objects, object);
     } else {
-      if(this.objects.containsKey(name)) {
-        this.changeState(name, "changed");  
-      }else {
+      if (this.objects.containsKey(name)) {
+        this.changeState(name, "changed");
+      } else {
         this.changeState(name, "set");
       }
       this.objects.put(name, object);
       triggerListener(name);
-      
-     }
+
+    }
   }
 
   private void triggerListener(String name) {
     List<Condition> condList = waitingForObjects.get(name);
     if (condList != null) {
-      for(Condition c : condList) {
+      for (Condition c : condList) {
         enabled.put(c, true); // enable the check
       }
     }
@@ -134,20 +134,20 @@ public class Program {
     }
     list.add(cond);
   }
-  
+
   public void registerStateListener(String object, String stateName, StateChangeListener l) {
     Map<String, Set<StateChangeListener>> stateListenersMap = this.stateListeners.get(object);
-    if(stateListenersMap == null) {
+    if (stateListenersMap == null) {
       stateListenersMap = new HashMap<>();
       this.stateListeners.put(object, stateListenersMap);
     }
-    
+
     Set<StateChangeListener> listeners = stateListenersMap.get(stateName);
-    if(listeners == null) {
+    if (listeners == null) {
       listeners = new HashSet<StateChangeListener>();
       stateListenersMap.put(stateName, listeners);
     }
-    
+
     listeners.add(l);
   }
 
@@ -156,18 +156,19 @@ public class Program {
   }
 
   public void changeState(String o, String newState) {
-    if(o != null) {
+    if (o != null) {
       String oldState = this.states.get(o);
       this.states.put(o, newState);
       Map<String, Set<StateChangeListener>> listeners = this.stateListeners.get(o);
-      if(listeners != null) {
+      if (listeners != null) {
         Set<StateChangeListener> set = listeners.get(newState);
-        for(StateChangeListener l : set) {
-          l.changed(newState, oldState);
+        if (set != null) {
+          for (StateChangeListener l : set) {
+            l.changed(newState, oldState);
+          }
         }
       }
     }
   }
 
-  
 }
