@@ -2,6 +2,7 @@ package com.anor.roar.whenzint.actions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
@@ -132,10 +133,10 @@ public class RunShellCommand extends Action {
 			byte[] outBuf = new byte[1024];
 			StringBuilder output = new StringBuilder("");
 			StringBuilder errorOutput = new StringBuilder("");
-			program.changeState(ref.getFullyQualifiedName(), "Running");
-			program.setObject(ref.getFullyQualifiedName() + ".buffers.err", errBuf);
+			program.changeState(ref.getFullyQualifiedName(), "running");
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.err", ByteBuffer.wrap(errBuf));
 			program.setObject(ref.getFullyQualifiedName() + ".buffers.err.lastread", -1);
-			program.setObject(ref.getFullyQualifiedName() + ".buffers.out", outBuf);
+			program.setObject(ref.getFullyQualifiedName() + ".buffers.out", ByteBuffer.wrap(outBuf));
 			program.setObject(ref.getFullyQualifiedName() + ".buffers.out.lastread", -1);
 			program.setObject(ref.getFullyQualifiedName() + ".output", output);
 			program.setObject(ref.getFullyQualifiedName() + ".errorOutput", errorOutput);

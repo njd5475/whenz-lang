@@ -97,6 +97,7 @@ public class Program {
     if (this.mappings.containsKey(name)) {
       ByteBufferMapping map = this.mappings.get(name);
       map.apply(this, this.objects, object);
+      this.changeState(name, "changed");
     } else {
       if (this.objects.containsKey(name)) {
         this.changeState(name, "changed");

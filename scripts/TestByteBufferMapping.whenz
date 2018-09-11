@@ -1,34 +1,38 @@
 when event app_starts do once
 	@size = 1024 
 	@theBuffer is @size bytes
-  print @env.os.arch
+	print @env.os.arch
 	trigger event map_bytes
 	
 when event map_bytes do once
 	@theBuffer.magicNumber is 4 bytes from head
 	@theBuffer.class is 1 bytes from magicNumber
-  @theBuffer.endian is 1 bytes from class
-  @theBuffer.version is 1 bytes from endian
-  @theBuffer.targetOS is 1 bytes from version
-  @theBuffer.abiVersion is 1 bytes from targetOS
-  @theBuffer.pad is 7 bytes from abiVersion
-  @theBuffer.obj_file_type is 2 bytes from pad
-  @theBuffer.instruction_set is 2 bytes from obj_file_type
-  @theBuffer.elf_version is 4 bytes from instruction_set
-  @theBuffer.entry is 8 bytes from elf_version
+	@theBuffer.endian is 1 bytes from class
+	@theBuffer.version is 1 bytes from endian
+	@theBuffer.targetOS is 1 bytes from version
+	@theBuffer.abiVersion is 1 bytes from targetOS
+	@theBuffer.pad is 7 bytes from abiVersion
+	@theBuffer.obj_file_type is 2 bytes from pad
+	@theBuffer.instruction_set is 2 bytes from obj_file_type
+	@theBuffer.elf_version is 4 bytes from instruction_set
+	@theBuffer.entry is 8 bytes from elf_version
 	trigger event set_elf_header
 	
 when event set_elf_header do once
 	@theBuffer.magicNumber = 0x7F454C46
 	@theBuffer.class = 2
-  @theBuffer.endian = 1
-  @theBuffer.version = 1
-  @theBuffer.elf_version = 1
-  @theBuffer.obj_file_type = 0x02
-  @theBuffer.instruction_set = 0x3E
+	@theBuffer.endian = 1
+	@theBuffer.version = 1
+	@theBuffer.elf_version = 1
+	@theBuffer.obj_file_type = 0x02
+	@theBuffer.instruction_set = 0x3E
+
+when @theBuffer.instruction_set is changed do
+	print theBuffer.InstructionSet was changed
 	trigger event test_file
 	
 when event test_file do once
 	write @theBuffer to elf_file
 	print Done with the test
-  print Test passed
+	print Test passed
+	exit
