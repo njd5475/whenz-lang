@@ -33,9 +33,10 @@ public class Whenz {
             } else {
               WhenzParser.compileToProgram(f.getAbsolutePath(), program);
             }
-            System.out.println("Compiled " + f.getName() + " in "
+            if(System.getenv().get("WHENZ_PARSER_VERBOSE") != null) {
+              System.out.println("Compiled " + f.getName() + " in "
                 + (System.currentTimeMillis() - start) + "ms");
-
+            }
           } catch (IOException e) {
             System.err.println(
                 "Could load '" + f + "' either not a file or does not exist!");

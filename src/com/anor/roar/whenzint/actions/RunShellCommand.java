@@ -79,7 +79,6 @@ public class RunShellCommand extends Action {
 
 	@Override
 	public void perform(Program program, Map<String, Object> context) {
-		System.out.println("Executing Command '" + commandString + "'");
 		try {
 			if (ref == null) {
 				Runtime.getRuntime().exec(commandString);
@@ -144,19 +143,14 @@ public class RunShellCommand extends Action {
 			InputStream isOut = proc.getInputStream();
 			boolean errStreamOpen = true;
 			boolean outStreamOpen = true;
+			boolean errStreamUnavailable = false;
+			boolean outStreamUnavailable = false;
 			while(proc.isAlive() || errStreamOpen || outStreamOpen) {
 				try {
 					if(isErr.available() > 0) {
-						int read = isErr.read(errBuf, 0, errBuf.length);
-						if(read > 0) {
-							errorOutput.append(new String(errBuf, 0, read));
-				      program.setObject(ref.getFullyQualifiedName() + ".buffers.err.lastread", read);
-				      program.changeState(ref.getFullyQualifiedName() + ".buffers.err", "bufferRead");
-						}
-						if(read < 0) {
-						  errStreamOpen = false;
-						}
+						errStreamOpen = this.fillBuffer(errBuf, errorOutput, isErr, ref.getFullyQualifiedName() + ".buffers.err", program);
 					}else {
+					  errStreamUnavailable = true;
 					  errStreamOpen = false;
 					}
 				} catch (IOException e) {
@@ -165,16 +159,9 @@ public class RunShellCommand extends Action {
 				
 				try {
 					if(isOut.available() > 0) {
-						int read = isOut.read(outBuf, 0, outBuf.length);
-						if(read > 0) {
-							output.append(new String(outBuf, 0, read));
-				      program.setObject(ref.getFullyQualifiedName() + ".buffers.out.lastread", read);
-              program.changeState(ref.getFullyQualifiedName() + ".buffers.out", "bufferRead");
-						}
-						if(read < 9) {
-						  outStreamOpen = false;
-						}
+						outStreamOpen = this.fillBuffer(outBuf, output, isOut, ref.getFullyQualifiedName() + ".buffers.out", program);
 					}else {
+					  outStreamUnavailable = true;
 					  outStreamOpen = false;
 					}
 				} catch (IOException e) {
@@ -184,6 +171,28 @@ public class RunShellCommand extends Action {
 			// drain streams
 			program.setObject(ref.getFullyQualifiedName() + ".exitValue", proc.exitValue());
 			program.changeState(ref.getFullyQualifiedName(), "done");
+		}
+		
+		/**
+		 * @param buf
+		 * @param output
+		 * @param stream
+		 * @param var
+		 * @param p
+		 * @return True if the stream is still open, false if we reached the end of the stream
+		 * @throws IOException
+		 */
+		public boolean fillBuffer(byte[] buf, StringBuilder output, InputStream stream, String var, Program p) throws IOException {
+		  int read = stream.read(buf, 0, buf.length);
+      if(read > 0) {
+        output.append(new String(buf, 0, read));
+        p.setObject(var + ".lastread", read);
+        p.changeState(var, "bufferRead");
+      }
+      if(read < 0) {
+        return false;
+      }
+      return true;
 		}
 	}
 }
