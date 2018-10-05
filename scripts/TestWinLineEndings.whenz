@@ -1,0 +1,5 @@
+
+when event app_starts do once
+	print Hello World!
+	print Test passed
+	exit

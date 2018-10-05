@@ -68,7 +68,7 @@ public class Token {
 			return TTYPE.WORD;
 		} else if (c == ' ' || c == '\t') {
 			return TTYPE.WHITESPACE;
-		} else if (c == '\n') {
+		} else if (c == '\n' || c == '\r') {
 			return TTYPE.NEWLINE;
 		} else if (oneOf(c, '#', '!', '\\', '/', '=', '.', '|', ':', '(', ')', '&', '@', '<', '>')) {
 			return TTYPE.SYMBOL;

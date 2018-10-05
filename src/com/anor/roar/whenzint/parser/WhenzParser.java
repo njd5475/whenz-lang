@@ -118,7 +118,7 @@ public class WhenzParser {
 			while (!tokens.peek().isNewline()) {
 				tokens.take();
 			}
-			tokens.take(); // remove newline
+			consumeWhitespace(tokens, true);
 			return; // just skip it
 		} else {
 			unexpectedToken(tokens.peek());
@@ -376,7 +376,7 @@ public class WhenzParser {
 				}
 				conditions.add(condChild);
 				if (tokens.peek().isNewline()) {
-					tokens.take();
+					consumeWhitespace(tokens, true);
 				} else if (tokens.peek().is("//")) {
 					while (!tokens.peek().isNewline()) {
 						tokens.take();
