@@ -49,9 +49,9 @@ public class SetToLiteral extends Action {
     Node rval = node.children()[2];
     String quickRef = builder.referenceString(lval.children());
     if ("Literals".equals(rval.name())) {
-      return new SetToLiteral(quickRef, rval.children()[0].getToken());
+      return new SetToLiteral(quickRef, rval.children()[0].getTokenOrValue());
     } else if ("Number".equals(rval.name())) {
-      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getToken()));
+      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getTokenOrValue()));
     } else if ("HexLiteral".equals(rval.name())) {
       return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getTokenOrValue(), 16));
     }

@@ -130,8 +130,10 @@ public class Node {
     return false;
   }
 
-  public void addChild(String name) {
-    this.children.add(new Node(name));
+  public Node addChild(String name) {
+    Node n = new Node(name);
+    this.children.add(n);
+    return n;
   }
 
   public Node getChildNamed(String childName) {

@@ -4,6 +4,7 @@ when event app_starts once
 	@opCount = 0
 	//@decimal = 0.49432
 	@string = Hello World!
+	print The last variable was @string
 	@integer = 2489
 
 //when @decimal == 0.49432 do

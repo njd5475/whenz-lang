@@ -16,6 +16,7 @@ import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
+import com.anor.roar.whenzint.actions.ReadFromFileChannel;
 import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.SetStateAction;
 import com.anor.roar.whenzint.actions.SetToLiteral;
@@ -41,7 +42,7 @@ public class WhenzParser {
 		definedActions.add(new ByteBufferMappingAction());
 		definedActions.add(new NewByteBuffer());
 		definedActions.add(new WriteVariableToFile());
-		new SetToLiteral(null, null);
+		definedActions.add(new ReadFromFileChannel(null, null));
 	}
 
 	public void registerAction(TokenAction action) {
