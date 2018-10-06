@@ -1,0 +1,14 @@
+
+when event app_starts do once
+	print Setting hex literal1
+	@hexLiteral1 = 0xA4FF0130
+	print Setting hex literal2
+	@hexLiteral2 = 0x09234567
+	print Setting hex literal3
+	@hexLiteral3 = 0x09a3bbC0
+	print Setting hex literal4
+	@hexLiteral4 = 0xAA0011CC33cc44dfafacab
+	
+when @hexLiteral4 is set do
+	print Test passed
+	exit

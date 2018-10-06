@@ -1,6 +1,7 @@
 package com.anor.roar.whenzint.actions;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
+import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 import com.anor.roar.whenzint.parser.Node;
 import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
@@ -53,6 +55,16 @@ public class PrintAction extends Action {
       int i = 0;
       for(VariablePath path : array) {
         vals[i] = program.getObject(path.getFullyQualifiedName());
+        if(vals[i] instanceof ByteBufferMapping) {
+          ByteBufferMapping mapping = (ByteBufferMapping)vals[i];
+          VariablePath p = mapping.getPath();
+          Object obj = p.get(context);
+          ByteBuffer bb = (ByteBuffer)obj;
+          vals[i] = new String(bb.array(), mapping.getLocation(), mapping.getNumberOfBytes());
+        }else if(vals[i] instanceof ByteBuffer) {
+          ByteBuffer bb = (ByteBuffer)vals[i];
+          vals[i] = new String(bb.array()).trim();
+        }
         ++i;
       }
       System.out.format(format + "\n", vals);

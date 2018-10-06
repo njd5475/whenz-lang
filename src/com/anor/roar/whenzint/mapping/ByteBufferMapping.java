@@ -39,6 +39,10 @@ public class ByteBufferMapping {
       }
     }
   }
+  
+  public VariablePath getPath() {
+    return path;
+  }
 
   public int getLocation() {
     return this.location;

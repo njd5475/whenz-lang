@@ -1,0 +1,9 @@
+
+when event app_starts do once
+	print Creating a new byte buffer
+	@buf is 64 bytes
+	@buf.field1 is 4 bytes from head
+	@buf.field1 = 0x4c424344
+	print The field is '@buf.field1' as a string
+	print Test passed
+	exit

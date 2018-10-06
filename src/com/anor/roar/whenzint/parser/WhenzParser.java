@@ -220,7 +220,7 @@ public class WhenzParser {
 		this.consumeWhitespace(t);
 		if (t.peek().is("0")) {
 			t.take();
-			if (t.peek().is("x")) {
+			if (t.peek().is("x") || (t.peek().isWord() && t.peek().asString().startsWith("x"))) {
 				t.take();
 				StringBuilder sb = new StringBuilder("");
 				while (t.peek().isNumber() || t.peek().isWord()) {
