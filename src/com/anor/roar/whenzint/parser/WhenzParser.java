@@ -16,6 +16,7 @@ import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
+import com.anor.roar.whenzint.actions.PutsAction;
 import com.anor.roar.whenzint.actions.ReadFromFileChannel;
 import com.anor.roar.whenzint.actions.RunShellCommand;
 import com.anor.roar.whenzint.actions.SetStateAction;
@@ -32,6 +33,7 @@ public class WhenzParser {
 	private WhenzParser() {
 		definedActions.add(new SetToLiteral(null, null));
 		definedActions.add(new PrintAction(""));
+		definedActions.add(new PutsAction((String)null));
 		definedActions.add(new LaunchWindowAction());
 		definedActions.add(new TriggerEventAction(""));
 		definedActions.add(new ExitAction());

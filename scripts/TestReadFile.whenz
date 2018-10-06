@@ -1,18 +1,16 @@
 
 when event app_starts do once
-	print Create a buffer
 	@buf is 1024 bytes
 	@theFile = /tmp/test_file
-	read @theFile into @buf
-	trigger event itWasDone
+	trigger event processingDone
 	
 when @buf.monitor is bufferFull do
-	print Buffer is full
-	print @buf
+	put @buf
+	trigger event processingDone
+	
+when event processingDone do
 	read @theFile into @buf
 	
-when @buf.lastReadLength is set do
-	print @buf.lastReadLength bytes were read into the buffer 
-	
-when event itWasDone do once
-	print Event itWasDone was triggered
+when @buf.monitor is eof do once
+	print @buf
+	exit

@@ -49,6 +49,7 @@ public class ReadFromFileChannel extends Action {
         tokens.take();
         parser.consumeWhitespace(tokens);
         parser.globalReference(n.addChild("into"), tokens);
+        parser.consumeWhitespace(tokens, true);
         return n;
       } else {
         parser.unexpectedToken(tokens);
@@ -80,18 +81,40 @@ public class ReadFromFileChannel extends Action {
     try {
       FileChannel fileChannel = FileChannel.open(Paths.get(path), options);
 
-      Object o = to.get(context);
+      Object o = program.getObject(to.getFullyQualifiedName());
+      long byteCount = -1;
+      long offset = 0;
+      String varName = to.getFullyQualifiedName();
       if (o instanceof ByteBuffer) {
-        long readNum = fileChannel.read((ByteBuffer) o);
-        program.setObject(to.getFullyQualifiedName() + ".lastReadLength", readNum);
-        program.changeState(to.getFullyQualifiedName() + ".monitor", "bufferFull");
+        ByteBuffer b = (ByteBuffer) o;
+        b.rewind();
+        if(program.hasObject(varName + ".position")) {
+          offset = (long) program.getObject(varName + ".position");
+        }
+        fileChannel.position(offset);
+        byteCount = fileChannel.read(b);
+        program.setObject(varName + ".position", fileChannel.position());
+        program.setObject(varName + ".lastReadLength", byteCount);
+        program.changeState(varName + ".monitor", "bufferFull");
+        if(byteCount < b.limit()) {
+          program.changeState(varName + ".monitor", "eof");  
+        }
       } else if (o instanceof ByteBufferMapping) {
         ByteBufferMapping bbm = (ByteBufferMapping) o;
+
+        if(program.hasObject(varName + ".position")) {
+          offset = (long) program.getObject(varName + ".position");
+        }
         
         ByteBuffer b = (ByteBuffer) bbm.getPath().get(context);
-        long readNum = fileChannel.read(new ByteBuffer[] { b }, bbm.getLocation(), bbm.getNumberOfBytes());
-        program.setObject(to.getFullyQualifiedName() + ".lastReadLength", readNum);
-        program.setObject(to.getFullyQualifiedName() + ".monitor", "bufferFull");
+        fileChannel.position(offset);
+        byteCount = fileChannel.read(new ByteBuffer[] { b }, bbm.getLocation(), 1);
+        program.setObject(varName + ".position", fileChannel.position());
+        program.setObject(varName + ".lastReadLength", byteCount);
+        program.changeState(varName + ".monitor", "bufferFull");
+        if(byteCount < b.limit()) {
+          program.changeState(varName + ".monitor", "eof");  
+        }
       }
 
     } catch (IOException e) {

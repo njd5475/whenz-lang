@@ -86,7 +86,7 @@ public class TrackableTokenBuffer implements TokenBuffer {
 
   @Override
   public boolean isEmpty() {
-    return buffer.isEmpty();
+    return buffer.isEmpty() && (iter == null || !iter.hasNext());
   }
 
   public static final TrackableTokenBuffer wrap(TokenBuffer buffer) {

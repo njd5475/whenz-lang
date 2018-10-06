@@ -172,4 +172,11 @@ public class Program {
     }
   }
 
+  public boolean hasObject(String name) {
+    if(!this.objects.containsKey(name)) {
+      return this.mappings.containsKey(name);
+    }
+    return true;
+  }
+
 }
