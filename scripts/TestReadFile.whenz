@@ -1,6 +1,6 @@
 
 when event app_starts do once
-	@buf is 1024 bytes
+	@buf is bytes
 	@theFile = /tmp/test_file
 	trigger event processingDone
 	
@@ -12,5 +12,6 @@ when event processingDone do
 	read @theFile into @buf
 	
 when @buf.monitor is eof do once
-	print @buf
+	@buf.trimmed is @buf.lastReadLength bytes from head
+	put @buf.trimmed
 	exit

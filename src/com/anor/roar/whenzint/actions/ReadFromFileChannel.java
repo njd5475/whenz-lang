@@ -95,9 +95,11 @@ public class ReadFromFileChannel extends Action {
         byteCount = fileChannel.read(b);
         program.setObject(varName + ".position", fileChannel.position());
         program.setObject(varName + ".lastReadLength", byteCount);
-        program.changeState(varName + ".monitor", "bufferFull");
+        
         if(byteCount < b.limit()) {
           program.changeState(varName + ".monitor", "eof");  
+        }else {
+          program.changeState(varName + ".monitor", "bufferFull");
         }
       } else if (o instanceof ByteBufferMapping) {
         ByteBufferMapping bbm = (ByteBufferMapping) o;
@@ -111,9 +113,11 @@ public class ReadFromFileChannel extends Action {
         byteCount = fileChannel.read(new ByteBuffer[] { b }, bbm.getLocation(), 1);
         program.setObject(varName + ".position", fileChannel.position());
         program.setObject(varName + ".lastReadLength", byteCount);
-        program.changeState(varName + ".monitor", "bufferFull");
+        
         if(byteCount < b.limit()) {
           program.changeState(varName + ".monitor", "eof");  
+        }else {
+          program.changeState(varName + ".monitor", "bufferFull");
         }
       }
 

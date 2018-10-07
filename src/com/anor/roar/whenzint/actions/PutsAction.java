@@ -58,11 +58,13 @@ public class PutsAction extends Action {
         if(vals[i] instanceof ByteBufferMapping) {
           ByteBufferMapping mapping = (ByteBufferMapping)vals[i];
           VariablePath p = mapping.getPath();
-          Object obj = p.get(context);
+          Object obj = program.getObject(p.getFullyQualifiedName());
           ByteBuffer bb = (ByteBuffer)obj;
-          vals[i] = new String(bb.array(), mapping.getLocation(), mapping.getNumberOfBytes());
+          bb.rewind();
+          vals[i] = new String(bb.array(), mapping.getLocation(), mapping.getNumberOfBytes(program));
         }else if(vals[i] instanceof ByteBuffer) {
           ByteBuffer bb = (ByteBuffer)vals[i];
+          bb.rewind();
           vals[i] = new String(bb.array()).trim();
         }
         ++i;

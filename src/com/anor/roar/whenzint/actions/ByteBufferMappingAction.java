@@ -84,7 +84,11 @@ public class ByteBufferMappingAction extends Action {
     // throw new IllegalArgumentException("Not implemented yet");
     VariablePath path = builder.getPath(node.children()[0]);
     VariablePath parent = path.getParent();
-    int numberOfBytes = Integer.parseInt(node.children()[1].getTokenOrValue());
+    VariablePath pathToBytes = builder.getPath(node.children()[1]);
+    int numberOfBytes = -1;
+    if(pathToBytes == null) {
+      numberOfBytes = Integer.parseInt(node.children()[1].getTokenOrValue());
+    }
     Node locationNode = node.children()[2];
     int location = -1;
     if(locationNode.is("head")) {
@@ -93,12 +97,17 @@ public class ByteBufferMappingAction extends Action {
       VariablePath derive = parent.derive(locationNode.getTokenOrValue());
       ByteBufferMapping mapping = builder.getMapping(derive.getFullyQualifiedName());
       if(mapping != null) {
-        location = mapping.getLocation() + mapping.getNumberOfBytes();
+        location = mapping.getLocation() + mapping.getNumberOfBytes(null);
       }else {
         System.out.println("ERROR: Missing mapping for '" + locationNode.getTokenOrValue() + "'");
       }
     }
-    ByteBufferMapping bmm = new ByteBufferMapping(numberOfBytes, parent, location);
+    ByteBufferMapping bmm = null;
+    if(pathToBytes != null) {
+      bmm = new ByteBufferMapping(pathToBytes, parent, location);
+    }else{
+      bmm = new ByteBufferMapping(numberOfBytes, parent, location);
+    }
     builder.registerMapping(bmm, path);
     ByteBufferMappingAction bbmA = new ByteBufferMappingAction(path, bmm);
     return bbmA;
