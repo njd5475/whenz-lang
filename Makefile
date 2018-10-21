@@ -1,4 +1,5 @@
 
+target := whenz-lang
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
@@ -15,14 +16,14 @@ $(HOME)/bin:
 	echo mkdir $(HOME)/bin
 	mkdir $(HOME)/bin
 
-./build/distributions/Whenz.zip:
+./build/distributions/$(target).zip:
 	./gradlew distZip
 
-./build/distributions/Whenz: ./build/distributions/Whenz.zip
-	cd ./build/distributions/ && unzip Whenz.zip
+./build/distributions/$(target): ./build/distributions/$(target).zip
+	cd ./build/distributions/ && unzip $(target).zip
 
-$(HOME)/bin/whenz: $(HOME)/bin ./build/distributions/Whenz
-	cp -R ./build/distributions/Whenz/ $(HOME)/bin/.
-	ln -s $(HOME)/bin/Whenz/bin/Whenz $(HOME)/bin/whenz
+$(HOME)/bin/whenz: $(HOME)/bin ./build/distributions/$(target)
+	cp -R ./build/distributions/$(target)/ $(HOME)/bin/.
+	ln -s $(HOME)/bin/$(target)/bin/Whenz $(HOME)/bin/whenz
 
 all: $(HOME)/bin/whenz
