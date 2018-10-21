@@ -33,6 +33,14 @@ public class BoolCondition extends Condition {
       theOp = (p) -> {
         return checkNotEqual(p);
       };
+    }else if("<".equals(op)) {
+      theOp = (p) -> {
+        return checkLess(p);
+      };
+    }else if(">".equals(op)) {
+      theOp = (p) -> {
+        return checkGreater(p);
+      };
     }
     this.repeats = repeats;
   }
@@ -56,6 +64,14 @@ public class BoolCondition extends Condition {
       theOp = (p) -> {
         return checkNotEqual(p);
       };
+    }else if("<".equals(op)) {
+      theOp = (p) -> {
+        return checkLess(p);
+      };
+    }else if(">".equals(op)) {
+      theOp = (p) -> {
+        return checkGreater(p);
+      };
     }
     this.repeats = repeats;
   }
@@ -63,6 +79,24 @@ public class BoolCondition extends Condition {
   @Override
   public boolean check(Program program) {
     return theOp.test(program);
+  }
+  
+  public boolean checkLess(Program program) {
+    Object refObj = program.getObject(ref);
+    if(refObj != null && number != null && refObj instanceof Number) {
+      Number n = (Number)refObj;
+      return n.intValue() < number;
+    }
+    return false;
+  }
+  
+  public boolean checkGreater(Program program) {
+    Object refObj = program.getObject(ref);
+    if(refObj != null && number != null && refObj instanceof Number) {
+      Number n = (Number)refObj;
+      return n.intValue() > number;
+    }
+    return false;
   }
   
   public boolean checkGreaterEqual(Program program) {

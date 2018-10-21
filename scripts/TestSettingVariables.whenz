@@ -6,6 +6,7 @@ when event app_starts once
 	@string = Hello World!
 	print The last variable was @string
 	@integer = 2489
+	print The last variable was @integer
 
 //when @decimal == 0.49432 do
 //	print Decimal set
@@ -19,7 +20,7 @@ when @integer == 2489 do once
   print Integer set to @integer, and Op count at @opCount
   increment @opCount
 
-when @opCount == 1 do
+when @opCount == 1 do once
   increment @opCount
 
 when @opCount >= 2 do once

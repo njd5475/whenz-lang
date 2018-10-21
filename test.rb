@@ -2,12 +2,12 @@
 require 'open3'
 
 simple = true
-verbose = false
+verbose = true
 passed = []
 errors = []
 number = 1
 Dir.glob %w(. scripts ** Test*.whenz).join('/')  do |file|
-  puts "Test ##{number} - Running test file #{file}" if verbose
+  puts "\nTest ##{number} - Running test file #{file}\n" if verbose
   result, err, status = Open3.capture3("java -jar build/libs/*.jar #{file}")
   if result =~ /Test passed/ then
     puts "Test passes" if verbose

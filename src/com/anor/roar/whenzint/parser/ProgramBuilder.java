@@ -1,3 +1,4 @@
+
 package com.anor.roar.whenzint.parser;
 
 import java.lang.reflect.Constructor;
@@ -14,6 +15,7 @@ import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
 import com.anor.roar.whenzint.conditions.BoolCondition;
+import com.anor.roar.whenzint.conditions.ConditionalChain;
 import com.anor.roar.whenzint.conditions.EventCondition;
 import com.anor.roar.whenzint.conditions.StateCondition;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
@@ -54,16 +56,24 @@ public class ProgramBuilder implements NodeVisitor {
   public void visit(Node node) {
     if ("whenz".equals(node.name())) {
       Condition cond = null;
+      ConditionalChain.Op condOp = null;
       Action lastAction = null;
       String defining = null;
       for(Node child : node.children()) {
-        if ("conditions".equals(child.name())) {
+        if("and".equals(child.name())) {
+           cond = ConditionalChain.wrap(cond);
+           condOp = ConditionalChain.Op.AND;
+        }else if("or".equals(child.name())) {
+           cond = ConditionalChain.wrap(cond);
+           condOp = ConditionalChain.Op.OR;
+        }else if ("conditions".equals(child.name())) {
           if (child.children()[0].is("define")) {
             Node defChild = child.children()[0].children()[0];
             defining = defChild.getTokenOrValue();
           } else if (child.children()[0].is("event")) {
             cond = new EventCondition(child.children()[0].children()[0].getTokenOrValue());
           } else if ("Reference".equals(child.children()[0].name())) {
+            Condition lastCond = cond;
             Node referenceNode = child.children()[0];
             String ref = referenceString(referenceNode.children());
             String op = child.children()[1].children()[0].getTokenOrValue();
@@ -79,7 +89,13 @@ public class ProgramBuilder implements NodeVisitor {
               Node rightValChild = rightVal.children()[0];
               cond = new BoolCondition(op, ref, rightValChild.getTokenOrValue(), repeats);
             }
-            program.setListener(ref, cond);
+            if(lastCond instanceof ConditionalChain && condOp != null) {
+              ConditionalChain chain = (ConditionalChain) lastCond;
+              cond = chain.next(cond, condOp);
+            }else if(lastCond instanceof ConditionalChain && condOp == null) {
+              System.err.println("Conditional is missing");
+            }
+            //program.setListener(ref, cond);
           } else if("StateCondition".equals(child.children()[0].name())) {
             Node stateNode = child.children()[0];
             VariablePath path = this.getPath(stateNode.getChildNamed("Reference"));
@@ -150,6 +166,9 @@ public class ProgramBuilder implements NodeVisitor {
   }
 
   public VariablePath getPath(Node node) {
+    if(node == null) {
+      return null;
+    }
     String ref = referenceString(node.children());
     if (ref != null) {
       VariablePath path = paths.get(ref);

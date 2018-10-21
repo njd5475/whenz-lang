@@ -39,12 +39,15 @@ public class Program {
           noConditions = false;
           c = e.getKey();
           if (c.check(this)) {
-            actions.push(c.getAction());
-          }
-
-          if (!c.repeats() || c instanceof EventCondition) {
-            // System.out.println("Disabled condition for " + c.getClass());
-            enabled.put(c, false); // disable condition
+            Action a = c.getAction();
+            if(a != null) {
+              actions.push(a);
+            }
+            
+            if (!c.repeats() || c instanceof EventCondition) {
+              // System.out.println("Disabled condition for " + c.getClass());
+              enabled.put(c, false); // disable condition
+            }
           }
         }
       }

@@ -404,6 +404,22 @@ public class WhenzParser {
 				stateCondition(conditions, tb);
 			}
 			consumeWhitespace(tokens);
+			if(tokens.peek().is("and")) {
+			  tokens.take();
+			  Node andNode = new Node("and");
+			  whenNode.add(conditions);
+			  whenNode.add(andNode);
+			  this.conditions(whenNode, tokens);
+			  return;
+			}
+			if(tokens.peek().is("or")) {
+			  tokens.take();
+			  Node orNode = new Node("or");
+			  whenNode.add(conditions);
+			  whenNode.add(orNode);
+			  this.conditions(whenNode, tokens);
+			  return;
+			}
 			if (tokens.peek().is("do")) {
 				tokens.take();
 				consumeWhitespace(tokens);
@@ -452,7 +468,7 @@ public class WhenzParser {
 				tokens.take();
 				op.add(new Node("greater equal", ">="));
 			} else {
-				unexpectedToken(tokens.peek());
+				op.add(new Node("greater than", ">"));
 			}
 		} else if (tokens.peek().isSymbol("<")) {
 			tokens.take();
@@ -460,7 +476,7 @@ public class WhenzParser {
 				tokens.take();
 				op.add(new Node("less equal", "<="));
 			} else {
-				unexpectedToken(tokens.peek());
+				op.add(new Node("less than", "<"));
 			}
 		} else if (tokens.peek().isSymbol("!")) {
 			tokens.take();

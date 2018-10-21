@@ -1,7 +1,7 @@
 
 when event app_starts do once
-	@buf is bytes
-	@theFile = /tmp/test_file
+	@buf is 1024 bytes
+	@theFile = ./README.md
 	trigger event processingDone
 	
 when @buf.monitor is bufferFull do
@@ -14,4 +14,6 @@ when event processingDone do
 when @buf.monitor is eof do once
 	@buf.trimmed is @buf.lastReadLength bytes from head
 	put @buf.trimmed
+	print .
+	print Test passed.
 	exit

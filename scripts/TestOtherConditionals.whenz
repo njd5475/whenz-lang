@@ -1,0 +1,23 @@
+#!/usr/bin/env whenz
+
+when event app_starts do
+	@count = 1
+	
+when @count < 2 do
+	increment @count
+	
+when @count > 1 and @count < 5 or @count == 10 do
+	print The count @count is in-between 1 and 5 or its 200
+	increment @count
+
+when @count is changed do
+	print THe count was changed @count
+	
+when @count == 5 do
+	print We reached @count
+	@count = 10
+	
+when @count > 10 do
+	print Greater than 200
+	print Test passed.
+	exit
