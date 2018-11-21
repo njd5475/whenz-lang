@@ -84,10 +84,7 @@ public class PutsAction extends Action {
       parser.consumeWhitespace(tokens);
       boolean skipNext = false;
       while (!tokens.peek().isNewline()) {
-        if(tokens.peek().isSymbol("\\")) {
-          tokens.take();
-          skipNext = true;
-        }else if(!skipNext && tokens.peek().isSymbol("@")) {
+        if(!skipNext && tokens.peek().isSymbol("@")) {
           parser.globalReference(printAction, tokens);
           skipNext = false;
         }else {

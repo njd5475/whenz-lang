@@ -33,7 +33,7 @@ public class SetToLiteral extends Action {
     parser.consumeWhitespace(tokens);
     parser.assignment(assignNode, tokens);
     parser.consumeWhitespace(tokens);
-    parser.literals(assignNode, tokens);
+    parser.expression(assignNode, tokens);
     parser.consumeWhitespace(tokens, true);
     return assignNode;
   }

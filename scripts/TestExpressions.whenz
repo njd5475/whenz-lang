@@ -1,0 +1,6 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	@adds = 1 + 1
+	@two = @adds - 2
+	

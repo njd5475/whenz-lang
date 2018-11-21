@@ -153,4 +153,17 @@ public class Token {
   public TTYPE getType() {
     return type;
   }
+
+  public boolean oneOf(String...ops) {
+    for(String op : ops) {
+      if(token.toString().equals(op)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean isOperator() {
+    return type == TTYPE.OPERATION;
+  }
 }

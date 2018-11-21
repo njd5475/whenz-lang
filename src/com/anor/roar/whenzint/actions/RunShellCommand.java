@@ -81,9 +81,9 @@ public class RunShellCommand extends Action {
 	public void perform(Program program, Map<String, Object> context) {
 		try {
 			if (ref == null) {
-				Runtime.getRuntime().exec(new String[] {"sh", "'" + commandString + "'"});
+				Runtime.getRuntime().exec(new String[] {"sh", "-c", commandString});
 			} else {
-				Process proc = Runtime.getRuntime().exec(new String[] {"sh", commandString});
+				Process proc = Runtime.getRuntime().exec(new String[] {"sh", "-c", commandString});
 				(new Monitor(proc, program, ref)).start();
 			}
 		} catch (IOException e) {

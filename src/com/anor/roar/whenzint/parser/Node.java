@@ -148,4 +148,10 @@ public class Node {
   public void removeAll() {
     children.clear();
   }
+
+  public Node addChild(String name, Token token) {
+    Node child = new Node(name, token);
+    this.children.add(child);
+    return child;
+  }
 }
