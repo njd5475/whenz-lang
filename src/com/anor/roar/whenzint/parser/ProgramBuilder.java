@@ -122,7 +122,8 @@ public class ProgramBuilder implements NodeVisitor {
                 lastAction = new ChainAction(lastAction, a);
               }
             }else {
-              System.out.format("WARNING: Action builder '%s' failed to build action\n");
+              System.out.format("WARNING: Action builder '%s' failed to build action\n", String.valueOf(a));
+              System.out.format("%s\n", actionNode.toString());
             }
           } else if ("GlobalReference".equals(actionNode.name())) {
             ActionBuilder builder = actions.get(actionNode.name());

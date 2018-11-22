@@ -1,5 +1,7 @@
 #!/usr/bin/env whenz
 
 when event app_starts do
+  put Hello world!
+  put \nY
   execute cat README.md > ./test_file
   exit

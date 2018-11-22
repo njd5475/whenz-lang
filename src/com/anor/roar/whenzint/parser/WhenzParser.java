@@ -197,7 +197,7 @@ public class WhenzParser {
       n.add(new Node("Part", literal));
       return n;
     };
-    TokenAction actions[] = new TokenAction[] { hex, number, decimals, stringLiteral };
+    TokenAction actions[] = new TokenAction[] { hex, decimals, number, stringLiteral };
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrapAndMark(tokens);
     Node found = null;
     for (TokenAction a : actions) {
@@ -620,6 +620,7 @@ public class WhenzParser {
   }
 
   public void expression(Node assignNode, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+    Node expression = assignNode.addChild("Expression");
     this.consumeWhitespace(tokens);
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
     tb.mark();
@@ -627,16 +628,25 @@ public class WhenzParser {
     WhenzSyntaxError error = null;
     if (!found) {
       try {
-        globalReference(assignNode, tb);
+        globalReference(expression, tb);
         found = true;
       } catch (WhenzSyntaxError e) {
         error = e;
         tb.rewind();
       }
     }
+    if(!found) {
+      try {
+        expressionGroup(expression, tb);
+        found = true;
+      }catch(WhenzSyntaxError e) {
+        error = e;
+        tb.rewind();
+      }
+    }
     if (!found) {
       try {
-        literals(assignNode, tb);
+        literals(expression, tb);
         found = true;
       } catch (WhenzSyntaxError e) {
         error = e;
@@ -649,13 +659,27 @@ public class WhenzParser {
       Token cur = tb.peek();
       if(cur.oneOf("+", "-", "*", "/") && cur.isOperator()) {
         Token token = tb.take();
-        assignNode.addChild("Operator", token);
-        this.expression(assignNode, tb);
-      }else {
-        this.unexpectedToken(cur);
+        expression.addChild("Operator", token);
+        this.expression(expression, tb);
       }
     } else {
       throw error;
+    }
+  }
+
+  private void expressionGroup(Node expression, TrackableTokenBuffer tb) throws IOException, WhenzSyntaxError {
+    consumeWhitespace(tb);
+    if(tb.peek().isSymbol("(")) {
+      tb.take();
+      Node group = expression.addChild("ExpGroup");
+      expression(group, tb);
+      if(tb.peek().isSymbol(")")) {
+        tb.take();
+      }else {
+        unexpectedToken(tb);
+      }
+    }else {
+      unexpectedToken(tb.peek());
     }
   }
 

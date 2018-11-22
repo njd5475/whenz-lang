@@ -3,4 +3,4 @@
 when event app_starts do once
 	@adds = 1 + 1
 	@two = @adds - 2
-	
+	@three = (1 * @adds) + (@two / 5) - (@adds - 10) + 0.987
