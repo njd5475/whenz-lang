@@ -2,6 +2,7 @@ package com.anor.roar.whenzint.expressions;
 
 import java.util.Map;
 
+import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 
 public class VariableValue implements ExpressionValue {
@@ -13,8 +14,11 @@ public class VariableValue implements ExpressionValue {
     this.path = path;
   }
   
-  public boolean realize(Map<String, Object> context) {
+  public boolean realize(Program program, Map<String, Object> context) {
     Object object = path.get(context);
+    if(object == null) {
+      object = program.getObject(path.getFullyQualifiedName());
+    }
     if(object instanceof Double) {
       realizedValue = new DoubleValue((double)object);
       return true;

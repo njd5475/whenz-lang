@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 
 public class MinusOperationTest {
@@ -18,7 +19,8 @@ public class MinusOperationTest {
     Map<String, Object> context = new HashMap<>();
     context.put("testVar", 2);
     VariableValue lval = new VariableValue(VariablePath.create("testVar"));
-    lval.realize(context);
+    Program program = new Program();
+    lval.realize(program, context);
     ExpressionValue rval = new IntegerValue(3);
     ExpressionValue calculated = op.calculate(lval, rval);
     assertEquals(-1, calculated.get());

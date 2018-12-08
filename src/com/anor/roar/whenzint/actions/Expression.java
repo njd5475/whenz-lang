@@ -123,10 +123,10 @@ public class Expression extends Action {
         ExpressionValue rval = waiting.pop();
         ExpressionValue lval = waiting.pop();
         if(rval instanceof VariableValue) {
-          ((VariableValue)rval).realize(context);
+          ((VariableValue)rval).realize(program, context);
         }
         if(lval instanceof VariableValue) {
-          ((VariableValue)lval).realize(context);
+          ((VariableValue)lval).realize(program, context);
         }
         waiting.push(op.calculate(lval, rval));
       }else {
