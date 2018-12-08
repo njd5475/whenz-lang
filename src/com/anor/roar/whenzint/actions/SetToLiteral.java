@@ -2,13 +2,23 @@ package com.anor.roar.whenzint.actions;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Stack;
+import java.util.function.Function;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.expressions.DivideOperation;
+import com.anor.roar.whenzint.expressions.DoubleValue;
+import com.anor.roar.whenzint.expressions.IntegerValue;
+import com.anor.roar.whenzint.expressions.MathOpData;
+import com.anor.roar.whenzint.expressions.MathOps;
+import com.anor.roar.whenzint.expressions.MinusOperation;
+import com.anor.roar.whenzint.expressions.MultiplyOperation;
+import com.anor.roar.whenzint.expressions.PlusOperation;
+import com.anor.roar.whenzint.expressions.VariableValue;
 import com.anor.roar.whenzint.parser.Node;
 import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.TrackableTokenBuffer;
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
@@ -48,14 +58,93 @@ public class SetToLiteral extends Action {
     Node lval = node.children()[0];
     Node rval = node.children()[2];
     String quickRef = builder.referenceString(lval.children());
-    if ("Literals".equals(rval.name())) {
-      return new SetToLiteral(quickRef, rval.children()[0].getTokenOrValue());
-    } else if ("Number".equals(rval.name())) {
-      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getTokenOrValue()));
-    } else if ("HexLiteral".equals(rval.name())) {
-      return new SetToLiteral(quickRef, Integer.parseInt(rval.children()[0].getTokenOrValue(), 16));
+    if ("Expression".equals(rval.name())) {
+      boolean containsExp = rval.hasChildNamed("Expression");
+      if (rval.hasChildNamed("Literals") && !containsExp) {
+        Node literal = rval.getChildNamed("Literals");
+        return new SetToLiteral(quickRef, literal.children()[0].getTokenOrValue());
+      } else if (rval.hasChildNamed("Number") && !containsExp) {
+        Node literal = rval.getChildNamed("Number");
+        return new SetToLiteral(quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue()));
+      } else if (rval.hasChildNamed("HexLiteral") && !containsExp) {
+        Node literal = rval.getChildNamed("HexLiteral");
+        return new SetToLiteral(quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue(), 16));
+      } else {
+        Stack<MathOpData> ops = new Stack<>();
+        buildExpression(builder, ops, rval);
+        return new Expression(quickRef, ops);
+      }
     }
+
     return null;
+  }
+
+  public Function<Number[], Number> createOpFunction(String op) {
+    Function<Number[], Number> fn = null;
+    if ("+".equals(op)) {
+      fn = (args) -> {
+        return args[0].doubleValue() + args[1].doubleValue();
+      };
+    } else if ("-".equals(op)) {
+      fn = (args) -> {
+        return args[0].doubleValue() - args[1].doubleValue();
+      };
+    } else if ("*".equals(op)) {
+      fn = (args) -> {
+        return args[0].doubleValue() * args[1].doubleValue();
+      };
+    } else if ("/".equals(op)) {
+      fn = (args) -> {
+        return args[0].doubleValue() / args[1].doubleValue();
+      };
+    }
+
+    return fn;
+  }
+
+  public void buildExpression(ProgramBuilder builder, Stack<MathOpData> expressions, Node expression) {
+    boolean grp = false;
+    boolean skipChildren = false;
+    if (expression.name().contains("Operator")) {
+      if ("+".equals(expression.getToken())) {
+        expressions.push(MathOps.PLUS.with(new PlusOperation()));
+      } else if ("-".equals(expression.getToken())) {
+        expressions.push(MathOps.MINUS.with(new MinusOperation()));
+      } else if ("/".equals(expression.getToken())) {
+        expressions.push(MathOps.DIV.with(new DivideOperation()));
+      } else if ("*".equals(expression.getToken())) {
+        expressions.push(MathOps.MULT.with(new MultiplyOperation()));
+      }
+    } else if (expression.name().contains("ExpGroup")) {
+      grp = true;
+      expressions.push(MathOps.GROUP_BEGIN.with(null));
+    } else if (expression.name().contains("Decimal")) {
+      double decimal = builder.buildDecimal(expression);
+      expressions.push(MathOps.NUMBER.with(new DoubleValue(decimal)));
+      skipChildren = true;
+    } else if (expression.name().contains("Number")) {
+      int num = Integer.parseInt(expression.children()[0].getTokenOrValue());
+      if (expression.hasChildNamed("Sign")) {
+        if ("-".equals(expression.getChildNamed("Sign").getTokenOrValue())) {
+          num = -num;
+        }
+      }
+      expressions.push(MathOps.NUMBER.with(new IntegerValue(num)));
+    } else if (expression.name().contains("Reference")) {
+      expressions.push(MathOps.VARIABLE.with(new VariableValue(builder.getPath(expression))));
+    }
+
+    if (expression.children().length > 0 && !skipChildren) {
+      for (Node exp : expression.children()) {
+        buildExpression(builder, expressions, exp);
+      }
+    } else if (expression.children().length == 0) {
+
+    }
+
+    if (grp) {
+      expressions.push(MathOps.GROUP_END.with(null));
+    }
   }
 
   @Override

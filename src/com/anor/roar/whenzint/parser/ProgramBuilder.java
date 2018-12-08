@@ -14,6 +14,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
+import com.anor.roar.whenzint.actions.Expression;
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.ConditionalChain;
 import com.anor.roar.whenzint.conditions.EventCondition;
@@ -165,6 +166,10 @@ public class ProgramBuilder implements NodeVisitor {
     }
 
   }
+  
+  public Expression buildExpression(Node node) {
+    return null;
+  }
 
   public VariablePath getPath(Node node) {
     if(node == null) {
@@ -260,5 +265,19 @@ public class ProgramBuilder implements NodeVisitor {
 
   public ByteBufferMapping getMapping(String path) {
     return this.mappings.get(path);
+  }
+
+  public double buildDecimal(Node expression) {
+    int signBit = 1;
+    if(expression.hasChildNamed("Sign")) {
+      if("-".equals(expression.getChildNamed("Sign").getTokenOrValue())) {
+        signBit = -1;
+      }
+    }
+    int leftSide = Integer.parseInt(expression.children()[0].children()[0].getTokenOrValue());
+    int rightSide = Integer.parseInt(expression.children()[1].children()[0].getTokenOrValue());
+    int rightDigits = expression.children()[1].children()[0].getTokenOrValue().length();
+    double decimals = signBit * leftSide + (rightSide / (Math.pow(10, rightDigits)));
+    return decimals;
   }
 }

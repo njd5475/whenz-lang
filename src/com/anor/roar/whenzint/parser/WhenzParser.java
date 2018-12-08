@@ -12,6 +12,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
+import com.anor.roar.whenzint.actions.Expression;
 import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
@@ -167,7 +168,7 @@ public class WhenzParser {
     // heres where lambdas are useful, instead of building interfaces
     TokenAction number = (p, t) -> {
       p.consumeWhitespace(t);
-      return p.number(t);
+      return p.signedNumber(t);
     };
     TokenAction hex = (p, t) -> {
       p.consumeWhitespace(tokens);
@@ -176,7 +177,7 @@ public class WhenzParser {
     TokenAction decimals = (p, t) -> {
       p.consumeWhitespace(t);
       Node n = new Node("Decimal");
-      n.add(p.number(t));
+      n.add(p.signedNumber(t));
       if (t.peek().isSymbol(".")) {
         t.take();
       }
@@ -214,6 +215,29 @@ public class WhenzParser {
     } else {
       node.add(found);
     }
+  }
+
+  private Node signedNumber(TokenBuffer t) throws IOException, WhenzSyntaxError {
+    Node num = new Node("Number");
+    Token numberToken = null;
+    Token signToken = null;
+    if (t.peek().isNumber()) {
+      numberToken = t.take();
+    } else if(t.peek().is("-") || t.peek().is("+")) {
+      signToken = t.take();
+      if(t.peek().isNumber()) {
+        numberToken = t.take();
+      }else {
+        unexpectedToken(t);
+      }
+    } else {
+      unexpectedToken(t.peek());
+    }
+    num.addChild(numberToken.asString(), numberToken);
+    if(signToken != null) {
+      num.addChild("Sign", signToken);
+    }
+    return num;
   }
 
   private Node hexidecimal(TokenBuffer t) throws IOException, WhenzSyntaxError {

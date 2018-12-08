@@ -1,6 +1,30 @@
 #!/usr/bin/env whenz
 
 when event app_starts do once
+	@noWorky = (2 - 10) + -1
+	print Not Right @noWorky should be -9
+	
 	@adds = 1 + 1
-	@two = @adds - 2
-	@three = (1 * @adds) + (@two / 5) - (@adds - 10) + 0.987
+	print Adds=@adds
+	
+	@two = @adds - 3
+	print Two=@two
+	
+	@three = ((1 * @adds * @two) + (@two / 5.0 + 3)) - ((@adds - 10) + @two) + 0.987
+	print Three=@three
+	
+	@partOne = 1 * @adds * @two
+	print PartOne is @partOne
+	
+	@partTwo = @two / 5.0 + 3
+	print PartTwo is @partTwo
+	
+	@partThree = (@partOne + @partTwo)
+	print PartThree is @partThree
+	
+	@partFour = @adds - 10 + @two
+	print PartFour is @partFour
+	
+when @three >= 8 do
+	print Test passed.
+	exit
