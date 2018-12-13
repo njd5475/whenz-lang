@@ -1,3 +1,4 @@
+#!/usr/bin/env whenz
 
 when event app_starts do once
 	@buf is 1024 bytes
