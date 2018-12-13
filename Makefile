@@ -24,6 +24,6 @@ $(HOME)/bin:
 
 $(HOME)/bin/whenz: $(HOME)/bin ./build/distributions/$(target)
 	cp -R ./build/distributions/$(target)/ $(HOME)/bin/.
-	ln -s $(HOME)/bin/$(target)/bin/Whenz $(HOME)/bin/whenz
+	ln -s $(HOME)/bin/$(target)/bin/whenz-lang $(HOME)/bin/whenz
 
 all: $(HOME)/bin/whenz
