@@ -1,5 +1,8 @@
 package com.anor.roar.whenzint.conditions;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 import com.anor.roar.whenzint.Action;
@@ -125,6 +128,14 @@ public class BoolCondition extends Condition {
     Object refObj = program.getObject(ref);
     if(refObj != null && cmp != null) {
       return refObj.equals(cmp);
+    }else if(refObj instanceof ByteBuffer) {
+      ByteBuffer bb = (ByteBuffer)refObj;
+      ByteBuffer forInt = ByteBuffer.allocate(Integer.BYTES);
+      bb.rewind();
+      forInt.put(bb);
+      forInt.rewind();
+      int refNum = Integer.reverseBytes(forInt.getInt());
+      return number == refNum;
     }else if(refObj != null) {
       return refObj.equals(number);
     }else{

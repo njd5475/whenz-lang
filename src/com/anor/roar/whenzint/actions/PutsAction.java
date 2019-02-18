@@ -65,7 +65,7 @@ public class PutsAction extends Action {
         }else if(vals[i] instanceof ByteBuffer) {
           ByteBuffer bb = (ByteBuffer)vals[i];
           bb.rewind();
-          vals[i] = new String(bb.array()).trim();
+          vals[i] = new String(bb.array());
         }
         ++i;
       }

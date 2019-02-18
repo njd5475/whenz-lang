@@ -3,6 +3,7 @@ package com.anor.roar.whenzint.parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,6 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
-import com.anor.roar.whenzint.actions.Expression;
 import com.anor.roar.whenzint.actions.IncrementAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
@@ -570,6 +570,20 @@ public class WhenzParser {
     }
     return null;
   }
+  
+  public static Program compileProgram(Reader input) throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(input, 4096));
+
+    Node root = null;
+    try {
+      root = instance.parse(new StreamTokenBuffer(tsr, 4096));
+      ProgramBuilder builder = new ProgramBuilder(root);
+      return builder.build();
+    } catch (WhenzSyntaxError e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
 
   public static Program compileToProgram(String filename, Program prog) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
@@ -584,6 +598,22 @@ public class WhenzParser {
     }
     return null;
   }
+  
+  public static Program compileToProgram(Reader input, Program program) throws IOException {
+    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(input, 4096));
+
+    Node root = null;
+    try {
+      root = instance.parse(new StreamTokenBuffer(tsr, 4096));
+      ProgramBuilder builder = new ProgramBuilder(root, program);
+      return builder.build();
+    } catch (WhenzSyntaxError e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+  
+
 
   public static void main(String[] args) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
