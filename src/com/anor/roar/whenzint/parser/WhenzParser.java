@@ -14,6 +14,7 @@ import com.anor.roar.whenzint.actions.ByteBufferMappingAction;
 import com.anor.roar.whenzint.actions.CallSetterMethod;
 import com.anor.roar.whenzint.actions.ExitAction;
 import com.anor.roar.whenzint.actions.IncrementAction;
+import com.anor.roar.whenzint.actions.LaunchModuleAction;
 import com.anor.roar.whenzint.actions.LaunchWindowAction;
 import com.anor.roar.whenzint.actions.NewByteBuffer;
 import com.anor.roar.whenzint.actions.PrintAction;
@@ -36,6 +37,7 @@ public class WhenzParser {
     definedActions.add(new PrintAction(""));
     definedActions.add(new PutsAction((String) null));
     definedActions.add(new LaunchWindowAction());
+    definedActions.add(new LaunchModuleAction());
     definedActions.add(new TriggerEventAction(""));
     definedActions.add(new ExitAction());
     definedActions.add(new CallSetterMethod("", "", ""));

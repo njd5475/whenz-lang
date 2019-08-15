@@ -1,3 +1,4 @@
+#!/usr/bin/env whenz
 when define dim
 	java.awt.Dimension#Dimension:640:480
 	
@@ -46,17 +47,17 @@ when event key_pressed
 when @print.var == "Set a variable" do once
 	print Print var has been set
 	
-when @keyPressed == 27
+when @keyPressed == 27 do
 	print Escaped was pressed
 	@keyPressed = 0
 	exit
 
-when @keyPressed == 78
+when @keyPressed == 78 do
 	print Space pressed
 	@keyPressed = 0
   launch window
   
-when @keyPressed == 0
+when @keyPressed == 0 do
 	print Key is zero
 	
 //try to see if line numbers match up

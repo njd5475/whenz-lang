@@ -19,7 +19,7 @@ public class ExitAction extends Action {
   
 	@Override
 	public void perform(Program program, Map<String, Object> context) {
-		System.exit(0);
+		program.exit(0);
 	}
 
   @Override
