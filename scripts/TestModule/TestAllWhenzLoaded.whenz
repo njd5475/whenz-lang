@@ -1,0 +1,4 @@
+
+when event app_starts do once
+	print All modules loaded
+	print Test passed.

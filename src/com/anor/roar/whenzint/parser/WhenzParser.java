@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.anor.roar.whenzint.Program;
@@ -28,9 +30,10 @@ import com.anor.roar.whenzint.actions.WriteVariableToFile;
 
 public class WhenzParser {
 
-  private Set<TokenAction>   definedActions = new LinkedHashSet<TokenAction>();
-  private Node               top;
-  private static WhenzParser instance       = new WhenzParser();
+  private Set<TokenAction>              definedActions = new LinkedHashSet<>();
+  private Node                          top;
+  private static WhenzParser            instance       = new WhenzParser();
+  private Map<String, Set<TokenAction>> moduleActions  = new HashMap<>();
 
   private WhenzParser() {
     definedActions.add(new SetToLiteral(null, null));
@@ -168,41 +171,41 @@ public class WhenzParser {
     // numbers,decimals,string literals
 
     // heres where lambdas are useful, instead of building interfaces
-    TokenAction number = (p, t) -> {
-      p.consumeWhitespace(t);
-      return p.signedNumber(t);
-    };
-    TokenAction hex = (p, t) -> {
-      p.consumeWhitespace(tokens);
-      return p.hexidecimal(t);
-    };
-    TokenAction decimals = (p, t) -> {
-      p.consumeWhitespace(t);
-      Node n = new Node("Decimal");
-      n.add(p.signedNumber(t));
-      if (t.peek().isSymbol(".")) {
-        t.take();
-      }
-      n.add(p.number(t));
-      return n;
-    };
-    TokenAction stringLiteral = (p, t) -> {
-      p.consumeWhitespace(t);
-      Node n = new Node("Literals");
-      StringBuilder sb = new StringBuilder();
-      while (!t.peek().isNewline() && !t.peek().is("do") && !t.peek().is("once")) {
-        sb.append(t.take().asString());
-      }
-      String literal = sb.toString();
-      if (t.peek().is("once") || t.peek().is("do")) {
-        literal = literal.trim();
-      }
-      n.add(new Node("Part", literal));
-      return n;
-    };
-    TokenAction actions[] = new TokenAction[] { hex, decimals, number, stringLiteral };
-    TrackableTokenBuffer tb = TrackableTokenBuffer.wrapAndMark(tokens);
-    Node found = null;
+    TokenAction          number        = (p, t) -> {
+                                         p.consumeWhitespace(t);
+                                         return p.signedNumber(t);
+                                       };
+    TokenAction          hex           = (p, t) -> {
+                                         p.consumeWhitespace(tokens);
+                                         return p.hexidecimal(t);
+                                       };
+    TokenAction          decimals      = (p, t) -> {
+                                         p.consumeWhitespace(t);
+                                         Node n = new Node("Decimal");
+                                         n.add(p.signedNumber(t));
+                                         if (t.peek().isSymbol(".")) {
+                                           t.take();
+                                         }
+                                         n.add(p.number(t));
+                                         return n;
+                                       };
+    TokenAction          stringLiteral = (p, t) -> {
+                                         p.consumeWhitespace(t);
+                                         Node          n  = new Node("Literals");
+                                         StringBuilder sb = new StringBuilder();
+                                         while (!t.peek().isNewline() && !t.peek().is("do") && !t.peek().is("once")) {
+                                           sb.append(t.take().asString());
+                                         }
+                                         String literal = sb.toString();
+                                         if (t.peek().is("once") || t.peek().is("do")) {
+                                           literal = literal.trim();
+                                         }
+                                         n.add(new Node("Part", literal));
+                                         return n;
+                                       };
+    TokenAction          actions[]     = new TokenAction[] { hex, decimals, number, stringLiteral };
+    TrackableTokenBuffer tb            = TrackableTokenBuffer.wrapAndMark(tokens);
+    Node                 found         = null;
     for (TokenAction a : actions) {
       try {
         // assuming found is not null but if it is an exception will be raised.
@@ -220,23 +223,23 @@ public class WhenzParser {
   }
 
   private Node signedNumber(TokenBuffer t) throws IOException, WhenzSyntaxError {
-    Node num = new Node("Number");
+    Node  num         = new Node("Number");
     Token numberToken = null;
-    Token signToken = null;
+    Token signToken   = null;
     if (t.peek().isNumber()) {
       numberToken = t.take();
-    } else if(t.peek().is("-") || t.peek().is("+")) {
+    } else if (t.peek().is("-") || t.peek().is("+")) {
       signToken = t.take();
-      if(t.peek().isNumber()) {
+      if (t.peek().isNumber()) {
         numberToken = t.take();
-      }else {
+      } else {
         unexpectedToken(t);
       }
     } else {
       unexpectedToken(t.peek());
     }
     num.addChild(numberToken.asString(), numberToken);
-    if(signToken != null) {
+    if (signToken != null) {
       num.addChild("Sign", signToken);
     }
     return num;
@@ -255,7 +258,7 @@ public class WhenzParser {
         }
         try {
           String hexStr = sb.toString();
-          int number = Integer.parseInt(hexStr, 16);
+          int    number = Integer.parseInt(hexStr, 16);
           hex.add(new Node("HexLiteral", hexStr));
         } catch (NumberFormatException nfe) {
           this.unexpectedToken(t.peek());
@@ -270,7 +273,7 @@ public class WhenzParser {
   }
 
   private Node number(TokenBuffer t) throws IOException, WhenzSyntaxError {
-    Node num = new Node("Number");
+    Node  num         = new Node("Number");
     Token numberToken = null;
     if (t.peek().isNumber()) {
       numberToken = t.take();
@@ -318,8 +321,8 @@ public class WhenzParser {
   private WhenzSyntaxError definedAction(Node action, TokenBuffer tokens) throws IOException {
     Node defAction = new Node("defined action");
     consumeWhitespace(tokens);
-    WhenzSyntaxError error = null;
-    TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
+    WhenzSyntaxError     error = null;
+    TrackableTokenBuffer tb    = TrackableTokenBuffer.wrap(tokens);
     tb.mark();
     Node actionNode = null;
     for (TokenAction ta : definedActions) {
@@ -371,8 +374,8 @@ public class WhenzParser {
   }
 
   private void className(Node action, TokenBuffer tokens) throws IOException {
-    Node className = new Node("classname");
-    String strClass = "";
+    Node   className = new Node("classname");
+    String strClass  = "";
     while (tokens.peek().isWord() || (tokens.peek().is("."))) {
       strClass += tokens.take().asString();
     }
@@ -560,9 +563,9 @@ public class WhenzParser {
   }
 
   public static Program compileProgram(String filename) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
+    TokenStreamReader tsr  = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
 
-    Node root = null;
+    Node              root = null;
     try {
       root = instance.parse(new StreamTokenBuffer(tsr, 4096));
       ProgramBuilder builder = new ProgramBuilder(root);
@@ -572,11 +575,11 @@ public class WhenzParser {
     }
     return null;
   }
-  
-  public static Program compileProgram(Reader input) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(input, 4096));
 
-    Node root = null;
+  public static Program compileProgram(Reader input) throws IOException {
+    TokenStreamReader tsr  = new TokenStreamReader(new BufferedReader(input, 4096));
+
+    Node              root = null;
     try {
       root = instance.parse(new StreamTokenBuffer(tsr, 4096));
       ProgramBuilder builder = new ProgramBuilder(root);
@@ -588,9 +591,9 @@ public class WhenzParser {
   }
 
   public static Program compileToProgram(String filename, Program prog) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
+    TokenStreamReader tsr  = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
 
-    Node root = null;
+    Node              root = null;
     try {
       root = instance.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root, prog);
@@ -600,11 +603,11 @@ public class WhenzParser {
     }
     return null;
   }
-  
-  public static Program compileToProgram(Reader input, Program program) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(input, 4096));
 
-    Node root = null;
+  public static Program compileToProgram(Reader input, Program program) throws IOException {
+    TokenStreamReader tsr  = new TokenStreamReader(new BufferedReader(input, 4096));
+
+    Node              root = null;
     try {
       root = instance.parse(new StreamTokenBuffer(tsr, 4096));
       ProgramBuilder builder = new ProgramBuilder(root, program);
@@ -614,17 +617,15 @@ public class WhenzParser {
     }
     return null;
   }
-  
-
 
   public static void main(String[] args) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
+    TokenStreamReader tsr  = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
 
-    Node root = null;
+    Node              root = null;
     try {
       root = instance.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root);
-      Program program = builder.build();
+      Program        program = builder.build();
     } catch (WhenzSyntaxError e) {
       e.printStackTrace();
     }
@@ -680,7 +681,7 @@ public class WhenzParser {
     this.consumeWhitespace(tokens);
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
     tb.mark();
-    boolean found = false;
+    boolean          found = false;
     WhenzSyntaxError error = null;
     if (!found) {
       try {
@@ -691,11 +692,11 @@ public class WhenzParser {
         tb.rewind();
       }
     }
-    if(!found) {
+    if (!found) {
       try {
         expressionGroup(expression, tb);
         found = true;
-      }catch(WhenzSyntaxError e) {
+      } catch (WhenzSyntaxError e) {
         error = e;
         tb.rewind();
       }
@@ -713,7 +714,7 @@ public class WhenzParser {
     if (found) {
       this.consumeWhitespace(tb);
       Token cur = tb.peek();
-      if(cur.oneOf("+", "-", "*", "/") && cur.isOperator()) {
+      if (cur.oneOf("+", "-", "*", "/") && cur.isOperator()) {
         Token token = tb.take();
         expression.addChild("Operator", token);
         this.expression(expression, tb);
@@ -725,16 +726,16 @@ public class WhenzParser {
 
   private void expressionGroup(Node expression, TrackableTokenBuffer tb) throws IOException, WhenzSyntaxError {
     consumeWhitespace(tb);
-    if(tb.peek().isSymbol("(")) {
+    if (tb.peek().isSymbol("(")) {
       tb.take();
       Node group = expression.addChild("ExpGroup");
       expression(group, tb);
-      if(tb.peek().isSymbol(")")) {
+      if (tb.peek().isSymbol(")")) {
         tb.take();
-      }else {
+      } else {
         unexpectedToken(tb);
       }
-    }else {
+    } else {
       unexpectedToken(tb.peek());
     }
   }

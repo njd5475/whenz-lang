@@ -29,9 +29,22 @@ public class CustomAction extends Action {
     
     int cur = 0;
     while(tokens.peek().getType() == types[cur]) {
-      tokens.take();
+      n.addChild("ActionToken", tokens.take());
+      
       ++cur;
+      
+      if(cur == types.length) {
+        break;
+      }
     }
+    
+    if(cur == types.length) {
+      //all types found
+      return n;
+    }
+    
+    parser.unexpectedToken(tokens.peek());
+    
     return null;
   }
 

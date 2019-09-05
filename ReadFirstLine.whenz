@@ -1,0 +1,35 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	@buf is 1 bytes
+ 	@counter = 0
+ 	@charCounter = 0
+ 	@lineEndIndex = 0
+ 	@lineBeginIndex = 0
+	@theFile = ./README.md
+	trigger event processFile
+
+when event processFile do
+  print Starting to read file @theFile
+  read @theFile into @buf
+
+when @buf.monitor is bufferFull and @buf != 10 do
+  increment @charCounter
+  read @theFile into @buf
+	
+when @buf.monitor is bufferFull and @buf == 10 do
+  @lineBeginIndex = @lineEndIndex
+  @lineEndIndex = @lineEndIndex + @charCounter
+  
+  @lineBuffer is @charCounter bytes
+  read @theFile into @lineBuffer from @lineBeginIndex
+
+  @charCounter = 0
+  increment @counter
+  read @theFile into @buf
+
+when @lineBuffer.monitor is bufferFull do once
+  put @lineBuffer
+
+when @buf.monitor is eof do once
+  exit

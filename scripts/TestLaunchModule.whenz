@@ -1,0 +1,4 @@
+
+when event app_starts do once
+	print Launching Test Module
+	launch TestModule

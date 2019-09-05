@@ -73,14 +73,20 @@ public class LaunchModuleAction extends Action {
 		File module = new File("./" + this.moduleName);
 		if(module.isDirectory()) {
 			File files[] = module.listFiles();
-			List<String> toLoad = new LinkedList<>();
+			List<File> toLoad = new LinkedList<>();
+			List<File> actionFiles = new LinkedList<>();
+			File file = null;
 			for(int i = 0; i < files.length; ++i) {
-				if(files[i].getName().endsWith(".whenz")) {
-					toLoad.add(files[i].getAbsolutePath());
+				file = files[i];
+				if(file.getName().endsWith(".whenz")) {
+					toLoad.add(file);
+				} else if(file.getName().endsWith(".action")) {
+					actionFiles.add(file);
 				}
 			}
 			
-			Program loaded = Whenz.loadFromFiles(files);
+			//WhenzParser parser = new WhenzParser(actionFiles.toArray(new String[actionFiles.size()]));
+			Program loaded = Whenz.loadFromFiles(toLoad.toArray(new File[toLoad.size()]));
 			
 			loaded.trigger("app_starts");
 			
