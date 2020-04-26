@@ -104,9 +104,9 @@ public class ByteBufferMappingAction extends Action {
     }
     ByteBufferMapping bmm = null;
     if(pathToBytes != null) {
-      bmm = new ByteBufferMapping(pathToBytes, parent, location);
+      bmm = new ByteBufferMapping(pathToBytes, parent, parent.derive("headOffset"), location);
     }else{
-      bmm = new ByteBufferMapping(numberOfBytes, parent, location);
+      bmm = new ByteBufferMapping(numberOfBytes, parent, parent.derive("headOffset"), location);
     }
     builder.registerMapping(bmm, path);
     ByteBufferMappingAction bbmA = new ByteBufferMappingAction(path, bmm);
@@ -121,5 +121,6 @@ public class ByteBufferMappingAction extends Action {
   @Override
   public void perform(Program program, Map<String, Object> context) {
     program.addMapping(this.map, this.link);
+    program.setObject(map.getOffsetPath().getFullyQualifiedName(), 0);
   }
 }
