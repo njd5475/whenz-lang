@@ -135,6 +135,10 @@ public class Expression extends Action {
     }
     if(!waiting.isEmpty()) {
       ExpressionValue pop = waiting.pop();
+      if(pop instanceof VariableValue) {
+        VariableValue v = (VariableValue) pop;
+        v.realize(program, context);
+      }
       program.setObject(ref, pop.get());
       context.put(ref, pop.get());
     }

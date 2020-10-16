@@ -36,6 +36,17 @@ public class IntegerValue implements ExpressionValue {
   public String toString() {
     return Integer.toString(val);
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if(o instanceof Integer) {
+      return val == ((Integer)o).intValue();
+    }else if(o instanceof ExpressionValue) {
+      Object other = ((ExpressionValue)o).get();
+      return other.equals(val);
+    }
+    return false;
+  }
 
   @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {

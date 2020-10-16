@@ -15,7 +15,8 @@ import com.anor.roar.whenzint.parser.WhenzParser;
 
 public class Whenz {
 
-	private static String VERSION = "v0.0.1.18377";
+  // Last number of version are days since epoch in UTC 
+	private static String VERSION = "v0.0.1.18551";
 	public static Program program = null;
 	private static boolean pauseOnStart = false;
 

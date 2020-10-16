@@ -58,8 +58,7 @@ public class VariableValue implements ExpressionValue {
 
   @Override
   public Object get() {
-    // TODO Auto-generated method stub
-    return null;
+    return realizedValue;
   }
   
   public String toString() {
