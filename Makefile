@@ -12,7 +12,7 @@ clean:
 	rm -rf $(HOME)/bin/whenz
 
 $(HOME)/bin:
-	echo No home, let's make a nice home!
+	echo No home, lets make a nice home!
 	echo mkdir $(HOME)/bin
 	mkdir $(HOME)/bin
 
@@ -23,7 +23,7 @@ $(HOME)/bin:
 	cd ./build/distributions/ && unzip $(target).zip
 
 $(HOME)/bin/whenz: $(HOME)/bin ./build/distributions/$(target)
-	cp -R ./build/distributions/$(target)/ $(HOME)/bin/.
-	ln -s $(HOME)/bin/$(target)/bin/whenz-lang $(HOME)/bin/whenz
+	cp -R ./build/distributions/$(target) $(HOME)/bin/$(target)
+	ln -s $(HOME)/bin/$(target)/bin/$(target) $(HOME)/bin/whenz
 
 all: $(HOME)/bin/whenz
