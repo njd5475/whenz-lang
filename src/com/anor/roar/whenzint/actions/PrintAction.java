@@ -96,10 +96,10 @@ public class PrintAction extends Action {
       if (tokens.peek().isNewline()) {
         tokens.take(); // consume the newline token
       } else {
-        parser.unexpectedToken(tokens.peek());
+        parser.unexpectedToken(tokens);
       }
     } else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return printAction;
   }

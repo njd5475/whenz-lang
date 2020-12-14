@@ -6,7 +6,7 @@ when event app_starts do
 	trigger event done
 	
 when @setOther == 10 do
-	print Test passes
+	print Test passed
 	
 when event done do
 	exit

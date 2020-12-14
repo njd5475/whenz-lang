@@ -67,15 +67,15 @@ public class NewByteBuffer extends Action {
         if (tokens.peek().is("bytes")) {
           tokens.take();
         }else{
-          parser.unexpectedToken(tokens.take());
+          parser.unexpectedToken(tokens);
         }
         
         return byteNode;
       } else {
-        parser.unexpectedToken(tokens.take());
+        parser.unexpectedToken(tokens);
       }
     } else {
-      parser.unexpectedToken(tokens.take());
+      parser.unexpectedToken(tokens);
     }
     return null;
   }

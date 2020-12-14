@@ -59,10 +59,10 @@ public class WriteVariableToFile extends Action {
         }
         return writeNode;
       }else {
-        parser.unexpectedToken(tokens.peek());
+        parser.unexpectedToken(tokens);
       }
     }else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return null;
   }

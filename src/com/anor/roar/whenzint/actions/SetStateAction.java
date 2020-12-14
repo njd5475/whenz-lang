@@ -38,7 +38,7 @@ public class SetStateAction extends Action {
       node.add(ident);
       parser.consumeWhitespace(tokens);
     } else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return node;
   }

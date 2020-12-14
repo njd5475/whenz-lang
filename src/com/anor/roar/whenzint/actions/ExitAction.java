@@ -32,10 +32,10 @@ public class ExitAction extends Action {
       if(tokens.peek().isNewline()) {
         tokens.take();
       }else{
-        parser.unexpectedToken(tokens.peek());
+        parser.unexpectedToken(tokens);
       }
     }else{
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return exitNode;
   }

@@ -54,7 +54,7 @@ public class RunShellCommand extends Action {
 				}
 			}
 		}
-		parser.unexpectedToken(tokens.peek());
+		parser.unexpectedToken(tokens);
 		return null;
 	}
 

@@ -56,7 +56,8 @@ public class ByteBufferMappingAction extends Action {
         if (tokens.peek().is("bytes")) {
           tokens.take();
         } else {
-          parser.unexpectedToken(tokens.take());
+          tokens.take();
+          parser.unexpectedToken(tokens);
         }
 
         parser.consumeWhitespace(tokens);
@@ -65,16 +66,16 @@ public class ByteBufferMappingAction extends Action {
           parser.consumeWhitespace(tokens);
           mappingNode.add(parser.identifier(tokens));
         } else {
-          parser.unexpectedToken(tokens.peek());
+          parser.unexpectedToken(tokens);
         }
         parser.consumeWhitespace(tokens);
 
         return mappingNode;
       } else {
-        parser.unexpectedToken(tokens.peek());
+        parser.unexpectedToken(tokens);
       }
     } else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return null;
   }
