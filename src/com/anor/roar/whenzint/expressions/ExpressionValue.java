@@ -17,5 +17,7 @@ public interface ExpressionValue {
   ExpressionValue calculateIntegerRight(Operation op, int lval);
 
   ExpressionValue calculateFloatRight(Operation op, float lval);
+  
+  ExpressionValue calculateByteArrayValue(Operation op, byte[] lval);
 
 }

@@ -1,62 +1,67 @@
 package com.anor.roar.whenzint.expressions;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
-public class FloatValue implements ExpressionValue {
+public class BigDecimalValue implements ExpressionValue {
 
-  private float val;
+  private BigDecimal val;
 
-  public FloatValue(float val) {
-    this.val = val;
+  public BigDecimalValue(BigDecimal divide) {
+    this.val = divide;
   }
 
   @Override
   public ExpressionValue calculate(Operation op, ExpressionValue rval) {
-    return op.calculateFloat(val, rval);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateDouble(Operation op, double rval) {
-    return op.calculateDoubles(val, rval);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateInteger(Operation op, int rval) {
-    return op.calculateFloats(val, rval);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateFloat(Operation op, float rval) {
-    return op.calculateFloats(val, rval);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public Object get() {
-    return val;
-  }
-  
-  public String toString() {
-    return Float.toString(val);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {
-    return op.calculateDoubles(lval, val);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateIntegerRight(Operation op, int lval) {
-    return op.calculateFloats(lval, val);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateFloatRight(Operation op, float lval) {
-    return op.calculateFloats(lval, val);
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override
   public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
-    return op.calculateBigDecimal(new BigDecimal(new BigInteger(lval)), BigDecimal.valueOf((double)val));
+    // TODO Auto-generated method stub
+    return null;
   }
+
 }

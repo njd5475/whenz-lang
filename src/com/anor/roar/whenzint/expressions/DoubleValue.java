@@ -9,6 +9,15 @@ public class DoubleValue implements ExpressionValue {
   }
 
   @Override
+  public Object get() {
+    return val;
+  }
+  
+  public String toString() {
+    return Double.toString(val);
+  }
+
+  @Override
   public ExpressionValue calculate(Operation op, ExpressionValue rval) {
     return op.calculateDouble(val, rval);
   }
@@ -29,15 +38,6 @@ public class DoubleValue implements ExpressionValue {
   }
 
   @Override
-  public Object get() {
-    return val;
-  }
-  
-  public String toString() {
-    return Double.toString(val);
-  }
-
-  @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {
     return op.calculateDoubles(lval, val);
   }
@@ -52,4 +52,9 @@ public class DoubleValue implements ExpressionValue {
     return op.calculateDoubles(lval, val);
   }
 
+  @Override
+  public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
+import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class VariableValue implements ExpressionValue {
 
@@ -28,12 +29,25 @@ public class VariableValue implements ExpressionValue {
     }else if(object instanceof Float) {
       realizedValue = new FloatValue((float)object);
       return true;
+    }else if(object instanceof ByteBufferMapping) {
+      ByteBufferMapping bbm = (ByteBufferMapping) object;
+      realizedValue = new ByteArrayValue(bbm.getBytes(program, context));
+      return true;
     }
     return false;
   }
   
   public boolean hasRealizedValue() {
     return realizedValue != null;
+  }
+
+  @Override
+  public Object get() {
+    return realizedValue;
+  }
+  
+  public String toString() {
+    return this.path.getFullyQualifiedName();
   }
   
   @Override
@@ -57,15 +71,6 @@ public class VariableValue implements ExpressionValue {
   }
 
   @Override
-  public Object get() {
-    return realizedValue;
-  }
-  
-  public String toString() {
-    return this.path.getFullyQualifiedName();
-  }
-
-  @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {
     return op.calculate(new DoubleValue(lval), realizedValue);
   }
@@ -78,6 +83,11 @@ public class VariableValue implements ExpressionValue {
   @Override
   public ExpressionValue calculateFloatRight(Operation op, float lval) {
     return op.calculate(new FloatValue(lval), realizedValue);
+  }
+
+  @Override
+  public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
+    return op.calculate(new ByteArrayValue(lval), realizedValue);
   }
 
 }

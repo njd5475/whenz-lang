@@ -1,0 +1,25 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	print Starting Copy Mapped Field Test
+	@size = 1024 
+	@theBuffer is @size bytes
+	@theBuffer.firstField is 4 bytes from head
+	@file = ./scripts/TestCopyingMappedField.whenz
+	read @file into @theBuffer
+
+when @theBuffer.monitor is eof do once
+	print File read @theBuffer.firstField
+	@otherField = @theBuffer.firstField
+
+when @otherField is set do once
+	print First field is set @otherField	 
+	
+when @otherField == #!/u do once
+	print Other Field set to a value
+	trigger event test_file
+	
+when event test_file do once
+	print Done with the test
+	print Test passed
+	exit
