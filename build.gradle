@@ -21,17 +21,19 @@ sourceSets {
 	}
 }
 
+int i = 0;
+String classpathVar = configurations.compileClasspath.files.collect { " libs/" + (i++==0?String.format("%0\$-50s", it.getName()):String.format("%0\$-62s", it.getName()))   }.join(" ");
 jar {
   manifest {
     attributes(
-      'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+      'Class-Path': classpathVar,
       'Main-Class': mainClassName
     )
   }
 }
 
 dependencies {
-  testCompile group: 'junit', name: 'junit', version: '4.12'
+  testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task createDocs {
