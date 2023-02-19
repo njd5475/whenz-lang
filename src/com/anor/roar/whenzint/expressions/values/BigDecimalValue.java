@@ -1,6 +1,8 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
 
 import java.math.BigDecimal;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public class BigDecimalValue implements ExpressionValue {
 

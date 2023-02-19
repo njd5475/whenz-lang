@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import com.anor.roar.whenzint.parser.WhenzParser;
 import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.WhenzSyntaxTreeError;
 
 public class Whenz {
 
@@ -104,7 +105,9 @@ public class Whenz {
         }
       } catch (IOException e) {
         System.err.println("Could load '" + file + "' either not a file or does not exist!");
-      }
+      } catch (WhenzSyntaxTreeError e) {
+		e.printStackTrace();
+	}
 
     }
     return program;

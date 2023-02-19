@@ -166,4 +166,13 @@ public class Token {
   public boolean isOperator() {
     return type == TTYPE.OPERATION;
   }
+
+  public boolean isOneOf(String...stopWords) {
+    for(String word : stopWords) {
+      if(is(word)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

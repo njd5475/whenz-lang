@@ -1,4 +1,6 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public interface ExpressionValue {
 

@@ -1,7 +1,9 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public class ByteArrayValue implements ExpressionValue {
 

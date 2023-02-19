@@ -15,7 +15,6 @@ public class BoolCondition extends Condition {
   private Integer number = null;
   private String cmp = null;
   private Predicate<Program> theOp;
-  private Action action;
 
   public BoolCondition(String op, String ref, int num, boolean repeats) {
     this.ref = ref;
@@ -146,15 +145,5 @@ public class BoolCondition extends Condition {
   
   private boolean checkNotEqual(Program program) {
     return !checkEqualEqual(program);
-  }
-
-  @Override
-  public Action getAction() {
-    return action;
-  }
-
-  @Override
-  public void setAction(Action action) {
-    this.action = action;
   }
 }

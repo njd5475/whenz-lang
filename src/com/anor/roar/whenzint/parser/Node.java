@@ -39,7 +39,7 @@ public class Node {
     return children.toArray(new Node[children.size()]);
   }
 
-  public void traverse(NodeVisitor visitor) {
+  public void traverse(NodeVisitor visitor) throws WhenzSyntaxTreeError {
     // depth first
     for (Node child : children) {
       child.traverse(visitor);

@@ -2,22 +2,29 @@
 
 when event app_starts do
 	@count = 1
+	@nextCount = 0
 	
 when @count < 2 do
 	increment @count
 	
-when @count > 1 and @count < 5 or @count == 10 do
+when @nextCount < 3 and @count > 1 and @count <= 5 or @count == 10 do
 	print The count @count is in-between 1 and 5 or its 200
 	increment @count
+	increment @nextCount
 
 when @count is changed do
-	print THe count was changed @count
+	print The count was changed @count
 	
 when @count == 5 do
 	print We reached @count
 	@count = 10
 	
-when @count > 10 do
+when @nextCount is changed do
+	print NextCount changed @nextCount
+	print Count=@count
+	
+when @count > 4 and @nextCount >= 3 do
 	print Greater than 200
+	print Next Count @nextCount
 	print Test passed.
 	exit

@@ -11,11 +11,8 @@ when event app_starts do once
 when @theBuffer.monitor is eof do once
 	print File read @theBuffer.firstField
 	@otherField = @theBuffer.firstField
-
-when @otherField is set do once
-	print First field is set @otherField	 
 	
-when @otherField == #!/u do once
+when @otherField == #!/u and @otherField is set do once
 	print Other Field set to a value
 	trigger event test_file
 	

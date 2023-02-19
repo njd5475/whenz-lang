@@ -1,7 +1,14 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.operations;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.anor.roar.whenzint.expressions.values.BigDecimalValue;
+import com.anor.roar.whenzint.expressions.values.ByteArrayValue;
+import com.anor.roar.whenzint.expressions.values.DoubleValue;
+import com.anor.roar.whenzint.expressions.values.ExpressionValue;
+import com.anor.roar.whenzint.expressions.values.FloatValue;
+import com.anor.roar.whenzint.expressions.values.IntegerValue;
 
 public class MinusOperation extends Operation {
 
@@ -24,19 +31,19 @@ public class MinusOperation extends Operation {
 
 
   @Override
-  protected ExpressionValue calculateByteArrayValue(byte[] lval, byte[] rval) {
+  public ExpressionValue calculateByteArrayValue(byte[] lval, byte[] rval) {
     return new ByteArrayValue((new BigInteger(lval)).subtract(new BigInteger(rval)).toByteArray());
   }
 
 
   @Override
-  protected ExpressionValue calculateBigInteger(BigInteger lval, BigInteger rval) {
+  public ExpressionValue calculateBigInteger(BigInteger lval, BigInteger rval) {
     return new ByteArrayValue(lval.subtract(rval).toByteArray());
   }
 
 
   @Override
-  protected ExpressionValue calculateBigDecimal(BigDecimal lval, BigDecimal rval) {
+  public ExpressionValue calculateBigDecimal(BigDecimal lval, BigDecimal rval) {
     return new BigDecimalValue(lval.subtract(rval));
   }
 

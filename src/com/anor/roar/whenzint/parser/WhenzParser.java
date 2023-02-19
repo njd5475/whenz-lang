@@ -170,7 +170,7 @@ public class WhenzParser {
     }
   }
 
-  public void literals(Node node, TokenBuffer tokens) throws IOException, WhenzSyntaxError {
+  public void literals(Node node, TokenBuffer tokens, String ...stopWords) throws IOException, WhenzSyntaxError {
     // numbers,decimals,string literals
 
     // heres where lambdas are useful, instead of building interfaces
@@ -196,11 +196,11 @@ public class WhenzParser {
       p.consumeWhitespace(t);
       Node n = new Node("Literals");
       StringBuilder sb = new StringBuilder();
-      while (!t.peek().isNewline() && !t.peek().is("do") && !t.peek().is("once")) {
+      while (!t.peek().isNewline() && !t.peek().isOneOf("do", "once") && !t.peek().isOneOf(stopWords)) {
         sb.append(t.take().asString());
       }
       String literal = sb.toString();
-      if (t.peek().is("once") || t.peek().is("do")) {
+      if (t.peek().isOneOf(stopWords) || t.peek().isOneOf("once", "do")) {
         literal = literal.trim();
       }
       n.add(new Node("Part", literal));
@@ -427,7 +427,7 @@ public class WhenzParser {
         consumeWhitespace(tb);
         conditionalOperand(conditions, tb);
         consumeWhitespace(tb);
-        literals(conditions, tb);
+        literals(conditions, tb, "and", "or");
       } catch (WhenzSyntaxError e) {
         tb.rewind();
         conditions.removeAll();
@@ -450,6 +450,8 @@ public class WhenzParser {
         this.conditions(whenNode, tokens);
         return;
       }
+
+      // do once block
       if (tokens.peek().is("do")) {
         tokens.take();
         consumeWhitespace(tokens);
@@ -561,7 +563,7 @@ public class WhenzParser {
     }
   }
 
-  public static Program compileProgram(String filename) throws IOException, WhenzSyntaxError {
+  public static Program compileProgram(String filename) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
@@ -569,7 +571,7 @@ public class WhenzParser {
     return builder.build();
   }
 
-  public static Program compileToProgram(String filename, Program prog) throws IOException, WhenzSyntaxError {
+  public static Program compileToProgram(String filename, Program prog) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 128));
@@ -585,7 +587,7 @@ public class WhenzParser {
       root = instance.parse(new StreamTokenBuffer(tsr, 128));
       ProgramBuilder builder = new ProgramBuilder(root, new File("./scripts/hello.whenz"));
       Program program = builder.build();
-    } catch (WhenzSyntaxError e) {
+    } catch (WhenzSyntaxError | WhenzSyntaxTreeError e) {
       e.printStackTrace();
     }
   }

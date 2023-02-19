@@ -1,9 +1,10 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
 
 import java.util.Map;
 
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
+import com.anor.roar.whenzint.expressions.operations.Operation;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class VariableValue implements ExpressionValue {

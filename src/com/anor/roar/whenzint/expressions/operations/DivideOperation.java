@@ -1,38 +1,45 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.operations;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import com.anor.roar.whenzint.expressions.values.BigDecimalValue;
+import com.anor.roar.whenzint.expressions.values.ByteArrayValue;
+import com.anor.roar.whenzint.expressions.values.DoubleValue;
+import com.anor.roar.whenzint.expressions.values.ExpressionValue;
+import com.anor.roar.whenzint.expressions.values.FloatValue;
+import com.anor.roar.whenzint.expressions.values.IntegerValue;
+
 public class DivideOperation extends Operation {
 
   @Override
-  protected ExpressionValue calculateDoubles(double lval, double rval) {
+  public ExpressionValue calculateDoubles(double lval, double rval) {
     return new DoubleValue(lval / rval);
   }
 
   @Override
-  protected ExpressionValue calculateIntegers(int lval, int rval) {
+  public ExpressionValue calculateIntegers(int lval, int rval) {
     return new IntegerValue(lval / rval);
   }
 
   @Override
-  protected ExpressionValue calculateFloats(float lval, float rval) {
+  public ExpressionValue calculateFloats(float lval, float rval) {
     return new FloatValue(lval / rval);
   }
 
   @Override
-  protected ExpressionValue calculateByteArrayValue(byte[] lval, byte[] rval) {
+  public ExpressionValue calculateByteArrayValue(byte[] lval, byte[] rval) {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  protected ExpressionValue calculateBigInteger(BigInteger lval, BigInteger rval) {
+  public ExpressionValue calculateBigInteger(BigInteger lval, BigInteger rval) {
     return new ByteArrayValue(lval.divide(rval).toByteArray());
   }
 
   @Override
-  protected ExpressionValue calculateBigDecimal(BigDecimal lval, BigDecimal rval) {
+  public ExpressionValue calculateBigDecimal(BigDecimal lval, BigDecimal rval) {
     return new BigDecimalValue(lval.divide(rval));
   }
 

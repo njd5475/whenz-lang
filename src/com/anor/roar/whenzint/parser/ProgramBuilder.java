@@ -4,10 +4,12 @@ package com.anor.roar.whenzint.parser;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Condition;
@@ -15,11 +17,12 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
-import com.anor.roar.whenzint.actions.Expression;
+import com.anor.roar.whenzint.conditions.AndConditionGroup;
 import com.anor.roar.whenzint.conditions.BoolCondition;
-import com.anor.roar.whenzint.conditions.ConditionalChain;
 import com.anor.roar.whenzint.conditions.EventCondition;
+import com.anor.roar.whenzint.conditions.OrConditionGroup;
 import com.anor.roar.whenzint.conditions.StateCondition;
+import com.anor.roar.whenzint.expressions.Expression;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class ProgramBuilder implements NodeVisitor {
@@ -35,7 +38,7 @@ public class ProgramBuilder implements NodeVisitor {
 	public ProgramBuilder(Node root, File currentFile) {
 		this.root = root;
 		this.program = new Program();
-		if(currentFile == null) {
+		if (currentFile == null) {
 			throw new NullPointerException("Programs are built from files, silly");
 		}
 		this.currentFile = currentFile;
@@ -44,7 +47,7 @@ public class ProgramBuilder implements NodeVisitor {
 	public ProgramBuilder(Node root2, File currentFile, Program prog) {
 		this.root = root2;
 		this.program = prog;
-		if(currentFile == null) {
+		if (currentFile == null) {
 			throw new NullPointerException("Programs are built from files, silly");
 		}
 		this.currentFile = currentFile;
@@ -53,17 +56,17 @@ public class ProgramBuilder implements NodeVisitor {
 	public File getCurrentFile() {
 		return currentFile;
 	}
-	
+
 	public File getCurrentDirectory() {
 		return currentFile.getParentFile().getAbsoluteFile();
 	}
-	
-	public Program build() {
+
+	public Program build() throws WhenzSyntaxTreeError {
 		convertTree();
 		return program;
 	}
 
-	private void convertTree() {
+	private void convertTree() throws WhenzSyntaxTreeError {
 		root.traverse(this);
 	}
 
@@ -71,33 +74,41 @@ public class ProgramBuilder implements NodeVisitor {
 		actions.put(builder.getActionNodeName(), builder);
 	}
 
+	enum Op {
+		AND, OR
+	};
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public void visit(Node node) {
+	public void visit(Node node) throws WhenzSyntaxTreeError {
 		if ("whenz".equals(node.name())) {
-			Condition cond = null;
-			ConditionalChain.Op condOp = null;
+			@SuppressWarnings("rawtypes")
+			Stack conds = new Stack();
 			Action lastAction = null;
 			String defining = null;
 			for (Node child : node.children()) {
 				if ("and".equals(child.name())) {
-					cond = ConditionalChain.wrap(cond);
-					condOp = ConditionalChain.Op.AND;
+					Object last = conds.pop();
+					conds.push(Op.AND);
+					conds.push(last);
 				} else if ("or".equals(child.name())) {
-					cond = ConditionalChain.wrap(cond);
-					condOp = ConditionalChain.Op.OR;
+					Object last = conds.pop();
+					conds.push(Op.OR);
+					conds.push(last);
 				} else if ("conditions".equals(child.name())) {
 					if (child.children()[0].is("define")) {
 						Node defChild = child.children()[0].children()[0];
 						defining = defChild.getTokenOrValue();
 					} else if (child.children()[0].is("event")) {
-						cond = new EventCondition(child.children()[0].children()[0].getTokenOrValue());
+						conds.push(new EventCondition(child.children()[0].children()[0].getTokenOrValue()));
 					} else if ("Reference".equals(child.children()[0].name())) {
-						Condition lastCond = cond;
 						Node referenceNode = child.children()[0];
 						String ref = referenceString(referenceNode.children());
 						String op = child.children()[1].children()[0].getTokenOrValue();
 						Node rightVal = child.children()[2];
 						boolean repeats = !child.hasChildNamed("once");
+
+						Condition cond = null;
 						if (rightVal.isNamed("Number")) {
 							Node rightValChild = rightVal.children()[0];
 							if (rightValChild.getRawToken().isNumber()) {
@@ -108,18 +119,20 @@ public class ProgramBuilder implements NodeVisitor {
 							Node rightValChild = rightVal.children()[0];
 							cond = new BoolCondition(op, ref, rightValChild.getTokenOrValue(), repeats);
 						}
-						if (lastCond instanceof ConditionalChain && condOp != null) {
-							ConditionalChain chain = (ConditionalChain) lastCond;
-							cond = chain.next(cond, condOp);
-						} else if (lastCond instanceof ConditionalChain && condOp == null) {
-							System.err.println("Conditional is missing");
+
+						if (cond != null) {
+							conds.push(cond);
 						}
+
 						// program.setListener(ref, cond);
 					} else if ("StateCondition".equals(child.children()[0].name())) {
 						Node stateNode = child.children()[0];
 						VariablePath path = this.getPath(stateNode.getChildNamed("Reference"));
 						String stateName = stateNode.getChildNamed("Identifier").getTokenOrValue();
-						cond = new StateCondition(path.getFullyQualifiedName(), stateName);
+						Condition stateCond = new StateCondition(path.getFullyQualifiedName(), stateName);
+						// TODO: state conditions need initialization
+						stateCond.check(program);
+						conds.push(stateCond);
 					} else {
 						System.out.println("Unhandled condition: " + child);
 					}
@@ -176,11 +189,87 @@ public class ProgramBuilder implements NodeVisitor {
 
 					defining = null; // clear what is being defined
 				}
-			}
+			} // done with loop
 
-			if (cond != null && lastAction != null) {
-				cond.setAction(lastAction);
-				program.add(cond);
+			// reduce conditions to single group
+			if (!conds.empty() && lastAction != null) {
+				Collections.reverse(conds);
+				Condition c = null;
+				Stack<Object> tmp = new Stack<Object>();
+
+				if (conds.size() == 2) {
+					System.err.print("Invalid syntax tree only 2 conditionals unexpected");
+					throw new WhenzSyntaxTreeError("Invalid syntax tree", node);
+				}
+
+				if (conds.size() >= 3) {
+					Op operation = null;
+					Condition one = null;
+					Condition two = null;
+					while (!conds.empty() || !tmp.empty()) {
+						Object top = conds.pop();
+						
+						if (operation == null && (top.equals(Op.AND) || top.equals(Op.OR))) {
+							operation = (Op) top;
+							continue;
+						}else if(operation == null && top instanceof Condition) {
+							conds.push(top);
+							break;
+						}
+						
+						if(one == null && (top instanceof Condition)) {
+							one = (Condition) top;
+							continue;
+						}else if(top instanceof Op) {
+							// push to tmp
+							tmp.push(operation);
+							operation = null;
+							
+							tmp.push(one);
+							one = null;
+							
+							conds.push(top); // push it back on and start over
+							continue;
+						}
+				
+						if(two == null && (top instanceof Condition)) {
+							two = (Condition) top;
+							// build it
+							// push it
+							if(operation == Op.AND) {
+								conds.push(new AndConditionGroup(one, two));
+							}else if(operation == Op.OR) {
+								conds.push(new OrConditionGroup(one, two));
+							}
+							one = null;
+							two = null;
+							operation = null;
+							
+							// push all from tmp
+							while(!tmp.empty()) {
+								conds.push(tmp.pop());
+							}
+							continue;
+						}else if(top instanceof Op) {
+							tmp.push(operation);
+							operation = null;
+							tmp.push(one);
+							one = null;
+							
+							conds.push(top);
+							continue;
+						}
+					}
+				}
+
+				if (c == null && conds.size() == 1) {
+					c = (Condition) conds.pop();
+				}
+
+				if (c != null) {
+					c.setAction(lastAction);
+					program.add(c);
+				}
 			}
 		}
 
