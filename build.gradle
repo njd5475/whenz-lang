@@ -8,6 +8,12 @@ repositories {
   mavenCentral()
 }
 
+dependencies {
+  implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
+ 
+  testImplementation group: 'junit', name: 'junit', version: '4.12' 
+}
+
 sourceSets {
 	main {
 		java {
@@ -21,19 +27,17 @@ sourceSets {
 	}
 }
 
-int i = 0;
-String classpathVar = configurations.compileClasspath.files.collect { " libs/" + (i++==0?String.format("%0\$-50s", it.getName()):String.format("%0\$-62s", it.getName()))   }.join(" ");
+
 jar {
   manifest {
+ 	int i = 0;
+	String classpathVar = configurations.compileClasspath.files.collect { "libs/${it.getName()}"  }.join(" ");
+ 	println "Jar: Including Class-path: ${classpathVar}"
     attributes(
       'Class-Path': classpathVar,
       'Main-Class': mainClassName
     )
   }
-}
-
-dependencies {
-  testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task createDocs {

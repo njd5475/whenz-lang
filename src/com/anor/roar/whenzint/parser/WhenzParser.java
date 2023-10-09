@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -578,6 +579,23 @@ public class WhenzParser {
     ProgramBuilder builder = new ProgramBuilder(root, new File(filename), prog);
     return builder.build();
   }
+  
+	public static Program compileProgram(StringBuilder contents, String filename) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
+		TokenStreamReader tsr = new TokenStreamReader(new StringReader(contents.toString()));
+	
+		Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
+		ProgramBuilder builder = new ProgramBuilder(root, new File(filename));
+		return builder.build();
+	}
+	
+	public static Program compileToProgram(StringBuilder contents, String filename, Program prog) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
+		TokenStreamReader tsr = new TokenStreamReader(new StringReader(contents.toString()));
+	
+		Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
+		ProgramBuilder builder = new ProgramBuilder(root, new File(filename), prog);
+		return builder.build();
+	}
+
 
   public static void main(String[] args) throws IOException {
     TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));

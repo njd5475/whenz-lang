@@ -1,0 +1,17 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	@red is 20 bytes
+    @red.red1 is 4 bytes from head
+    @red.red2 is 4 bytes from red1
+    @red.red3 is 4 bytes from red2
+    @red.red4 is 4 bytes from red3
+    @red.red5 is 4 bytes from red4
+    
+    @red.red1 = 0x00796f75
+    @red.red2 = 0x1b5b303b
+    @red.red3 = 0x33316d68
+    @red.red4 = 0x656c6c6f
+    @red.red5 = 0x1b5b306d
+    
+	print @red

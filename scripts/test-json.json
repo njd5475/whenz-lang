@@ -6,7 +6,7 @@
       { "name": "child3", "nesting": { "message": "hello" } }
     ],
     "properties": {
-      "name": "root",
+      "name": "prop-name",
       "key": "me"
     }
   }
