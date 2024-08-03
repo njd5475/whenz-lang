@@ -60,7 +60,7 @@ public class RunShellCommand extends Action {
 
 	private Node executableCommand(Node node, WhenzParser parser, TokenBuffer tokens) throws IOException {
 		parser.consumeWhitespace(tokens);
-		if (tokens.peek().isWord()) {
+		if (!tokens.peek().isNewline()) { // can be anything after exec
 			while (!tokens.peek().isNewline()) {
 				Node arg = new Node("Arg");
 				parser.consumeWhitespace(tokens);

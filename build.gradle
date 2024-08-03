@@ -24,14 +24,14 @@ sourceSets {
 jar {
   manifest {
     attributes(
-      'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+      'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
       'Main-Class': mainClassName
     )
   }
 }
 
 dependencies {
-  testCompile group: 'junit', name: 'junit', version: '4.12'
+  testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task createDocs {

@@ -10,6 +10,7 @@ clean:
 	rm -rf ./build/distributions
 	rm -rf $(HOME)/bin/Whenz
 	rm -rf $(HOME)/bin/whenz
+	rm -rf $(HOME)/bin/whenz-lang
 
 $(HOME)/bin:
 	echo No home, lets make a nice home!
@@ -21,6 +22,9 @@ $(HOME)/bin:
 
 ./build/distributions/$(target): ./build/distributions/$(target).zip
 	cd ./build/distributions/ && unzip $(target).zip
+
+daily-version:
+	@ruby -e 'puts (Time.now.utc.to_i / 86400)'
 
 $(HOME)/bin/whenz: $(HOME)/bin ./build/distributions/$(target)
 	cp -R ./build/distributions/$(target) $(HOME)/bin/$(target)
