@@ -30,9 +30,8 @@ sourceSets {
 
 jar {
   manifest {
- 	int i = 0;
-	String classpathVar = configurations.compileClasspath.files.collect { "libs/${it.getName()}"  }.join(" ");
- 	println "Jar: Including Class-path: ${classpathVar}"
+	  String classpathVar = configurations.compileClasspath.files.collect { "libs/${it.getName()}"  }.join(" ");
+ 	  println "Jar: Including Class-path: ${classpathVar}"
     attributes(
       'Class-Path': configurations.compileClasspath.collect { it.getName() }.join(' '),
       'Main-Class': mainClassName
