@@ -2,6 +2,6 @@ package com.anor.roar.whenzint.parser;
 
 public interface NodeVisitor {
 
-  public void visit(Node node);
+  public void visit(Node node) throws WhenzSyntaxTreeError;
   
 }

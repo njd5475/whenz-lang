@@ -1,0 +1,13 @@
+{
+  "root": {
+    "children": [
+      { "name": "child1" },
+      { "name": "child2" },
+      { "name": "child3", "nesting": { "message": "hello" } }
+    ],
+    "properties": {
+      "name": "prop-name",
+      "key": "me"
+    }
+  }
+}

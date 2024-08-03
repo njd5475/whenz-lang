@@ -5,6 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.anor.roar.whenzint.expressions.operations.Operation;
+import com.anor.roar.whenzint.expressions.operations.PlusOperation;
+import com.anor.roar.whenzint.expressions.values.DoubleValue;
+import com.anor.roar.whenzint.expressions.values.ExpressionValue;
+import com.anor.roar.whenzint.expressions.values.FloatValue;
+import com.anor.roar.whenzint.expressions.values.IntegerValue;
+
 public class PlusOperationTest {
   
   private Operation op = new PlusOperation();

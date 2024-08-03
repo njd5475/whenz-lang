@@ -2,22 +2,46 @@ package com.anor.roar.whenzint;
 
 public abstract class Condition {
 
-	// default behavior
-	protected boolean repeats = true;
-	
-	public abstract boolean check(Program program);
+  protected boolean repeats = true;
+  private Action    action;
+  private Condition next = null;
 
-	public abstract Action getAction();
+  public Condition pushDown(Condition c) {
+    if (!c.hasNext()) {
+      c.setNext(this);
+    }
+    return c;
+  }
 
-	//TODO: this needs refactoring for more controlled method
-	public abstract void setAction(Action action);
+  public abstract boolean check(Program program);
+  
+  public Condition getNext() {
+    return next;
+  }
 
-	public final boolean repeats() {
-		return repeats;
-	}
-	
-	public final void once() {
-		repeats = false;
-	}
+  public boolean hasNext() {
+    return next != null;
+  }
+
+  private void setNext(Condition c) {
+    this.next = c;
+  }
+  
+  public Action getAction() {
+    return action != null ? action : this.next.getAction();
+  }
+
+  // TODO: this needs refactoring for more controlled method
+  public void setAction(Action action) {
+    this.action = action;
+  }
+
+  public final boolean repeats() {
+    return repeats;
+  }
+
+  public final void once() {
+    repeats = false;
+  }
 
 }

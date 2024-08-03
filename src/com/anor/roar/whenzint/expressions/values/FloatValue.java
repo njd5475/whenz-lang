@@ -1,4 +1,9 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public class FloatValue implements ExpressionValue {
 
@@ -50,5 +55,10 @@ public class FloatValue implements ExpressionValue {
   @Override
   public ExpressionValue calculateFloatRight(Operation op, float lval) {
     return op.calculateFloats(lval, val);
+  }
+
+  @Override
+  public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
+    return op.calculateBigDecimal(new BigDecimal(new BigInteger(lval)), BigDecimal.valueOf((double)val));
   }
 }

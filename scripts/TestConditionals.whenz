@@ -1,3 +1,4 @@
+#!/usr/bin/env whenz
 
 when event app_starts once
 	print Starting counting up

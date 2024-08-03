@@ -43,7 +43,7 @@ public class CustomAction extends Action {
       return n;
     }
     
-    parser.unexpectedToken(tokens.peek());
+    parser.unexpectedToken(tokens);
     
     return null;
   }

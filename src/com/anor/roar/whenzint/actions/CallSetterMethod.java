@@ -85,7 +85,7 @@ public class CallSetterMethod extends Action {
                   variableIdent.getRawToken());
               variableIdent.add(obj);
             } else {
-              parser.unexpectedToken(tokens.peek());
+              parser.unexpectedToken(tokens);
             }
           } else {
             Node value = new Node("value", tokens.take());
@@ -97,7 +97,7 @@ public class CallSetterMethod extends Action {
         setAction.add(variableIdent);
       }
     } else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return setAction;
   }

@@ -1,4 +1,8 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
+
+import java.math.BigInteger;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public class IntegerValue implements ExpressionValue {
 
@@ -6,26 +10,6 @@ public class IntegerValue implements ExpressionValue {
 
   public IntegerValue(int val) {
     this.val = val;
-  }
-
-  @Override
-  public ExpressionValue calculate(Operation op, ExpressionValue rval) {
-    return op.calculateInteger(val, rval);
-  }
-
-  @Override
-  public ExpressionValue calculateDouble(Operation op, double rval) {
-    return op.calculateDoubles((double)val, rval);
-  }
-
-  @Override
-  public ExpressionValue calculateInteger(Operation op, int rval) {
-    return op.calculateIntegers(val, rval);
-  }
-
-  @Override
-  public ExpressionValue calculateFloat(Operation op, float rval) {
-    return op.calculateFloats((float)val, rval);
   }
 
   @Override
@@ -49,6 +33,26 @@ public class IntegerValue implements ExpressionValue {
   }
 
   @Override
+  public ExpressionValue calculate(Operation op, ExpressionValue rval) {
+    return op.calculateInteger(val, rval);
+  }
+
+  @Override
+  public ExpressionValue calculateDouble(Operation op, double rval) {
+    return op.calculateDoubles((double)val, rval);
+  }
+
+  @Override
+  public ExpressionValue calculateInteger(Operation op, int rval) {
+    return op.calculateIntegers(val, rval);
+  }
+
+  @Override
+  public ExpressionValue calculateFloat(Operation op, float rval) {
+    return op.calculateFloats((float)val, rval);
+  }
+
+  @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {
     return op.calculateDoubles(lval, (double)val);
   }
@@ -61,6 +65,11 @@ public class IntegerValue implements ExpressionValue {
   @Override
   public ExpressionValue calculateFloatRight(Operation op, float lval) {
     return op.calculateFloats(lval, (float)val);
+  }
+
+  @Override
+  public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
+    return op.calculateBigInteger(new BigInteger(lval), BigInteger.valueOf(val));
   }
 
 }

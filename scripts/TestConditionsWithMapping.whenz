@@ -1,0 +1,32 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+	@size = 1024 
+	@theBuffer is @size bytes
+	print @env.os.arch
+	trigger event map_bytes
+	
+when event map_bytes do once
+	@theBuffer.magicNumber is 4 bytes from head
+	@theBuffer.class is 1 bytes from magicNumber
+	@theBuffer.endian is 1 bytes from class
+	trigger event set_elf_header
+	
+when event set_elf_header do once
+	@theBuffer.magicNumber = 0x7F454C46
+	
+when @theBuffer.magicNumber is changed do once
+	print Magic Number Set
+	trigger event set_class
+	
+when event set_class do once
+	@theBuffer.class = 0x01
+
+when @theBuffer.class is changed do once
+	print theBuffer.InstructionSet was changed
+	trigger event test_file
+	
+when event test_file do once
+	print Done with the test
+	print Test passed
+	exit

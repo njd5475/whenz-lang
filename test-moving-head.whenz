@@ -1,0 +1,36 @@
+#!/usr/bin/env whenz
+
+when event app_starts do once
+  print Trying to create a buffer
+  @buf is 1024 bytes
+
+when @buf is set do
+  print Buffer created
+  @buf.firstField is 4 bytes from head
+  @buf.secondField is 4 bytes from firstField
+  trigger event start_setting
+
+when event start_setting do
+  print Starting to set up the first buf
+  @buf.firstField = abcd
+  @buf.secondField = a1234
+  @num = 5 
+
+when @num > 0 do 
+  print Ready to cycle
+  @num = @num - 1
+  @buf.headOffset = @buf.headOffset + 8
+
+  print Part @num buffer position @buf.headOffset
+  @buf.firstField = abcd
+  @buf.secondField = a5432
+
+when @buf.headOffset is set do
+  print The second field has been created
+
+when @num <= 0 do
+  @buf.headOffset = 0
+  write @buf to moving-head-test.txt
+  print Done! We are going, bye!
+  
+  exit

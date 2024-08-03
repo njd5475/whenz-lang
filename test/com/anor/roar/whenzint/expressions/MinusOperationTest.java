@@ -9,6 +9,11 @@ import org.junit.Test;
 
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
+import com.anor.roar.whenzint.expressions.operations.MinusOperation;
+import com.anor.roar.whenzint.expressions.operations.Operation;
+import com.anor.roar.whenzint.expressions.values.ExpressionValue;
+import com.anor.roar.whenzint.expressions.values.IntegerValue;
+import com.anor.roar.whenzint.expressions.values.VariableValue;
 
 public class MinusOperationTest {
 

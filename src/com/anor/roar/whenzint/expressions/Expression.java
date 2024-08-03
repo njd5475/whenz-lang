@@ -1,4 +1,4 @@
-package com.anor.roar.whenzint.actions;
+package com.anor.roar.whenzint.expressions;
 
 import static com.anor.roar.whenzint.expressions.MathOps.DIV;
 import static com.anor.roar.whenzint.expressions.MathOps.GROUP_BEGIN;
@@ -16,10 +16,9 @@ import java.util.Stack;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.expressions.ExpressionValue;
-import com.anor.roar.whenzint.expressions.MathOpData;
-import com.anor.roar.whenzint.expressions.Operation;
-import com.anor.roar.whenzint.expressions.VariableValue;
+import com.anor.roar.whenzint.expressions.operations.Operation;
+import com.anor.roar.whenzint.expressions.values.ExpressionValue;
+import com.anor.roar.whenzint.expressions.values.VariableValue;
 import com.anor.roar.whenzint.parser.Node;
 import com.anor.roar.whenzint.parser.ProgramBuilder;
 import com.anor.roar.whenzint.parser.TokenBuffer;

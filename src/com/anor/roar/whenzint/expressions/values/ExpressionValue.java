@@ -1,4 +1,6 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public interface ExpressionValue {
 
@@ -17,5 +19,7 @@ public interface ExpressionValue {
   ExpressionValue calculateIntegerRight(Operation op, int lval);
 
   ExpressionValue calculateFloatRight(Operation op, float lval);
+  
+  ExpressionValue calculateByteArrayValue(Operation op, byte[] lval);
 
 }

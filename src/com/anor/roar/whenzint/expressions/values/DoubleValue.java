@@ -1,4 +1,6 @@
-package com.anor.roar.whenzint.expressions;
+package com.anor.roar.whenzint.expressions.values;
+
+import com.anor.roar.whenzint.expressions.operations.Operation;
 
 public class DoubleValue implements ExpressionValue {
 
@@ -6,6 +8,15 @@ public class DoubleValue implements ExpressionValue {
 
   public DoubleValue(double val) {
     this.val = val;
+  }
+
+  @Override
+  public Object get() {
+    return val;
+  }
+  
+  public String toString() {
+    return Double.toString(val);
   }
 
   @Override
@@ -29,15 +40,6 @@ public class DoubleValue implements ExpressionValue {
   }
 
   @Override
-  public Object get() {
-    return val;
-  }
-  
-  public String toString() {
-    return Double.toString(val);
-  }
-
-  @Override
   public ExpressionValue calculateDoubleRight(Operation op, double lval) {
     return op.calculateDoubles(lval, val);
   }
@@ -52,4 +54,9 @@ public class DoubleValue implements ExpressionValue {
     return op.calculateDoubles(lval, val);
   }
 
+  @Override
+  public ExpressionValue calculateByteArrayValue(Operation op, byte[] lval) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

@@ -34,7 +34,7 @@ public class IncrementAction extends Action {
       parser.consumeWhitespace(tokens);
       parser.globalReference(node, tokens);
     } else {
-      parser.unexpectedToken(tokens.peek());
+      parser.unexpectedToken(tokens);
     }
     return node;
   }
