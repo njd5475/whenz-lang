@@ -1,0 +1,7 @@
+
+when event app_starts do once
+	print Passed In: @PassedOn
+	@ToCheck = @PassedOn
+	
+when @ToCheck == "This was passed to a module" do
+	print Test passed.

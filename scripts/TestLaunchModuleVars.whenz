@@ -1,0 +1,6 @@
+
+when event app_starts do once
+	print Launching Test Module
+	launch TestModuleVars with
+		@PassedOn = This was passed to a module
+	end

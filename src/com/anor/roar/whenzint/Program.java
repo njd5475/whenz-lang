@@ -177,6 +177,10 @@ public class Program {
 			}
 		}
 	}
+	
+	public Map<String, Object> getObjects() {
+		return this.objects;
+	}
 
 	public boolean hasObject(String name) {
 		if (!this.objects.containsKey(name)) {
