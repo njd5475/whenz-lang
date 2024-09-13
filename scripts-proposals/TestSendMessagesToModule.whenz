@@ -1,0 +1,11 @@
+
+when event app_starts do
+    print Starting 'Send Messages To Module' Test
+    @reciever = launch TestSendMessageModule with
+        @messagesExpected = 100
+    end
+    trigger startSendingMessages
+    @messageCounter = 0
+
+when event startSendingMessages or @messageCounter <= 100 do
+    @reciever << "This is a message"

@@ -1,13 +1,7 @@
 package com.anor.roar.whenzint;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.anor.roar.whenzint.actions.StateChangeListener;
@@ -17,18 +11,21 @@ import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 public class Program {
 
 	// private Queue<Condition> condQueue = new ConcurrentLinkedQueue<>();
-	private Map<String, List<Condition>> waitingForEvents = new HashMap<>();
-	private Map<String, List<Condition>> waitingForObjects = new HashMap<>();
+	private final Map<String, List<Condition>> waitingForEvents = new HashMap<>();
+	private final Map<String, List<Condition>> waitingForObjects = new HashMap<>();
 	// private Stack<Condition> conditions = new Stack<>();
-	private Map<String, Object> objects = new HashMap<>();
-	private Stack<Action> actions = new Stack<>();
-	private Map<Action, Map<String, Object>> actionContexts = new HashMap<>();
-	private Map<Condition, Boolean> enabled = new HashMap<>();
-	private Map<String, ByteBufferMapping> mappings = new HashMap<>();
-	private Map<String, String> states = new HashMap<>();
+	private final Map<String, Object> objects = new HashMap<>();
+	private final Stack<Action> actions = new Stack<>();
+	private final Map<Action, Map<String, Object>> actionContexts = new HashMap<>();
+	private final Map<Condition, Boolean> enabled = new HashMap<>();
+	private final Map<String, ByteBufferMapping> mappings = new HashMap<>();
+	private final Map<String, String> states = new HashMap<>();
+	private final Map<String, Program> loadedModules = new HashMap<>();
 
-	private Map<String, Map<String, Set<StateChangeListener>>> stateListeners = new HashMap<>();
-	private AtomicBoolean exit = new AtomicBoolean(false);
+	private final Map<String, Map<String, Set<StateChangeListener>>> stateListeners = new HashMap<>();
+	private final AtomicBoolean exit = new AtomicBoolean(false);
+
+	private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>();
 
 	public void run() {
 		boolean noConditions = false;
@@ -140,6 +137,14 @@ public class Program {
 			this.waitingForObjects.put(ref, list);
 		}
 		list.add(cond);
+	}
+
+	public boolean registerModule(String name, Program module) {
+		if(loadedModules.containsKey(name)) {
+			return false;
+		}
+		loadedModules.put(name, module);
+		return true;
 	}
 
 	public void registerStateListener(String object, String stateName, StateChangeListener l) {

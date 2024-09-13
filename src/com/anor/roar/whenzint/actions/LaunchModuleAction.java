@@ -132,25 +132,29 @@ public class LaunchModuleAction extends Action {
 			try {
 				Program loaded = Whenz.loadFromFiles(toLoad.toArray(new File[toLoad.size()]));
 
-				loaded.trigger("app_starts");
+				if(program.registerModule(this.moduleName, loaded)) {
+					loaded.trigger("app_starts");
 
-				new Thread() {
-					public void run() {
-						try {
-							if(envs != null) {
-								Map<String, Object> loadContext = new HashMap<String, Object>();
-								for(Action e : envs) {
-									e.perform(loaded, loadContext);
+					new Thread() {
+						public void run() {
+							try {
+								if (envs != null) {
+									Map<String, Object> loadContext = new HashMap<String, Object>();
+									for (Action e : envs) {
+										e.perform(loaded, loadContext);
+									}
 								}
+								loaded.run();
+							} catch (Exception e) {
+								System.err.format("Module thread '%s' errored with:\n", moduleName);
+								e.printStackTrace();
+								program.setObject(String.format("%s.exception", moduleName), e);
+								program.trigger("module_runtime_error");
 							}
-							loaded.run();
-						} catch (Exception e) {
-							System.err.format("Module thread '%s' errored with:\n", moduleName);
-							e.printStackTrace();
 						}
-					}
 
-				}.start();
+					}.start();
+				}
 			} catch (WhenzSyntaxError e) {
 				e.printStackTrace();
 			}

@@ -1,0 +1,13 @@
+
+when event app_starts do
+    print Starting Send Message Module
+    print Messages Expected: @messagesExpected
+    @messagesReceived = 0
+
+when event app_receives do
+    print Received message
+    @message <<&
+    @messagesReceived = @messagesReceived + 1
+
+when @messagesReceived == @messagesExpected do
+    print Test passed
