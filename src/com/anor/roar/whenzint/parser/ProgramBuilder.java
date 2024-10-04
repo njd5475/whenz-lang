@@ -279,7 +279,7 @@ public class ProgramBuilder implements NodeVisitor {
 		return null;
 	}
 
-	public VariablePath getPath(Node node) {
+	public VariablePath getPath(Node node) throws WhenzSyntaxTreeError {
 		if (node == null) {
 			return null;
 		}
@@ -291,7 +291,8 @@ public class ProgramBuilder implements NodeVisitor {
 			}
 			return path;
 		}
-		return null;
+
+		throw new WhenzSyntaxTreeError("Node is missing children expected 'Reference' node got: ", node);
 	}
 
 	public String referenceString(Node[] children) {

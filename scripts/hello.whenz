@@ -1,11 +1,11 @@
 #!/usr/bin/env whenz
-when define dim
+when define dim do
 	java.awt.Dimension#Dimension:640:480
 	
-when define bkcolor
+when define bkcolor do
 	java.awt.Color#Color:255:255:255
 
-when event app_starts once
+when event app_starts do once
 	print Hello World!
 	print Cannot have one print command after another
 	launch window
@@ -14,7 +14,7 @@ when event app_starts once
 	
 	execute touch aFileTouchedByWhenz
 
-when event window_launched //secretly sets a target object for set calls
+when event window_launched do //secretly sets a target object for set calls
 	print What
 	set Title Test Whenz Game Ha
 	set Size &dim
@@ -25,22 +25,22 @@ when event window_launched //secretly sets a target object for set calls
 	print @print.var
 	print Before this should have been "Set a variable"
 	
-when event window_closing
+when event window_closing do
 	print Exiting application
 	exit
 	
-when event start_game
+when event start_game do
 	print Game Started
 	print Error Here
 
 //when action draw box &x1,&y1-&x2,&y2 on &window
 //	draw box &x1,&y1-&x2,&y2
 
-when event mouse_moved
+when event mouse_moved do
 	print Mouse Moved
 	//draw box 0,0-10,10 on @window
 	
-when event key_pressed
+when event key_pressed do
 	print @keyPressed
 	print Bye Bye
 	

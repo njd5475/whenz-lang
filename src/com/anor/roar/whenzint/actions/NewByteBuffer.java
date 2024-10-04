@@ -7,12 +7,7 @@ import java.util.Map;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.Token;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
 public class NewByteBuffer extends Action {
 
@@ -103,7 +98,7 @@ public class NewByteBuffer extends Action {
   }
 
   @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
+  public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     NewByteBuffer act;
     VariablePath path2 = builder.getPath(node.children()[0]);
     if(node.children()[1].isNamed("Number")) {

@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
+import com.anor.roar.whenzint.parser.*;
 import org.yaml.snakeyaml.Yaml;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.json.Json;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
 
 public class ToJsonAction extends Action {
 
@@ -70,7 +66,7 @@ public class ToJsonAction extends Action {
   }
 
   @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
+  public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     VariablePath to = builder.getPath(node.children()[0]);
     VariablePath from = builder.getPath(node.children()[1]);
     if(to != null && from != null) {
@@ -98,9 +94,15 @@ public class ToJsonAction extends Action {
       str = ((Number) o).toString();
     }
 
+    
     Map<String, Object> parse = Json.parse(str, (String[] parentKeys, String path, Object value) -> {
-      String fullKey = String.format("%s.%s.%s", jsonObject.getFullyQualifiedName(), String.join(".", parentKeys), path);
-      program.setObject(fullKey, value);
+      if(parentKeys.length == 0) {
+        String fullKey = String.format("%s.%s", jsonObject.getFullyQualifiedName(), path);
+        program.setObject(fullKey, value);
+      }else{
+        String fullKey = String.format("%s.%s.%s", jsonObject.getFullyQualifiedName(), String.join(".", parentKeys), path);
+        program.setObject(fullKey, value);
+      }
     });
     program.setObject(jsonObject.getFullyQualifiedName(), parse);
   }

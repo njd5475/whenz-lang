@@ -8,10 +8,12 @@ when event app_starts do
 when @buf.monitor is eof do once
 	print The file has been read
 	@json as json from @buf
-	trigger event print
-	
-when event print do
-	print @json.root.properties.name
-	print Test passed
-	exit
+
+    @prop = @json.root.properties.name
+	print @prop
+
+when @prop == prop-name do
+    print Test passed
+    exit
+
 	

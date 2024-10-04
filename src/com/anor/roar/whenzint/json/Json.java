@@ -135,7 +135,7 @@ public final class Json {
         return Type.DIGIT;
       } else if (ch == '.') {
         return Type.PERIOD;
-      } else if (ch == '\n') {
+      } else if (ch == '\n' || ch == '\r') {
         return Type.NEWLINE;
       }
       return Type.UNKNOWN;
@@ -208,6 +208,12 @@ public final class Json {
     System.out.println(strObj);
     System.out.println(toJson(not));
     System.out.println("Test ran successfully");
+
+    String strObj2 = "{ \"DATA\": \".sqlfiles\" }";
+    jObj = parse(strObj2, (String[] parentKeys, String path, Object value) -> {
+      System.out.format("Got key %s, path=%s value=%s \n", parentKeys, path, value);
+    });
+    System.out.println(toJson(jObj));
   }
 
   private static Map<String, Object> objectContents(List<Token> tokens, String[] keys, Map<String, Object> obj, JsonKeyListener keyListener) {
@@ -243,7 +249,9 @@ public final class Json {
     if (obj.containsKey(key)) {
       throw new TokenError("Duplicate key found");
     }
-    keyListener.keyParse(keys, key, value);
+    if(keyListener != null) {
+      keyListener.keyParse(keys, key, value);
+    }
     obj.put(key, value);
   }
 
