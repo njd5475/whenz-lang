@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'active_support/core_ext'
+require 'active_support/all'
 
 readVal = ARGV.shift if ARGV[0]
 

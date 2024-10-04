@@ -18,7 +18,7 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxTreeError;
 public class Whenz {
 
   // Last number of version are days since epoch in UTC 
-	private static String VERSION = "v0.0.2.19938";
+	private static String VERSION = "v0.0.2.20000";
 	public static Program program = null;
 	private static boolean pauseOnStart = false;
 
