@@ -1,3 +1,4 @@
+
 when event app_starts do once
 	print Starting object state tests
 	@initializedObject = 0

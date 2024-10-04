@@ -3,6 +3,7 @@ package com.anor.roar.whenzint.actions;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -14,11 +15,7 @@ import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
 public class ReadFromFileChannel extends Action {
 
@@ -76,7 +73,7 @@ public class ReadFromFileChannel extends Action {
   }
 
   @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
+  public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     Node from = node.getChildNamed("from");
     Node into = node.getChildNamed("into");
     VariablePath pathFrom = builder.getPath(from.getChildNamed("Reference"));
@@ -151,7 +148,8 @@ public class ReadFromFileChannel extends Action {
           program.changeState(varName + ".monitor", "bufferFull");
         }
       }
-
+    } catch(NoSuchFileException nsfe) {
+      program.changeState(from.getFullyQualifiedName(), "notExist");
     } catch (IOException e) {
       e.printStackTrace();
     }

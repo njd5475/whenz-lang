@@ -8,11 +8,7 @@ import java.util.Map;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
 public class RunShellCommand extends Action {
 
@@ -92,7 +88,7 @@ public class RunShellCommand extends Action {
 	}
 
 	@Override
-	public Action buildAction(ProgramBuilder builder, Node node) {
+	public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
 		StringBuilder sb = new StringBuilder("");
 		for (Node ch : node.children()) {
 			if ("Arg".equals(ch.name())) {

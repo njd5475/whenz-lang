@@ -576,6 +576,12 @@ public class WhenzParser {
     TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 128));
+
+    boolean optionPrintTree = false;
+    if(optionPrintTree) {
+      System.out.println(root);
+    }
+
     ProgramBuilder builder = new ProgramBuilder(root, new File(filename), prog);
     return builder.build();
   }

@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.expressions.Expression;
 import com.anor.roar.whenzint.expressions.MathOpData;
 import com.anor.roar.whenzint.expressions.MathOps;
@@ -17,11 +18,7 @@ import com.anor.roar.whenzint.expressions.operations.PlusOperation;
 import com.anor.roar.whenzint.expressions.values.DoubleValue;
 import com.anor.roar.whenzint.expressions.values.IntegerValue;
 import com.anor.roar.whenzint.expressions.values.VariableValue;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
 public class SetToLiteral extends Action {
 
@@ -51,11 +48,16 @@ public class SetToLiteral extends Action {
 
   @Override
   public void perform(Program program, Map<String, Object> context) {
+    if(literal instanceof VariablePath) {
+      VariablePath pathObj = (VariablePath) literal;
+      program.setObject(name, program.getObject(pathObj.getFullyQualifiedName()));
+      return;
+    }
     program.setObject(name, literal);
   }
 
   @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
+  public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     Node lval = node.children()[0];
     Node rval = node.children()[2];
     String quickRef = builder.referenceString(lval.children());
@@ -70,6 +72,8 @@ public class SetToLiteral extends Action {
       } else if (rval.hasChildNamed("HexLiteral") && !containsExp) {
         Node literal = rval.getChildNamed("HexLiteral");
         return new SetToLiteral(quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue(), 16));
+      } else if (rval.hasChildNamed("Reference") && !containsExp) {
+        return new SetToLiteral(quickRef, builder.getPath(rval.getChildNamed("Reference")));
       } else {
         Stack<MathOpData> ops = new Stack<>();
         buildExpression(builder, ops, rval);
@@ -103,7 +107,7 @@ public class SetToLiteral extends Action {
     return fn;
   }
 
-  public void buildExpression(ProgramBuilder builder, Stack<MathOpData> expressions, Node expression) {
+  public void buildExpression(ProgramBuilder builder, Stack<MathOpData> expressions, Node expression) throws WhenzSyntaxTreeError {
     boolean grp = false;
     boolean skipChildren = false;
     if (expression.name().contains("Operator")) {

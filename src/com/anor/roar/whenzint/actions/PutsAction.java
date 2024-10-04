@@ -10,11 +10,7 @@ import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
 public class PutsAction extends Action {
 
@@ -104,7 +100,7 @@ public class PutsAction extends Action {
   }
 
   @Override
-  public Action buildAction(ProgramBuilder builder, Node node) {
+  public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     List<Object> opts = new LinkedList<Object>();
     for (Node part : node.children()) {
       if(part.isNamed("Reference")) {
