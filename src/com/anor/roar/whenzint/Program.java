@@ -64,7 +64,11 @@ public class Program {
 				} else {
 					context.clear();
 				}
-				a.perform(this, context);
+				try {
+					a.perform(this, context);
+				}catch(Exception e) {
+					System.err.format("Exception Occurred Executing action '%s' in %s:line=%d, col=%d\n", a.getActionNodeName(), a.getFile(), a.getLine(), a.getColumn());
+				}
 			}
 
 			try {

@@ -13,7 +13,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.*;
 
-public class WriteVariableToFile extends Action {
+public class WriteVariableToFile extends AbstractAction {
   
   static {
     ProgramBuilder.registerActionBuilder(new WriteVariableToFile());
@@ -23,10 +23,12 @@ public class WriteVariableToFile extends Action {
   private VariablePath path;
 
   public WriteVariableToFile() {
+    super(CodeLocation.fake);
     // TODO Auto-generated constructor stub
   }
 
-  public WriteVariableToFile(VariablePath path, String literal) {
+  public WriteVariableToFile(CodeLocation location, VariablePath path, String literal) {
+    super(location);
     if(path == null) {
       throw new NullPointerException("Nothing to be written to file!");
     }
@@ -70,7 +72,7 @@ public class WriteVariableToFile extends Action {
     Node parts[] = literalParts.children();
     String literal = builder.referenceString(parts);
     
-    return new WriteVariableToFile(path, literal);
+    return new WriteVariableToFile(CodeLocation.toLocation(node), path, literal);
   }
 
   @Override

@@ -39,21 +39,21 @@ public class WhenzParser {
   private Map<String, Set<TokenAction>> moduleActions  = new HashMap<>();
 
   private WhenzParser() {
-    definedActions.add(new SetToLiteral(null, null));
-    definedActions.add(new PrintAction(""));
-    definedActions.add(new PutsAction((String) null));
+    definedActions.add(new SetToLiteral());
+    definedActions.add(new PrintAction(CodeLocation.fake, ""));
+    definedActions.add(new PutsAction(CodeLocation.fake, (String) null));
     definedActions.add(new LaunchWindowAction());
     definedActions.add(new LaunchModuleAction());
-    definedActions.add(new TriggerEventAction(""));
-    definedActions.add(new ExitAction());
-    definedActions.add(new CallSetterMethod("", "", ""));
-    definedActions.add(new RunShellCommand(""));
-    definedActions.add(new IncrementAction(null));
-    definedActions.add(new SetStateAction(null, ""));
+    definedActions.add(new TriggerEventAction(CodeLocation.fake, ""));
+    definedActions.add(new ExitAction(CodeLocation.fake));
+    definedActions.add(new CallSetterMethod());
+    definedActions.add(new RunShellCommand(CodeLocation.fake, ""));
+    definedActions.add(new IncrementAction(CodeLocation.fake, null));
+    definedActions.add(new SetStateAction(CodeLocation.fake,null, ""));
     definedActions.add(new ByteBufferMappingAction());
     definedActions.add(new NewByteBuffer());
     definedActions.add(new WriteVariableToFile());
-    definedActions.add(new ReadFromFileChannel(null, null));
+    definedActions.add(new ReadFromFileChannel(CodeLocation.fake, null, null));
     definedActions.add(new ToJsonAction());
   }
 
@@ -128,10 +128,7 @@ public class WhenzParser {
       actions(whenNode, tokens);
     } else if (tokens.peek().is("//")) {
       // consume it all
-      while (!tokens.peek().isNewline()) {
-        tokens.take();
-      }
-      consumeWhitespace(tokens, true);
+      consumeComment(tokens, whenNode);
       return; // just skip it
     } else {
       unexpectedToken(tokens);
@@ -161,13 +158,22 @@ public class WhenzParser {
         whenNode.add(action);
         consumeWhitespace(tokens, true);
       } else if (tokens.peek().is("//")) {
-        // consume it all
-        while (!tokens.peek().isNewline()) {
-          tokens.take();
-        }
-        tokens.take(); // remove newline
-        consumeWhitespace(tokens);
+        consumeComment(tokens, action);
+        whenNode.add(action);
       }
+    }
+  }
+
+  public void consumeComment(TokenBuffer tokens, Node action) throws IOException, WhenzSyntaxError {
+    if(tokens.peek().is("//")) {
+      StringBuilder commentString = new StringBuilder();
+      while(!tokens.peek().isNewline()) {
+        tokens.take().appendTo(commentString);
+      }
+      action.addChild("Comment", commentString);
+      consumeWhitespace(tokens, true);
+    }else{
+      throw new WhenzSyntaxError("Expected Comment // here", tokens);
     }
   }
 
@@ -409,13 +415,11 @@ public class WhenzParser {
           tokens.take();
         }
         conditions.add(condChild);
+
         if (tokens.peek().isNewline()) {
           consumeWhitespace(tokens, true);
         } else if (tokens.peek().is("//")) {
-          while (!tokens.peek().isNewline()) {
-            tokens.take();
-          }
-          tokens.take();
+          consumeComment(tokens, condChild);
         }
       } else {
         unexpectedToken(tokens);
@@ -565,7 +569,7 @@ public class WhenzParser {
   }
 
   public static Program compileProgram(String filename) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
+    TokenStreamReader tsr = new TokenStreamReader(new File(filename),new BufferedReader(new FileReader(filename), 4096));
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
     ProgramBuilder builder = new ProgramBuilder(root, new File(filename));
@@ -573,7 +577,7 @@ public class WhenzParser {
   }
 
   public static Program compileToProgram(String filename, Program prog) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
-    TokenStreamReader tsr = new TokenStreamReader(new BufferedReader(new FileReader(filename), 4096));
+    TokenStreamReader tsr = new TokenStreamReader(new File(filename), new BufferedReader(new FileReader(filename), 4096));
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 128));
 
@@ -587,7 +591,7 @@ public class WhenzParser {
   }
   
 	public static Program compileProgram(StringBuilder contents, String filename) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
-		TokenStreamReader tsr = new TokenStreamReader(new StringReader(contents.toString()));
+		TokenStreamReader tsr = new TokenStreamReader(new File(filename), new StringReader(contents.toString()));
 	
 		Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
 		ProgramBuilder builder = new ProgramBuilder(root, new File(filename));
@@ -595,7 +599,7 @@ public class WhenzParser {
 	}
 	
 	public static Program compileToProgram(StringBuilder contents, String filename, Program prog) throws IOException, WhenzSyntaxError, WhenzSyntaxTreeError {
-		TokenStreamReader tsr = new TokenStreamReader(new StringReader(contents.toString()));
+		TokenStreamReader tsr = new TokenStreamReader(new File(filename), new StringReader(contents.toString()));
 	
 		Node root = instance.parse(new StreamTokenBuffer(tsr, 4096));
 		ProgramBuilder builder = new ProgramBuilder(root, new File(filename), prog);
@@ -604,7 +608,7 @@ public class WhenzParser {
 
 
   public static void main(String[] args) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(new FileReader("./scripts/hello.whenz"));
+    TokenStreamReader tsr = new TokenStreamReader(new File("./scripts/hello.whenz"),new FileReader("./scripts/hello.whenz"));
 
     Node root = null;
     try {
@@ -652,7 +656,7 @@ public class WhenzParser {
         for (Token t : tokList) {
           sb.append(t.asString());
         }
-        Node ident = new Node("Identifier", sb.toString());
+        Node ident = new Node("Identifier", sb.toString(), tokList.get(0));
         return ident;
       }
     } catch (IOException e) {

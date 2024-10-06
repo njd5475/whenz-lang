@@ -5,16 +5,16 @@ import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
-public class ExitAction extends Action {
+public class ExitAction extends AbstractAction {
 
   static {
-    ProgramBuilder.registerActionBuilder(new ExitAction());
+    ProgramBuilder.registerActionBuilder(new ExitAction(CodeLocation.fake));
+  }
+
+  public ExitAction(CodeLocation location) {
+    super(location);
   }
   
 	@Override
@@ -42,7 +42,7 @@ public class ExitAction extends Action {
 
   @Override
   public Action buildAction(ProgramBuilder builder, Node node) {
-    return new ExitAction();
+    return new ExitAction(CodeLocation.fake);
   }
 
   @Override

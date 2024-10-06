@@ -4,3 +4,4 @@ when event app_starts once //comments are ignored
   print \/\/Comments are ignored //comments are ignored
   // more comments
   print Test passed
+  // can put comments at the end too

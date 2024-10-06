@@ -20,16 +20,21 @@ import com.anor.roar.whenzint.expressions.values.IntegerValue;
 import com.anor.roar.whenzint.expressions.values.VariableValue;
 import com.anor.roar.whenzint.parser.*;
 
-public class SetToLiteral extends Action {
+public class SetToLiteral extends AbstractAction {
 
   private String name;
   private Object literal;
 
   static {
-    ProgramBuilder.registerActionBuilder(new SetToLiteral(null, null));
+    ProgramBuilder.registerActionBuilder(new SetToLiteral());
   }
 
-  public SetToLiteral(String name, Object literal) {
+  public SetToLiteral() {
+    super(CodeLocation.fake);
+  }
+
+  public SetToLiteral(CodeLocation location, String name, Object literal) {
+    super(location);
     this.name = name;
     this.literal = literal;
   }
@@ -65,19 +70,19 @@ public class SetToLiteral extends Action {
       boolean containsExp = rval.hasChildNamed("Expression");
       if (rval.hasChildNamed("Literals") && !containsExp) {
         Node literal = rval.getChildNamed("Literals");
-        return new SetToLiteral(quickRef, literal.children()[0].getTokenOrValue());
+        return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, literal.children()[0].getTokenOrValue());
       } else if (rval.hasChildNamed("Number") && !containsExp) {
         Node literal = rval.getChildNamed("Number");
-        return new SetToLiteral(quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue()));
+        return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue()));
       } else if (rval.hasChildNamed("HexLiteral") && !containsExp) {
         Node literal = rval.getChildNamed("HexLiteral");
-        return new SetToLiteral(quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue(), 16));
+        return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue(), 16));
       } else if (rval.hasChildNamed("Reference") && !containsExp) {
-        return new SetToLiteral(quickRef, builder.getPath(rval.getChildNamed("Reference")));
+        return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, builder.getPath(rval.getChildNamed("Reference")));
       } else {
         Stack<MathOpData> ops = new Stack<>();
         buildExpression(builder, ops, rval);
-        return new Expression(quickRef, ops);
+        return new Expression(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, ops);
       }
     }
 

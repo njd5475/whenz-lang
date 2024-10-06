@@ -5,18 +5,15 @@ import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
-public class ChainAction extends Action {
+public class ChainAction extends AbstractAction {
 
 	private Action action;
 	private Action next;
 
 	public ChainAction(Action action, Action next) {
+        super(CodeLocation.toLocation(action.getFile(), action.getLine(), action.getColumn()));
 		this.action = action;
 		this.next = next;
 	}

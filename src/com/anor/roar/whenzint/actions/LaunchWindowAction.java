@@ -17,16 +17,16 @@ import javax.swing.JFrame;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
-public class LaunchWindowAction extends Action {
+public class LaunchWindowAction extends AbstractAction {
 
   static {
     ProgramBuilder.registerActionBuilder(new LaunchWindowAction());
+  }
+
+  public LaunchWindowAction() {
+    super(CodeLocation.fake);
   }
   
   @Override

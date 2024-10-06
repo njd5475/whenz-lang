@@ -16,21 +16,19 @@ import java.util.Stack;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.actions.AbstractAction;
 import com.anor.roar.whenzint.expressions.operations.Operation;
 import com.anor.roar.whenzint.expressions.values.ExpressionValue;
 import com.anor.roar.whenzint.expressions.values.VariableValue;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
-public class Expression extends Action {
+public class Expression extends AbstractAction {
 
   private String            ref = null;
   private Stack<MathOpData> ops;
 
-  public Expression(String quickRef, Stack<MathOpData> ops) {
+  public Expression(CodeLocation location, String quickRef, Stack<MathOpData> ops) {
+    super(location);
     this.ref = quickRef;
     this.ops = ops;
     Collections.reverse(this.ops);

@@ -10,7 +10,7 @@ import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 import com.anor.roar.whenzint.parser.*;
 
-public class ByteBufferMappingAction extends Action {
+public class ByteBufferMappingAction extends AbstractAction {
 
   static {
     ProgramBuilder.registerActionBuilder(new ByteBufferMappingAction());
@@ -20,10 +20,11 @@ public class ByteBufferMappingAction extends Action {
   private VariablePath      link;
 
   public ByteBufferMappingAction() {
-
+    super(CodeLocation.fake);
   }
 
-  public ByteBufferMappingAction(VariablePath link, ByteBufferMapping map) {
+  public ByteBufferMappingAction(CodeLocation location, VariablePath link, ByteBufferMapping map) {
+    super(location);
     this.map = map;
     this.link = link;
   }
@@ -106,7 +107,7 @@ public class ByteBufferMappingAction extends Action {
       bmm = new ByteBufferMapping(numberOfBytes, parent, parent.derive("headOffset"), location);
     }
     builder.registerMapping(bmm, path);
-    ByteBufferMappingAction bbmA = new ByteBufferMappingAction(path, bmm);
+    ByteBufferMappingAction bbmA = new ByteBufferMappingAction(CodeLocation.toLocation(node), path, bmm);
     return bbmA;
   }
 

@@ -2,6 +2,7 @@ package com.anor.roar.whenzint.mapping;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.anor.roar.whenzint.Program;
@@ -115,5 +116,11 @@ public class ByteBufferMapping {
 
   public VariablePath getOffsetPath() {
     return offsetValue;
+  }
+
+  public boolean equals(Object o, Program program) {
+    //TODO: do not create a hashmap here (wasteful)
+    String str = new String(getBytes(program, new HashMap<>()));
+    return str.equals(o);
   }
 }

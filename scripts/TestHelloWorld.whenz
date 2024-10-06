@@ -1,0 +1,4 @@
+
+when event app_starts do
+    print Hello World!
+    print Test passed

@@ -1,6 +1,12 @@
 package com.anor.roar.whenzint.parser;
 
+import java.io.File;
+
 public class Token {
+
+	public File getFile() {
+		return file;
+	}
 
 	public enum TTYPE {
 		NUMBER,
@@ -19,12 +25,17 @@ public class Token {
 	private StringBuilder	token	= new StringBuilder("");
 	private int						line	= 1;
 	private int						col		= 0;
+	private File file;
 
-	public Token(char c, int line, int col) {
+	public Token(char c, File file, int line, int col) {
+		if(file == null) {
+			throw new NullPointerException("Tokens come from files sometimes");
+		}
 		token.append(c);
 		type = type(c);
 		this.line = line;
 		this.col = col;
+		this.file = file;
 	}
 
 	private Token(TTYPE type, int line, int col) {
@@ -47,7 +58,7 @@ public class Token {
 		}
 
 		if (nextType != type || type == TTYPE.SYMBOL || type == TTYPE.NEWLINE) {
-			return new Token(c, nLine, nCol);
+			return new Token(c, file, nLine, nCol);
 		} else {
 			this.token.append(c);
 		}
@@ -152,6 +163,10 @@ public class Token {
 
   public TTYPE getType() {
     return type;
+  }
+
+  public void appendTo(StringBuilder builder) {
+	builder.append(token);
   }
 
   public boolean oneOf(String...ops) {

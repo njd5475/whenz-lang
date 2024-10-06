@@ -9,7 +9,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.*;
 
-public class NewByteBuffer extends Action {
+public class NewByteBuffer extends AbstractAction {
 
   static {
     //WhenzParser.getInstance().registerAction(new NewByteBuffer());
@@ -21,15 +21,17 @@ public class NewByteBuffer extends Action {
   private int          staticSize;
 
   public NewByteBuffer() {
-
+    super(CodeLocation.fake);
   }
 
-  public NewByteBuffer(VariablePath path, VariablePath size) {
+  public NewByteBuffer(CodeLocation location, VariablePath path, VariablePath size) {
+    super(location);
     this.path = path;
     this.sizePath = size;
   }
 
-  public NewByteBuffer(VariablePath path, int size) {
+  public NewByteBuffer(CodeLocation location, VariablePath path, int size) {
+    super(location);
     this.path = path;
     this.staticSize = size;
     if(size <= 0) { 
@@ -102,9 +104,9 @@ public class NewByteBuffer extends Action {
     NewByteBuffer act;
     VariablePath path2 = builder.getPath(node.children()[0]);
     if(node.children()[1].isNamed("Number")) {
-      act = new NewByteBuffer(path2, node.children()[1].getRawToken().asNumber());
+      act = new NewByteBuffer(CodeLocation.toLocation(node.getFirstTokenNode()), path2, node.children()[1].getRawToken().asNumber());
     }else{
-      act = new NewByteBuffer(path2, builder.getPath(node.children()[1]));
+      act = new NewByteBuffer(CodeLocation.toLocation(node.getFirstTokenNode()), path2, builder.getPath(node.children()[1]));
     }
     
     return act;
