@@ -1,14 +1,25 @@
-@receiver as @This
 
+//
+// This module would receiver triggered events
+// the downside is that in this module you would not
+// be able to control which events could be triggered
+// by external modules and which would be by internal
+// code.
+//
+// A solution to this would be to add a key word like
+// external to the event so it would be 'external event'
+// and then restrict the events in a module to be internal
+// only except those designated with the external keyword
+//
 when event app_starts do
     print Starting Send Message Module
     print Messages Expected: @messagesExpected
     @messagesReceived = 0
 
-when event @receiver.in is bufferRead do
-    print Received message
-    @message = @receiver.in
-    @messagesReceived = @messagesReceived + 1
+when event messageFromMainModule do
+    print Received message:
+    print @messageFromMainModule
+    increment @messagesReceived
 
 when @messagesReceived == @messagesExpected do
     print Test passed

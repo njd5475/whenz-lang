@@ -1,0 +1,37 @@
+
+// Proposed syntax:
+// Definition alias !name = <expression>
+// when !name[@exprerssionVar=@scopeVar, ...variables list] do
+//      ...
+// since you may want to substitute mutliple instances of the expression
+// but use different variables in context or modules
+// you will need a way to make the expression generic
+//
+// The variables list could be optional and then the compiler
+// would assume any variables are defined in scope
+
+// simple test no var list
+alias !isMonkey = @monkey == George
+
+when event app_starts do once
+    @monkey = George
+
+when !isMonkey do
+    print @m is a Monkey
+    print Test passed.
+
+// test with var list
+alias !isNotAMonkey = @notMonkey != George
+
+when event app_starts do once
+    @monkey = Mike
+
+when !isNotAMonkey[@notMonkey=@monkey] do
+    print @monkey is not a monkey
+    print Test passed.
+
+//
+// The purpose of logical condition aliases is to prevent long exhaustive
+// lists of conditions that would occur for the programmer since the language
+// unwraps nested logic in imperative, and functional languages.
+//
