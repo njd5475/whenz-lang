@@ -12,7 +12,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.parser.*;
 
-public class LaunchModuleAction extends Action {
+public class LaunchModuleAction extends AbstractAction {
 
 	static {
 		ProgramBuilder.registerActionBuilder(new LaunchModuleAction());
@@ -20,19 +20,21 @@ public class LaunchModuleAction extends Action {
 
 	private String			moduleName;
 	private File			dir;
-	private SetToLiteral	setToLiteral	= new SetToLiteral(null, null);
+	private SetToLiteral	setToLiteral	= new SetToLiteral();
 	private Action[]	envs;
 
 	public LaunchModuleAction() {
-
+		super(CodeLocation.fake);
 	}
 
-	public LaunchModuleAction(String modName, File dir) {
+	public LaunchModuleAction(CodeLocation location, String modName, File dir) {
+		super(location);
 		this.moduleName	= modName;
 		this.dir		= dir;
 	}
 
-	public LaunchModuleAction(String modName, File dir, Action[] env) {
+	public LaunchModuleAction(CodeLocation location, String modName, File dir, Action[] env) {
+		super(location);
 		this.envs		= env;
 		this.moduleName	= modName;
 		this.dir		= dir;
@@ -96,9 +98,9 @@ public class LaunchModuleAction extends Action {
 				}
 			}
 			
-			return new LaunchModuleAction(modNameNode.getToken(), builder.getCurrentDirectory(), actions.toArray(new Action[actions.size()]));
+			return new LaunchModuleAction(CodeLocation.toLocation(node), modNameNode.getToken(), builder.getCurrentDirectory(), actions.toArray(new Action[actions.size()]));
 		}
-		return new LaunchModuleAction(modNameNode.getToken(), builder.getCurrentDirectory());
+		return new LaunchModuleAction(CodeLocation.toLocation(node), modNameNode.getToken(), builder.getCurrentDirectory());
 	}
 
 	@Override

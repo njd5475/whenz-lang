@@ -6,13 +6,9 @@ import java.util.Map;
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Event;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 
-public class TriggerEventAction extends Action {
+public class TriggerEventAction extends AbstractAction {
 
   private String eventName;
   
@@ -21,10 +17,11 @@ public class TriggerEventAction extends Action {
   }
   
   public TriggerEventAction() {
-    
+    super(CodeLocation.fake);
   }
 
-  public TriggerEventAction(String eventName) {
+  public TriggerEventAction(CodeLocation location, String eventName) {
+    super(location);
     if(eventName == null) {
       throw new NullPointerException("Cannot trigger a null event");
     }
@@ -72,7 +69,7 @@ public class TriggerEventAction extends Action {
 
   @Override
   public Action buildAction(ProgramBuilder builder, Node node) {
-    return new TriggerEventAction(node.getChildNamed("Event").getChildNamed("Identifier").getTokenOrValue());
+    return new TriggerEventAction(CodeLocation.toLocation(node), node.getChildNamed("Event").getChildNamed("Identifier").getTokenOrValue());
   }
 
   @Override

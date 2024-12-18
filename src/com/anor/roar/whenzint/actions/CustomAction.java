@@ -5,19 +5,16 @@ import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 import com.anor.roar.whenzint.parser.Token.TTYPE;
 
-public class CustomAction extends Action {
+public class CustomAction extends AbstractAction {
 
   private TTYPE[] types;
   private String  nodeName;
 
-  public CustomAction(String nodeName, TTYPE... types) {
+  public CustomAction(CodeLocation location, String nodeName, TTYPE... types) {
+    super(location);
     this.types = types;
     this.nodeName = nodeName;
   }

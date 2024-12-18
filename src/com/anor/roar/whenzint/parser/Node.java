@@ -8,7 +8,7 @@ public class Node {
   private List<Node> children = new LinkedList<Node>();
   private String     name;
   private Token      token;
-  private String     val;
+  private StringBuilder     val;
 
   public Node() {
     this("Unamed");
@@ -25,7 +25,18 @@ public class Node {
 
   public Node(String name, String val) {
     this.name = name;
+    this.val = new StringBuilder(val);
+  }
+
+  public Node(String name, StringBuilder val) {
+    this.name = name;
     this.val = val;
+  }
+
+  public Node(String name, String val, Token token) {
+    this.name = name;
+    this.val = new StringBuilder(val);
+    this.token = token;
   }
 
   public void add(Node child) {
@@ -77,10 +88,10 @@ public class Node {
   }
 
   public boolean is(String term) {
-    if(hasToken()) {
+    if(val != null) {
+      return val.toString().equals(term);
+    }else if(hasToken()) {
       return token.is(term);
-    }else if(val != null) {
-      return val.equals(term);
     }
     return false;
   }
@@ -101,7 +112,7 @@ public class Node {
   }
 
   public String getValue() {
-    return val;
+    return val.toString();
   }
 
   public String name() {
@@ -113,10 +124,10 @@ public class Node {
   }
 
   public String getTokenOrValue() {
-    if(hasToken()) {
+    if(hasValue()) {
+      return val.toString();
+    } else if(hasToken()) {
       return token.asString();
-    }else if(hasValue()) {
-      return val;
     }
     return null;
   }
@@ -153,5 +164,34 @@ public class Node {
     Node child = new Node(name, token);
     this.children.add(child);
     return child;
+  }
+
+  public Node addChild(String name, StringBuilder string) {
+    Node child = new Node(name, string);
+    this.children.add(child);
+    return child;
+
+  }
+
+  public Token getFirstTokenNode() {
+    if(token != null) {
+      return token;
+    }
+
+    for(Node node : children) {
+      if(node.getRawToken() != null) {
+        return node.getRawToken();
+      }
+    }
+
+    // now go down into the children one at a time
+    for(Node node : children) {
+      Token deep = node.getFirstTokenNode();
+      if(deep != null) {
+        return deep;
+      }
+    }
+
+    return null; // no available tokens
   }
 }

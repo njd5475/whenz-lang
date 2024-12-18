@@ -18,12 +18,17 @@ import com.anor.roar.whenzint.parser.WhenzSyntaxTreeError;
 public class Whenz {
 
   // Last number of version are days since epoch in UTC 
-	private static String VERSION = "v0.0.2.19938";
+	private static String VERSION = "v0.0.2.20002";
 	public static Program program = null;
 	private static boolean pauseOnStart = false;
+    private static boolean printStackTrace = false;
 
   private static Map<String, ArgumentHandler> commands     = new HashMap<>();
   static {
+    commands.put("printStackTrace", (ArgumentHandler) (arg) -> {
+      printStackTrace = true;
+      return false;
+    });
     commands.put("version", (ArgumentHandler) (arg) -> {
       System.out.println("Whenz Parser version " + VERSION);
       return true;
@@ -85,6 +90,9 @@ public class Whenz {
         program.run();
       } catch (WhenzSyntaxError e) {
         System.err.format("%s\n", e.getDefaultFormattedMessage());
+        if(printStackTrace) {
+          e.printStackTrace();
+        }
       }
 
     }

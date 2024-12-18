@@ -12,23 +12,25 @@ import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 import com.anor.roar.whenzint.parser.*;
 
-public class PrintAction extends Action {
+public class PrintAction extends AbstractAction {
 
   private String toPrint;
   private String format;
   private VariablePath[] array;
   
   static {
-    ProgramBuilder.registerActionBuilder(new PrintAction((String)null));
+    ProgramBuilder.registerActionBuilder(new PrintAction(CodeLocation.fake,(String)null));
   }
 
-  public PrintAction(String toPrint) {
+  public PrintAction(CodeLocation location, String toPrint) {
+    super(location);
     this.toPrint = toPrint;
     this.format = null;
     this.array = null;
   }
 
-  public PrintAction(List<Object> opts) {
+  public PrintAction(CodeLocation location, List<Object> opts) {
+    super(location);
     StringBuilder bld = new StringBuilder("");
     List<Object> values = new LinkedList<Object>();
     for(Object opt : opts) {
@@ -84,13 +86,19 @@ public class PrintAction extends Action {
         }else if(!skipNext && tokens.peek().isSymbol("@")) {
           parser.globalReference(printAction, tokens);
           skipNext = false;
+        }else if(!skipNext && tokens.peek().is("//")) {
+          break;
         }else {
           skipNext = false;
           printAction.add(new Node("string part", tokens.take()));
         }
       }
-      if (tokens.peek().isNewline()) {
-        tokens.take(); // consume the newline token
+      if (tokens.peek().isNewline() || tokens.peek().is("//")) {
+        if(tokens.peek().is("//")) {
+          parser.consumeComment(tokens, printAction);
+        }else {
+          tokens.take(); // consume the newline token
+        }
       } else {
         parser.unexpectedToken(tokens);
       }
@@ -107,11 +115,11 @@ public class PrintAction extends Action {
       if(part.isNamed("Reference")) {
         VariablePath path = builder.getPath(part);
         opts.add(path);
-      }else{
+      }else if(!part.isNamed("Comment")) {
         opts.add(part.getToken());
       }
     }
-    return new PrintAction(opts);
+    return new PrintAction(CodeLocation.toLocation(node), opts);
   }
 
   @Override

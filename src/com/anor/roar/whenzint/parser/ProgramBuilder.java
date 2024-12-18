@@ -296,19 +296,15 @@ public class ProgramBuilder implements NodeVisitor {
 	}
 
 	public String referenceString(Node[] children) {
-		String quickRef = "";
+		StringBuilder quickRef = new StringBuilder();
 		Node parts[] = children;
 		for (Node n : children) {
-			if (n.hasToken()) {
-				quickRef += n.getToken();
-			} else {
-				quickRef += n.getValue();
-			}
+			quickRef.append(n.getTokenOrValue());
 			if (n != parts[parts.length - 1]) {
-				quickRef += ".";
+				quickRef.append(".");
 			}
 		}
-		return quickRef;
+		return quickRef.toString();
 	}
 
 	public Object instanceObject(String className, String methodName, String params[]) {

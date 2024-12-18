@@ -3,11 +3,14 @@ package com.anor.roar.whenzint.conditions;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.function.Predicate;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
+import com.anor.roar.whenzint.mapping.ByteBufferMap;
+import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class BoolCondition extends Condition {
 
@@ -125,8 +128,11 @@ public class BoolCondition extends Condition {
   
   public boolean checkEqualEqual(Program program) {
     Object refObj = program.getObject(ref);
-    if(refObj != null && cmp != null) {
+    if(refObj != null && cmp != null && !(refObj instanceof ByteBufferMapping)) {
       return refObj.equals(cmp);
+    }else if(refObj != null && cmp != null && (refObj instanceof ByteBufferMapping)) {
+      ByteBufferMapping mapping = (ByteBufferMapping) refObj;
+      return mapping.equals(cmp, program);
     }else if(refObj instanceof ByteBuffer) {
       ByteBuffer bb = (ByteBuffer)refObj;
       ByteBuffer forInt = ByteBuffer.allocate(Integer.BYTES);

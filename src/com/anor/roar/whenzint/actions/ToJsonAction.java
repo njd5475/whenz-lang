@@ -12,7 +12,7 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.json.Json;
 
-public class ToJsonAction extends Action {
+public class ToJsonAction extends AbstractAction {
 
   static {
     ProgramBuilder.registerActionBuilder(new ToJsonAction());
@@ -22,10 +22,11 @@ public class ToJsonAction extends Action {
   private VariablePath jsonObject;
 
   public ToJsonAction() {
-
+    super(CodeLocation.fake);
   }
 
-  public ToJsonAction(VariablePath map, VariablePath jsonObject) {
+  public ToJsonAction(CodeLocation location, VariablePath map, VariablePath jsonObject) {
+    super(location);
     this.map = map;
     this.jsonObject = jsonObject;
   }
@@ -70,7 +71,7 @@ public class ToJsonAction extends Action {
     VariablePath to = builder.getPath(node.children()[0]);
     VariablePath from = builder.getPath(node.children()[1]);
     if(to != null && from != null) {
-      Action a = new ToJsonAction(from, to);
+      Action a = new ToJsonAction(CodeLocation.toLocation(node), from, to);
       return a;
     }
     return null;

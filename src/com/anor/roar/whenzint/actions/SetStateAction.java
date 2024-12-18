@@ -8,16 +8,17 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.*;
 
-public class SetStateAction extends Action {
+public class SetStateAction extends AbstractAction {
 
   static {
-    ProgramBuilder.registerActionBuilder(new SetStateAction(null, null));
+    ProgramBuilder.registerActionBuilder(new SetStateAction(CodeLocation.fake, null, null));
   }
   
   private VariablePath path;
   private String       state;
 
-  public SetStateAction(VariablePath path, String state) {
+  public SetStateAction(CodeLocation location, VariablePath path, String state) {
+    super(location);
     this.path = path;
     this.state = state;
   }
@@ -44,7 +45,7 @@ public class SetStateAction extends Action {
     if (node.isNamed(getActionNodeName())) {
       VariablePath path = builder.getPath(node.getChildNamed("Reference"));
       String name = node.getChildNamed("Identifier").getTokenOrValue();
-      return new SetStateAction(path, name);
+      return new SetStateAction(CodeLocation.toLocation(node), path, name);
     }
     return null;
   }

@@ -8,15 +8,16 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.*;
 
-public class IncrementAction extends Action {
+public class IncrementAction extends AbstractAction {
 
   private VariablePath path;
 
   static {
-    ProgramBuilder.registerActionBuilder(new IncrementAction(null));
+    ProgramBuilder.registerActionBuilder(new IncrementAction(CodeLocation.fake, null));
   }
   
-  public IncrementAction(VariablePath path) {
+  public IncrementAction(CodeLocation location, VariablePath path) {
+    super(location);
     this.path = path;
   }
 
@@ -58,7 +59,7 @@ public class IncrementAction extends Action {
   public Action buildAction(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
     Node children[] = node.children();
     VariablePath path = builder.getPath(children[0]);
-    return new IncrementAction(path);
+    return new IncrementAction(CodeLocation.toLocation(node), path);
   }
 
   @Override

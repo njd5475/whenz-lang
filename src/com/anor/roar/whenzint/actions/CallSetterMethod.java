@@ -7,15 +7,10 @@ import java.util.Map;
 
 import com.anor.roar.whenzint.Action;
 import com.anor.roar.whenzint.Program;
-import com.anor.roar.whenzint.parser.Node;
-import com.anor.roar.whenzint.parser.ProgramBuilder;
-import com.anor.roar.whenzint.parser.Token;
-import com.anor.roar.whenzint.parser.TokenBuffer;
-import com.anor.roar.whenzint.parser.WhenzParser;
-import com.anor.roar.whenzint.parser.WhenzSyntaxError;
+import com.anor.roar.whenzint.parser.*;
 import com.anor.roar.whenzint.parser.Token.TTYPE;
 
-public class CallSetterMethod extends Action {
+public class CallSetterMethod extends AbstractAction {
 
   private Object value;
   private String set;
@@ -26,11 +21,12 @@ public class CallSetterMethod extends Action {
         .registerActionBuilder(new CallSetterMethod());
   }
   
-  private CallSetterMethod() {
-    
+  public CallSetterMethod() {
+      super(CodeLocation.fake);
   }
 
-  public CallSetterMethod(String set, String name, Object to) {
+  public CallSetterMethod(CodeLocation location, String set, String name, Object to) {
+    super(location);
     if (to == null) {
       throw new NullPointerException(
           "Cannot call set" + set + " on " + name + " to a null object");
@@ -110,11 +106,7 @@ public class CallSetterMethod extends Action {
     Object obj = "";
     if ("Reference".equals(setNode.name())) {
       Node val = setNode.children()[0];
-      if (val.hasToken()) {
-        obj = builder.getObject(val.getToken());
-      } else if (val.hasValue()) {
-        obj = builder.getObject(val.getValue());
-      }
+      obj = builder.getObject(val.getTokenOrValue());
       if (obj == null) {
         System.err.println("Link Error: Reference " + val.getTokenOrValue()
             + " referes to a null object");
@@ -123,11 +115,7 @@ public class CallSetterMethod extends Action {
     } else if ("VariableIdentifier".equals(setNode.name())) {
       StringBuilder str = new StringBuilder("");
       for (Node v : setNode.children()) {
-        if (v.hasToken()) {
-          str.append(v.getToken());
-        } else if (v.hasValue()) {
-          str.append(v.getValue());
-        }
+        str.append(v.getTokenOrValue());
       }
       obj = str.toString();
       if (obj == null) {
@@ -137,7 +125,7 @@ public class CallSetterMethod extends Action {
       builder.setObject(name, obj);
     }
 
-    return new CallSetterMethod(set, name, obj);
+    return new CallSetterMethod(CodeLocation.toLocation(node), set, name, obj);
   }
 
   @Override

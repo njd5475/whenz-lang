@@ -12,23 +12,25 @@ import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 import com.anor.roar.whenzint.parser.*;
 
-public class PutsAction extends Action {
+public class PutsAction extends AbstractAction {
 
   private String toPrint;
   private String format;
   private VariablePath[] array;
   
   static {
-    ProgramBuilder.registerActionBuilder(new PutsAction((String)null));
+    ProgramBuilder.registerActionBuilder(new PutsAction(CodeLocation.fake, (String)null));
   }
 
-  public PutsAction(String toPrint) {
+  public PutsAction(CodeLocation location, String toPrint) {
+    super(location);
     this.toPrint = toPrint;
     this.format = null;
     this.array = null;
   }
 
-  public PutsAction(List<Object> opts) {
+  public PutsAction(CodeLocation location, List<Object> opts) {
+    super(location);
     StringBuilder bld = new StringBuilder("");
     List<Object> values = new LinkedList<Object>();
     for(Object opt : opts) {
@@ -110,7 +112,7 @@ public class PutsAction extends Action {
         opts.add(part.getToken());
       }
     }
-    return new PutsAction(opts);
+    return new PutsAction(CodeLocation.toLocation(node), opts);
   }
 
   @Override

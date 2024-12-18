@@ -17,7 +17,7 @@ import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 import com.anor.roar.whenzint.parser.*;
 
-public class ReadFromFileChannel extends Action {
+public class ReadFromFileChannel extends AbstractAction {
 
   private VariablePath    from;
   private VariablePath    to;
@@ -25,16 +25,18 @@ public class ReadFromFileChannel extends Action {
   private VariablePath    start;
 
   static {
-    ProgramBuilder.registerActionBuilder(new ReadFromFileChannel(null, null));
+    ProgramBuilder.registerActionBuilder(new ReadFromFileChannel(CodeLocation.fake, null, null));
   }
 
-  public ReadFromFileChannel(VariablePath from, VariablePath to) {
+  public ReadFromFileChannel(CodeLocation location, VariablePath from, VariablePath to) {
+    super(location);
     this.from = from;
     this.to = to;
     options.add(StandardOpenOption.READ);
   }
 
-  public ReadFromFileChannel(VariablePath from, VariablePath to, VariablePath start) {
+  public ReadFromFileChannel(CodeLocation location, VariablePath from, VariablePath to, VariablePath start) {
+    super(location);
     this.from = from;
     this.to = to;
     this.start = start;
@@ -82,10 +84,10 @@ public class ReadFromFileChannel extends Action {
     Node start = node.getChildNamed("start");
     if (start != null) {
       VariablePath pathStart = builder.getPath(start.getChildNamed("Reference"));
-      return new ReadFromFileChannel(pathFrom, pathInto, pathStart);
+      return new ReadFromFileChannel(CodeLocation.toLocation(node), pathFrom, pathInto, pathStart);
     }
 
-    return new ReadFromFileChannel(pathFrom, pathInto);
+    return new ReadFromFileChannel(CodeLocation.toLocation(node), pathFrom, pathInto);
   }
 
   @Override

@@ -10,20 +10,22 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.parser.*;
 
-public class RunShellCommand extends Action {
+public class RunShellCommand extends AbstractAction {
 
 	private String commandString;
 	private VariablePath ref;
 
 	static {
-		ProgramBuilder.registerActionBuilder(new RunShellCommand(null));
+		ProgramBuilder.registerActionBuilder(new RunShellCommand(CodeLocation.fake, null));
 	}
 
-	public RunShellCommand(String varName) {
+	public RunShellCommand(CodeLocation location, String varName) {
+		super(location);
 		this.commandString = varName;
 	}
 
-	public RunShellCommand(VariablePath ref, String varName) {
+	public RunShellCommand(CodeLocation location, VariablePath ref, String varName) {
+		super(location);
 		this.commandString = varName;
 		this.ref = ref;
 	}
@@ -101,9 +103,9 @@ public class RunShellCommand extends Action {
 		Node refNode = node.getChildNamed("Reference");
 		VariablePath ref = builder.getPath(refNode);
 		if (ref != null) {
-			return new RunShellCommand(ref, sb.toString().trim());
+			return new RunShellCommand(CodeLocation.toLocation(node), ref, sb.toString().trim());
 		}
-		return new RunShellCommand(sb.toString().trim());
+		return new RunShellCommand(CodeLocation.toLocation(node), sb.toString().trim());
 	}
 
 	@Override

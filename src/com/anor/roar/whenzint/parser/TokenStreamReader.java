@@ -1,5 +1,6 @@
 package com.anor.roar.whenzint.parser;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -8,12 +9,14 @@ public class TokenStreamReader extends Reader {
 
   private Reader stream;
   private Token  current;
+  private File file;
 
-  public TokenStreamReader(Reader stream) {
+  public TokenStreamReader(File file, Reader stream) {
     if (stream == null) {
       throw new NullPointerException("Need a valid stream to create tokens");
     }
     this.stream = stream;
+    this.file = file;
   }
 
   public Token readToken() throws IOException {
@@ -32,7 +35,7 @@ public class TokenStreamReader extends Reader {
       } else {
 
         if (next == null) {
-          next = new Token((char) r, 1, 0);
+          next = new Token((char) r, file, 1, 0);
         } else {
           next = next.next((char) r);
         }
@@ -61,7 +64,7 @@ public class TokenStreamReader extends Reader {
   }
 
   public static void main(String... args) throws IOException {
-    TokenStreamReader tsr = new TokenStreamReader(
+    TokenStreamReader tsr = new TokenStreamReader(new File("./scripts/hello.whenz"),
         new FileReader("./scripts/hello.whenz"));
 
     Token t = null;
