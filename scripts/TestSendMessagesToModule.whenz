@@ -1,0 +1,18 @@
+
+when event app_starts do
+    print Starting 'Send Messages To Module' Test
+    @numberOfMessages = 5
+    @receiver = launch TestSendMessageModule with
+        @messagesExpected = 10
+    end
+
+    @messageCounter = 0
+
+when @messageCounter < 10 do
+    increment @messageCounter
+    print Sending message @messageCounter
+    trigger event FromMainModule on @receiver
+
+when @messageCounter >= 10 do
+    print Message sending exceeded
+    exit

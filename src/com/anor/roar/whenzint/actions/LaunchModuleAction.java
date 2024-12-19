@@ -22,6 +22,7 @@ public class LaunchModuleAction extends AbstractAction {
 	private File			dir;
 	private SetToLiteral	setToLiteral	= new SetToLiteral();
 	private Action[]	envs;
+	private String _variableReference;
 
 	public LaunchModuleAction() {
 		super(CodeLocation.fake);
@@ -51,19 +52,7 @@ public class LaunchModuleAction extends AbstractAction {
 				Node assignments = launchAction.addChild("Assignments");
 				// set environment for module
 				parser.consumeWhitespace(tokens);
-				if (tokens.peek().is("with")) {
-					tokens.take();
-					parser.consumeWhitespace(tokens,true);
-					do {
-						try {
-							Node last = setToLiteral.buildNode(parser, tokens);
-							assignments.add(last);
-						}catch(WhenzSyntaxError err) {
-							throw err;
-						}
-					} while (!tokens.peek().is("end"));
-					tokens.take();
-				}
+				parser.withBlock(tokens, assignments);
 			} else {
 				tokens.take();
 				parser.unexpectedToken(tokens);
@@ -128,31 +117,69 @@ public class LaunchModuleAction extends AbstractAction {
 			// WhenzParser parser = new WhenzParser(actionFiles.toArray(new
 			// String[actionFiles.size()]));
 			try {
+				// We may need to load the module reference if there is one before starting to load the module
+				// to make sure the reference is available immediately, event triggers will have to wait
+				// for the module to be registered
+
+
 				Program loaded = Whenz.loadFromFiles(toLoad.toArray(new File[toLoad.size()]));
 
-				loaded.trigger("app_starts");
+				if(program.registerModule(this.moduleName, loaded)) {
+					loaded.trigger("app_starts");
 
-				new Thread() {
-					public void run() {
-						try {
-							if(envs != null) {
-								Map<String, Object> loadContext = new HashMap<String, Object>();
-								for(Action e : envs) {
-									e.perform(loaded, loadContext);
-								}
-							}
-							loaded.run();
-						} catch (Exception e) {
-							System.err.format("Module thread '%s' errored with:\n", moduleName);
-							e.printStackTrace();
-						}
+					if(this._variableReference != null) {
+						program.setObject(this._variableReference, new ModuleReference(loaded, this.moduleName, this._variableReference));
 					}
 
-				}.start();
+					new Thread() {
+						public void run() {
+							try {
+								if (envs != null) {
+									Map<String, Object> loadContext = new HashMap<String, Object>();
+									for (Action e : envs) {
+										e.perform(loaded, loadContext);
+									}
+								}
+								loaded.run();
+							} catch (Exception e) {
+								System.err.format("Module thread '%s' errored with:\n", moduleName);
+								e.printStackTrace();
+								program.setObject(String.format("%s.exception", moduleName), e);
+								program.trigger("module_runtime_error");
+							}
+						}
+
+					}.start();
+				}
 			} catch (WhenzSyntaxError e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
+	public void linkToVar(String quickRef) {
+		this._variableReference = quickRef;
+	}
+
+	public static class ModuleReference {
+		private String moduleName;
+		private String referenceName;
+		private Program program;
+
+		public ModuleReference(Program launchModuleAction, String moduleName, String referenceName) {
+			this.moduleName = moduleName;
+			this.referenceName = referenceName;
+			this.program = launchModuleAction;
+		}
+
+		public void triggerEventOnModule(String event, Action[] envs) {
+			if (envs != null) {
+				Map<String, Object> loadContext = new HashMap<String, Object>();
+				for (Action e : envs) {
+					e.perform(this.program, loadContext);
+				}
+			}
+			this.program.triggerSafe(event);
+		}
+	}
 }

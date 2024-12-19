@@ -45,11 +45,10 @@ public class IncrementAction extends AbstractAction {
     }
     
     if (v != null) {
-      if (v instanceof Integer) {
-        Integer i = (Integer) v;
-        path.set(program, context, i + 1);
+      if (v instanceof Integer i) {
+         path.set(program, context, i + 1);
       } else if (v instanceof String) {
-        Integer i = Integer.parseInt(v.toString());
+        int i = Integer.parseInt(v.toString());
         path.set(program, context, i + 1);
       }
     }

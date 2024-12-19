@@ -1,0 +1,25 @@
+
+//
+// This module would receiver triggered events
+// the downside is that in this module you would not
+// be able to control which events could be triggered
+// by external modules and which would be by internal
+// code.
+//
+// A solution to this would be to add a key word like
+// external to the event so it would be 'external event'
+// and then restrict the events in a module to be internal
+// only except those designated with the external keyword
+//
+when event app_starts do
+    print Starting Send Message Module
+    print Messages Expected: @messagesExpected
+    @messagesReceived = 0
+
+when event FromMainModule do
+    increment @messagesReceived
+    print Received message: @messageFromMainModule messageCount=@messagesReceived
+
+when @messagesReceived is changed and @messagesReceived == 10 do once
+    print Test passed.
+    exit
