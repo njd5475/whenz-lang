@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -38,6 +37,8 @@ public class WhenzParser {
   private static WhenzParser            instance       = new WhenzParser();
   private Map<String, Set<TokenAction>> moduleActions  = new HashMap<>();
 
+  private boolean printAST = false;
+
   private WhenzParser() {
     definedActions.add(new SetToLiteral());
     definedActions.add(new PrintAction(CodeLocation.fake, ""));
@@ -62,6 +63,11 @@ public class WhenzParser {
   }
 
   public static WhenzParser getInstance() {
+    return instance;
+  }
+
+  public static WhenzParser printASTMode() {
+    instance.printAST = true;
     return instance;
   }
 
@@ -153,6 +159,7 @@ public class WhenzParser {
           error = definedAction(action, tb);
         }
         if (error != null) {
+          tb.rewind();
           throw error;
         }
         whenNode.add(action);
@@ -333,10 +340,10 @@ public class WhenzParser {
     consumeWhitespace(tokens);
     WhenzSyntaxError error = null;
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
-    tb.mark();
     Node actionNode = null;
     for (TokenAction ta : definedActions) {
       try {
+        tb.mark();
         actionNode = ta.buildNode(this, tb);
         error = null;
         break;
@@ -548,7 +555,13 @@ public class WhenzParser {
   }
 
   public void unexpectedToken(Node subtree, TokenBuffer t) throws WhenzSyntaxError {
-    throw new WhenzSyntaxError("Unexpected token: ", t, subtree);
+    String tok = "Stream Error";
+      try {
+          tok = t.peek().asString();
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
+      throw new WhenzSyntaxError("Unexpected token: " + tok, t, subtree);
   }
 
   public void consumeWhitespace(TokenBuffer tokens) throws IOException {
@@ -581,8 +594,7 @@ public class WhenzParser {
 
     Node root = instance.parse(new StreamTokenBuffer(tsr, 128));
 
-    boolean optionPrintTree = false;
-    if(optionPrintTree) {
+    if(instance.printAST) {
       System.out.println(root);
     }
 
@@ -669,11 +681,13 @@ public class WhenzParser {
     Node expression = assignNode.addChild("Expression");
     this.consumeWhitespace(tokens);
     TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
-    tb.mark();
+
     boolean found = false;
+    // masking errors here
     WhenzSyntaxError error = null;
     if (!found) {
       try {
+        tb.mark();
         globalReference(expression, tb);
         found = true;
       } catch (WhenzSyntaxError e) {
@@ -683,6 +697,7 @@ public class WhenzParser {
     }
     if (!found) {
       try {
+        tb.mark();
         expressionGroup(expression, tb);
         found = true;
       } catch (WhenzSyntaxError e) {
@@ -690,15 +705,28 @@ public class WhenzParser {
         tb.rewind();
       }
     }
+
+    if (!found) {
+      tb.mark();
+      error = definedAction(expression, tb);
+      if(error == null) {
+        found = true;
+      }else{
+        tb.rewind();
+      }
+    }
+
     if (!found) {
       try {
-        literals(expression, tb);
+        tb.mark();
+        literals(expression, tb); // this consumes pretty much anything so it needs to be last
         found = true;
       } catch (WhenzSyntaxError e) {
         error = e;
         tb.rewind();
       }
     }
+
 
     if (found) {
       this.consumeWhitespace(tb);
@@ -729,4 +757,28 @@ public class WhenzParser {
     }
   }
 
+  public Node withBlock(TokenBuffer tokens, Node parent) throws IOException, WhenzSyntaxError {
+    this.consumeWhitespace(tokens,true);
+    if (tokens.peek().is("with")) {
+      tokens.take();
+      this.consumeWhitespace(tokens,true);
+      do {
+          Node last = this.literalAssignment(tokens);
+          parent.add(last);
+      } while (!tokens.peek().is("end"));
+      tokens.take();
+    }
+    return parent;
+  }
+
+  public Node literalAssignment(TokenBuffer tokens) throws WhenzSyntaxError, IOException {
+    Node assignNode = new Node("Assignment");
+    this.globalReference(assignNode, tokens);
+    this.consumeWhitespace(tokens);
+    this.assignment(assignNode, tokens);
+    this.consumeWhitespace(tokens);
+    this.expression(assignNode, tokens);
+    this.consumeWhitespace(tokens, true);
+    return assignNode;
+  }
 }

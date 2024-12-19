@@ -41,14 +41,7 @@ public class SetToLiteral extends AbstractAction {
 
   @Override
   public Node buildNode(WhenzParser parser, TokenBuffer tokens) throws WhenzSyntaxError, IOException {
-    Node assignNode = new Node("Assignment");
-    parser.globalReference(assignNode, tokens);
-    parser.consumeWhitespace(tokens);
-    parser.assignment(assignNode, tokens);
-    parser.consumeWhitespace(tokens);
-    parser.expression(assignNode, tokens);
-    parser.consumeWhitespace(tokens, true);
-    return assignNode;
+    return parser.literalAssignment(tokens);
   }
 
   @Override
@@ -79,6 +72,15 @@ public class SetToLiteral extends AbstractAction {
         return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, Integer.parseInt(literal.children()[0].getTokenOrValue(), 16));
       } else if (rval.hasChildNamed("Reference") && !containsExp) {
         return new SetToLiteral(CodeLocation.toLocation(lval.getFirstTokenNode()), quickRef, builder.getPath(rval.getChildNamed("Reference")));
+      } else if (rval.hasChildNamed("defined action") && rval.getChildNamed("defined action").hasChildNamed("LaunchModule")) {
+        Node launchModuleNode = rval.getChildNamed("defined action").getChildNamed("LaunchModule");
+        LaunchModuleAction action = new LaunchModuleAction();
+        Action genericAction = action.buildAction(builder, launchModuleNode);
+        if(genericAction instanceof LaunchModuleAction) {
+          LaunchModuleAction launchModuleAction = (LaunchModuleAction) genericAction;
+          launchModuleAction.linkToVar(quickRef);
+          return launchModuleAction;
+        }
       } else {
         Stack<MathOpData> ops = new Stack<>();
         buildExpression(builder, ops, rval);

@@ -23,8 +23,8 @@ public class WhenzSyntaxError extends Exception {
       this.tokenPeekError = ioe;
     }
     tokenBuffer = t;
-    this.message = message;
-    this.defaultMessage = String.format("%s: %s at line=%d col=%d", message, t.toString(), ln, ch);
+    this.message = String.format("%s: %s at line=%d col=%d", message, t.toString(), ln, ch);
+    this.defaultMessage = this.message;
   }
 
   public WhenzSyntaxError(String message, TokenBuffer t, int ln, int ch, Node top) {
@@ -49,8 +49,8 @@ public class WhenzSyntaxError extends Exception {
     }
     this.tokenBuffer = tok;
     this.tree = top;
-    this.message = message;
-    this.defaultMessage = String.format("%s: '%s' at line=%d col=%d", message, token.asString(), line, column);
+    this.message = String.format("%s: '%s' at line=%d col=%d", message, token.asString(), line, column);
+    this.defaultMessage = this.message;
   }
   
   public int getLine() {

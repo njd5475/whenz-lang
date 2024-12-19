@@ -16,10 +16,10 @@ when event app_starts do
     print Messages Expected: @messagesExpected
     @messagesReceived = 0
 
-when event messageFromMainModule do
-    print Received message:
-    print @messageFromMainModule
+when event FromMainModule do
     increment @messagesReceived
+    print Received message: @messageFromMainModule messageCount=@messagesReceived
 
-when @messagesReceived == @messagesExpected do
-    print Test passed
+when @messagesReceived is changed and @messagesReceived == 10 do once
+    print Test passed.
+    exit

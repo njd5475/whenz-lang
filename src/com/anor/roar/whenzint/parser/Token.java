@@ -101,7 +101,7 @@ public class Token {
 	}
 
 	public String toString() {
-		return String.format("T[tok='%s',type=%s,line=%d,col=%d",
+		return String.format("T[tok='%s',type=%s,line=%d,col=%d]",
 				token.toString().replaceAll("[\n\r]", "<NL>"), type.name(), line, col);
 	}
 

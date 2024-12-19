@@ -10,7 +10,7 @@ import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class Program {
 
-	// private Queue<Condition> condQueue = new ConcurrentLinkedQueue<>();
+	private Queue<Condition> condQueue = new ConcurrentLinkedQueue<>();
 	private final Map<String, List<Condition>> waitingForEvents = new HashMap<>();
 	private final Map<String, List<Condition>> waitingForObjects = new HashMap<>();
 	// private Stack<Condition> conditions = new Stack<>();
@@ -34,6 +34,21 @@ public class Program {
 
 			Condition c;
 			noConditions = true;
+			while(!condQueue.isEmpty()) {
+				c = condQueue.remove();
+				if (c.check(this)) {
+					Action a = c.getAction();
+					if (a != null) {
+						actions.push(a);
+					}
+
+					if (!c.repeats() || c instanceof EventCondition) {
+						// System.out.println("Disabled condition for " + c.getClass());
+						enabled.put(c, false); // disable condition
+					}
+				}
+			}
+
 			for (Map.Entry<Condition, Boolean> e : enabled.entrySet()) {
 				if (e.getValue()) {
 					noConditions = false;
@@ -88,6 +103,15 @@ public class Program {
 			enabled.put(c, false);
 		} else {
 			enabled.put(c, true);
+		}
+	}
+
+	public synchronized void triggerSafe(String eventName) {
+		List<Condition> list = waitingForEvents.get(eventName);
+		if(list != null) {
+			for(Condition c : list) {
+				condQueue.add(c);
+			}
 		}
 	}
 

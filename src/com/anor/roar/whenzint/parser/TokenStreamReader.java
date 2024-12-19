@@ -35,7 +35,7 @@ public class TokenStreamReader extends Reader {
       } else {
 
         if (next == null) {
-          next = new Token((char) r, file, 1, 0);
+          next = new Token((char) r, file, 0, 0);
         } else {
           next = next.next((char) r);
         }
