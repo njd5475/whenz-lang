@@ -70,7 +70,9 @@ public class Node {
     builder.append("> '" + name + "'");
     if (token != null) {
       builder.append(" Token: " + token.toString());
-    } else if(val != null) {
+    }
+
+    if(val != null) {
       builder.append(" Value: " + val);
     } else {
       builder.append("|");

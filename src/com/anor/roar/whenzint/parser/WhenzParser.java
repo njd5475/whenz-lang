@@ -98,7 +98,7 @@ public class WhenzParser {
     this.top = root;
     TrackableTokenBuffer ttb = TrackableTokenBuffer.wrap(tokens);
     while (!tokens.isEmpty()) {
-      ttb.mark();
+      ttb = ttb.wrapAndMark();
       try {
         when(root, ttb);
       } catch (WhenzSyntaxError e) {
@@ -210,14 +210,18 @@ public class WhenzParser {
       p.consumeWhitespace(t);
       Node n = new Node("Literals");
       StringBuilder sb = new StringBuilder();
+      Token startToken = null;
       while (!t.peek().isNewline() && !t.peek().isOneOf("do", "once") && !t.peek().isOneOf(stopWords)) {
+        if(startToken == null) {
+          startToken = t.peek();
+        }
         sb.append(t.take().asString());
       }
       String literal = sb.toString();
       if (t.peek().isOneOf(stopWords) || t.peek().isOneOf("once", "do")) {
         literal = literal.trim();
       }
-      n.add(new Node("Part", literal));
+      n.add(new Node("Part", literal, startToken));
       return n;
     };
     TokenAction actions[] = new TokenAction[] { hex, decimals, number, stringLiteral };
@@ -343,7 +347,7 @@ public class WhenzParser {
     Node actionNode = null;
     for (TokenAction ta : definedActions) {
       try {
-        tb.mark();
+        tb = tb.wrapAndMark();
         actionNode = ta.buildNode(this, tb);
         error = null;
         break;
@@ -432,14 +436,42 @@ public class WhenzParser {
         unexpectedToken(tokens);
       }
     } else if (tokens.peek().isSymbol("@")) {
-      TrackableTokenBuffer tb = TrackableTokenBuffer.wrap(tokens);
+      TrackableTokenBuffer tb = TrackableTokenBuffer.wrapAndMark(tokens);
       try {
-        tb.mark();
         globalReference(conditions, tb);
         consumeWhitespace(tb);
         conditionalOperand(conditions, tb);
         consumeWhitespace(tb);
-        literals(conditions, tb, "and", "or");
+
+        boolean success = false;
+        // try another global reference first
+        try{
+          tb = tb.wrapAndMark();
+          globalReference(conditions,tb);
+          consumeWhitespace(tb);
+          success = true;
+        }catch(WhenzSyntaxError e) {
+          tb.rewind();
+          //WARN: could have added nodes which need to be removed in global ref call first
+        }
+
+        if(!success) {
+          try {
+            tb = tb.wrapAndMark();
+            expression(conditions, tb); //FIXME: might not work because expressions can be boolean and contain and/or
+                                        //FIXME: it might not stop consuming bits of expressions when desired
+            consumeWhitespace(tb);
+            success = true;
+          }catch(WhenzSyntaxError e) {
+            tb.rewind();
+            //WARN: could have added nodes which need to be removed in global ref call first
+          }
+        }
+
+        if(!success) {
+          literals(conditions, tb, "and", "or");
+        }
+
       } catch (WhenzSyntaxError e) {
         tb.rewind();
         conditions.removeAll();
@@ -697,7 +729,7 @@ public class WhenzParser {
     }
     if (!found) {
       try {
-        tb.mark();
+        tb = tb.wrapAndMark();
         expressionGroup(expression, tb);
         found = true;
       } catch (WhenzSyntaxError e) {
@@ -707,7 +739,7 @@ public class WhenzParser {
     }
 
     if (!found) {
-      tb.mark();
+      tb = tb.wrapAndMark();
       error = definedAction(expression, tb);
       if(error == null) {
         found = true;
@@ -718,7 +750,7 @@ public class WhenzParser {
 
     if (!found) {
       try {
-        tb.mark();
+        tb = tb.wrapAndMark();
         literals(expression, tb); // this consumes pretty much anything so it needs to be last
         found = true;
       } catch (WhenzSyntaxError e) {

@@ -31,6 +31,9 @@ public class Expression extends AbstractAction {
     super(location);
     this.ref = quickRef;
     this.ops = ops;
+    if(this.ops.size() == 0) {
+      throw new IllegalArgumentException("An expression needs at least one operation");
+    }
     Collections.reverse(this.ops);
     this.ops = convertToPostFix(ops);
     Collections.reverse(this.ops);
@@ -111,6 +114,16 @@ public class Expression extends AbstractAction {
 
   @Override
   public void perform(Program program, Map<String, Object> context) {
+    Object value = evaluate(program, context);
+    program.setObject(ref, value);
+    context.put(ref, value);
+  }
+
+  public String toString() {
+    return "Expression";
+  }
+
+  public Object evaluate(Program program, Map<String,Object> context) {
     Stack<MathOpData> toProcess = (Stack<MathOpData>) ops.clone();
     Stack<ExpressionValue> waiting = new Stack<>();
     while(!toProcess.isEmpty()) {
@@ -132,16 +145,12 @@ public class Expression extends AbstractAction {
     }
     if(!waiting.isEmpty()) {
       ExpressionValue pop = waiting.pop();
-      if(pop instanceof VariableValue) {
+      if (pop instanceof VariableValue) {
         VariableValue v = (VariableValue) pop;
         v.realize(program, context);
       }
-      program.setObject(ref, pop.get());
-      context.put(ref, pop.get());
+      return pop.get();
     }
-  }
-
-  public String toString() {
-    return "Expression";
+    return null;
   }
 }

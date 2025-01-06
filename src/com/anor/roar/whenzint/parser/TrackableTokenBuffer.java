@@ -1,5 +1,6 @@
 package com.anor.roar.whenzint.parser;
 
+import javax.sound.midi.Track;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -26,6 +27,8 @@ public class TrackableTokenBuffer implements TokenBuffer {
     if (track == null) {
       track = new LinkedList<Token>();
       iter = null;
+    }else{
+      throw new RuntimeException("Please, mark already set should use wrapAndMark here!");
     }
   }
 
@@ -92,10 +95,14 @@ public class TrackableTokenBuffer implements TokenBuffer {
   public static final TrackableTokenBuffer wrap(TokenBuffer buffer) {
     return new TrackableTokenBuffer(buffer);
   }
-  
+
   public static final TrackableTokenBuffer wrapAndMark(TokenBuffer buffer) {
     TrackableTokenBuffer ttb = wrap(buffer);
     ttb.mark();
     return ttb;
+  }
+
+  public TrackableTokenBuffer wrapAndMark() {
+    return TrackableTokenBuffer.wrapAndMark(this);
   }
 }

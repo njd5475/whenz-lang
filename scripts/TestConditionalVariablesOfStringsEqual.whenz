@@ -1,0 +1,8 @@
+
+when event app_starts do once
+    @var = Hello World
+    @var2 = Hello World
+
+when @var2 == @var do
+    print Test passed
+    exit

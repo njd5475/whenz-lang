@@ -1,5 +1,7 @@
 package com.anor.roar.whenzint.parser;
 
+import com.anor.roar.whenzint.ColoredTextBuilder;
+
 import java.io.File;
 
 public class Token {
@@ -22,7 +24,7 @@ public class Token {
 	};
 
 	private TTYPE					type;
-	private StringBuilder	token	= new StringBuilder("");
+	private StringBuilder			token	= new StringBuilder("");
 	private int						line	= 1;
 	private int						col		= 0;
 	private File file;

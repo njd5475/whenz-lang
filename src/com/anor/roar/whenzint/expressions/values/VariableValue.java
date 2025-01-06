@@ -34,6 +34,9 @@ public class VariableValue implements ExpressionValue {
       ByteBufferMapping bbm = (ByteBufferMapping) object;
       realizedValue = new ByteArrayValue(bbm.getBytes(program, context));
       return true;
+    }else if(object instanceof String) {
+      realizedValue = new StringValue((String)object);
+      return true;
     }
     return false;
   }

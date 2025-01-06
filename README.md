@@ -28,7 +28,7 @@ when event app_starts do once
 # Variables
 
 ```
-	//atm just globals
+	//atm just module global variables
 	@<identifier>.<identifier>...<identifier>
 ```
 

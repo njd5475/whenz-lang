@@ -17,12 +17,15 @@ import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.Whenz;
 import com.anor.roar.whenzint.actions.ChainAction;
+import com.anor.roar.whenzint.actions.SetToLiteral;
 import com.anor.roar.whenzint.conditions.AndConditionGroup;
 import com.anor.roar.whenzint.conditions.BoolCondition;
 import com.anor.roar.whenzint.conditions.EventCondition;
 import com.anor.roar.whenzint.conditions.OrConditionGroup;
 import com.anor.roar.whenzint.conditions.StateCondition;
 import com.anor.roar.whenzint.expressions.Expression;
+import com.anor.roar.whenzint.expressions.MathOpData;
+import com.anor.roar.whenzint.expressions.values.VariableValue;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
 
 public class ProgramBuilder implements NodeVisitor {
@@ -115,9 +118,20 @@ public class ProgramBuilder implements NodeVisitor {
 								int num = Integer.parseInt(rightValChild.name());
 								cond = new BoolCondition(op, ref, num, repeats);
 							}
-						} else if (rightVal.isNamed("Literals")) {
+						} else if (rightVal.isNamed("Reference")) {
+							VariablePath path = this.getPath(rightVal);
+							cond = new BoolCondition(op, ref, new VariableValue(path), repeats);
+						} else if (rightVal.isNamed("Literals") || rightVal.hasChildNamed("Literals")) {
+							if(rightVal.hasChildNamed("Literals")) {
+								rightVal=rightVal.getChildNamed("Literals");
+							}
 							Node rightValChild = rightVal.children()[0];
+
 							cond = new BoolCondition(op, ref, rightValChild.getTokenOrValue(), repeats);
+						} else if (rightVal.isNamed("Expression")) {
+							cond = new BoolCondition(op, ref, buildExpression(this, rightVal), repeats);
+						} else {
+							throw new WhenzSyntaxTreeError(String.format("Unsupported conditional rightVal: %s", rightVal.name()), rightVal);
 						}
 
 						if (cond != null) {
@@ -275,7 +289,15 @@ public class ProgramBuilder implements NodeVisitor {
 
 	}
 
-	public Expression buildExpression(Node node) {
+	public Expression buildExpression(ProgramBuilder builder, Node node) throws WhenzSyntaxTreeError {
+		if(node.isNamed("Expression")) {
+			Stack<MathOpData> ops = new Stack<>();
+			(new SetToLiteral()).buildExpression(builder, ops, node);
+			if(ops.size() == 0) {
+				throw new WhenzSyntaxTreeError("Expression is missing an operation", node);
+			}
+			return new Expression(CodeLocation.toLocation(node.getFirstTokenNode()), null, ops);
+		}
 		return null;
 	}
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env whenz
 
-when event app_starts once
+when event app_starts do once
 	print Starting counting up
 	@counter = 0
 	
