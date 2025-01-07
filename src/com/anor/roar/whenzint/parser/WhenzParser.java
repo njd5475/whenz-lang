@@ -751,7 +751,7 @@ public class WhenzParser {
     if (!found) {
       try {
         tb = tb.wrapAndMark();
-        literals(expression, tb); // this consumes pretty much anything so it needs to be last
+        literals(expression, tb, "and", "or"); // this consumes pretty much anything so it needs to be last
         found = true;
       } catch (WhenzSyntaxError e) {
         error = e;
