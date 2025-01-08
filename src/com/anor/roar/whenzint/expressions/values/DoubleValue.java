@@ -19,6 +19,16 @@ public class DoubleValue implements ExpressionValue {
     return Double.toString(val);
   }
 
+  public boolean equals(Object o) {
+    if(o instanceof Double) {
+      return ((Double)o) == val;
+    }
+    if(o instanceof DoubleValue) {
+      return ((DoubleValue)o).val == val;
+    }
+    return false;
+  }
+
   @Override
   public ExpressionValue calculate(Operation op, ExpressionValue rval) {
     return op.calculateDouble(val, rval);

@@ -1,0 +1,8 @@
+
+when event app_starts do once
+    @var = 10
+    @var2 = 10
+
+when @var2 <= @var do
+    print Test passed
+    exit

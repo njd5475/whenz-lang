@@ -1,0 +1,8 @@
+
+when event app_starts do once
+    @var2 = 10.2
+    @var = 10.2
+
+when @var2 == @var and @var2 != 10.3 do
+    print Test passed
+    exit

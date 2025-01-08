@@ -13,6 +13,7 @@ import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.expressions.Expression;
+import com.anor.roar.whenzint.expressions.values.DoubleValue;
 import com.anor.roar.whenzint.expressions.values.IntegerValue;
 import com.anor.roar.whenzint.expressions.values.VariableValue;
 import com.anor.roar.whenzint.mapping.ByteBufferMap;
@@ -110,16 +111,6 @@ public class BoolCondition extends Condition {
   public boolean check(Program program) {
     return theOp.test(program);
   }
-  
-  public boolean checkLess(Program program) {
-    Object refObj = program.getObject(ref);
-    Number num = getNumber(program);
-    if(refObj != null && num != null && refObj instanceof Number) {
-      Number n = (Number)refObj;
-      return n.intValue() < num.intValue();
-    }
-    return false;
-  }
 
   private Number getNumber(Program program) {
     Object value = number;
@@ -129,10 +120,12 @@ public class BoolCondition extends Condition {
 
     }
     if(cmpValue != null && cmpValue.realize(program, program.getObjects())) {
-        value = cmpValue.get();
-        if(value instanceof  IntegerValue) {
-          value = (Number)((IntegerValue)value).get();
-        }
+      value = cmpValue.get();
+      if(value instanceof  IntegerValue) {
+        value = (Number)((IntegerValue)value).get();
+      }else if(value instanceof  DoubleValue) {
+        value = (Number)((DoubleValue)value).get();
+      }
     }
 
     if(value != null && value instanceof Number) {
@@ -143,11 +136,27 @@ public class BoolCondition extends Condition {
     //throw new RuntimeException("NaN");
   }
 
+  public boolean checkLess(Program program) {
+    Object refObj = program.getObject(ref);
+    Number num = getNumber(program);
+    if(num != null && refObj instanceof Number) {
+      Number n = (Number)refObj;
+      if(n instanceof Double || num instanceof Double) {
+        return n.doubleValue() < num.doubleValue();
+      }
+      return n.intValue() < num.intValue();
+    }
+    return false;
+  }
+
   public boolean checkGreater(Program program) {
     Object refObj = program.getObject(ref);
     Number num = getNumber(program);
-    if(refObj != null && num != null && refObj instanceof Number) {
+    if(num != null && refObj instanceof Number) {
       Number n = (Number)refObj;
+      if(n instanceof Double || num instanceof Double) {
+        return n.doubleValue() > num.doubleValue();
+      }
       return n.intValue() > num.intValue();
     }
     return false;
@@ -156,11 +165,12 @@ public class BoolCondition extends Condition {
   public boolean checkGreaterEqual(Program program) {
     Object refObj = program.getObject(ref);
     Number num = getNumber(program);
-    if(refObj != null && num != null) {
-      if(refObj instanceof Number) {
-        Number n = (Number)refObj;
-        return n.intValue() >= num.intValue();
+    if(num != null && refObj instanceof Number) {
+      Number n = (Number)refObj;
+      if(n instanceof Double || num instanceof Double) {
+        return n.doubleValue() >= num.doubleValue();
       }
+      return n.intValue() >= num.intValue();
     }
     return false;
   }
@@ -171,6 +181,9 @@ public class BoolCondition extends Condition {
     if(refObj != null && num != null) {
       if(refObj instanceof Number) {
         Number n = (Number)refObj;
+        if(n instanceof Double || num instanceof Double) {
+          return n.doubleValue() <= num.doubleValue();
+        }
         return n.intValue() <= num.intValue();
       }
     }
