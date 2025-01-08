@@ -13,6 +13,7 @@ import com.anor.roar.whenzint.Condition;
 import com.anor.roar.whenzint.Program;
 import com.anor.roar.whenzint.VariablePath;
 import com.anor.roar.whenzint.expressions.Expression;
+import com.anor.roar.whenzint.expressions.values.IntegerValue;
 import com.anor.roar.whenzint.expressions.values.VariableValue;
 import com.anor.roar.whenzint.mapping.ByteBufferMap;
 import com.anor.roar.whenzint.mapping.ByteBufferMapping;
@@ -129,13 +130,17 @@ public class BoolCondition extends Condition {
     }
     if(cmpValue != null && cmpValue.realize(program, program.getObjects())) {
         value = cmpValue.get();
+        if(value instanceof  IntegerValue) {
+          value = (Number)((IntegerValue)value).get();
+        }
     }
 
     if(value != null && value instanceof Number) {
       return (Number)value;
     }
 
-    throw new RuntimeException("NaN");
+    return null;
+    //throw new RuntimeException("NaN");
   }
 
   public boolean checkGreater(Program program) {
