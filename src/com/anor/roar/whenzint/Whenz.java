@@ -23,11 +23,16 @@ public class Whenz {
 	private static boolean pauseOnStart = false;
     private static boolean printStackTrace = false;
     private static boolean printFullAST = false;
+    private static boolean printStats = false;
 
   private static Map<String, ArgumentHandler> commands     = new HashMap<>();
   static {
     commands.put("printStackTrace", (ArgumentHandler) (arg) -> {
       printStackTrace = true;
+      return false;
+    });
+    commands.put("printStats", (ArgumentHandler) (arg) -> {
+      printStats = true;
       return false;
     });
     commands.put("printFullAST", (ArgumentHandler) (arg) -> {
@@ -66,6 +71,11 @@ public class Whenz {
               found = c.getValue();
             }
           }
+
+          if(found == null) {
+            System.err.format("Error: Unrecognized argument '%s'\n", matchArg);
+            return;
+          }
           found.handleArgument(matchArg);
         }
       }
@@ -83,9 +93,13 @@ public class Whenz {
           }
         }
       }
+
+      int fileCount = 0;
       try {
 
-        program = loadFromFiles(files.toArray(new File[files.size()]));
+        fileCount = files.size();
+        program = loadFromFiles(files.toArray(new File[fileCount]));
+        files = null;
 
         program.trigger("app_starts");
 
@@ -93,7 +107,13 @@ public class Whenz {
 
         program.loadJavaProperties();
 
+        long start = System.currentTimeMillis();
+
         program.run();
+
+        if(printStats) {
+          System.out.format("Ran %s files in %dms",files.size(),(System.currentTimeMillis()-start));
+        }
       } catch (WhenzSyntaxError e) {
         System.err.format("%s\n", e.getDefaultFormattedMessage());
         if(printStackTrace) {
@@ -115,8 +135,8 @@ public class Whenz {
         } else {
           WhenzParser.compileToProgram(file.getAbsolutePath(), program);
         }
-        if (System.getenv().get("WHENZ_PARSER_VERBOSE") != null) {
-          System.out.println("Compiled " + file.getName() + " in " + (System.currentTimeMillis() - start) + "ms");
+        if (System.getenv().get("WHENZ_PARSER_VERBOSE") != null || printStats) {
+          System.out.format("Compiled %s in %dms\n",file.getName(),(System.currentTimeMillis() - start));
         }
       } catch (IOException e) {
         System.err.println("Could load '" + file + "' either not a file or does not exist!");
