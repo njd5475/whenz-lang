@@ -99,7 +99,6 @@ public class Whenz {
 
         fileCount = files.size();
         program = loadFromFiles(files.toArray(new File[fileCount]));
-        files = null;
 
         program.trigger("app_starts");
 
